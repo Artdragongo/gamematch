@@ -3,27 +3,66 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>GameMatch — Find Your Next Game</title>
-    <meta name="description" content="Find the perfect game to play tonight — solo or with friends." />
+
+    <!-- Primary Meta Tags -->
+    <title>GameMatch — Find Your Next Game to Play Tonight</title>
+    <meta name="title" content="GameMatch — Find Your Next Game to Play Tonight" />
+    <meta name="description" content="Not sure what to play? Answer 3 quick questions and instantly get game recommendations matched to your PC, squad size, and mood. Free, no account needed." />
+    <meta name="keywords" content="what game should I play, game recommendations, find a game to play, co-op games, PC games, game finder, games for friends, steam games" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph (Discord / Reddit / Facebook previews) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://gamematch-app.onrender.com/" />
+    <meta property="og:title" content="GameMatch — Find Your Next Game in Seconds" />
+    <meta property="og:description" content="Answer 3 quick questions and get instant game recommendations matched to your PC, squad size, and mood. Try the Friends Room — everyone adds prefs, you get games you all agree on." />
+    <meta property="og:image" content="https://gamematch-app.onrender.com/og-image.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="GameMatch — Find Your Next Game in Seconds" />
+    <meta property="twitter:description" content="Answer 3 quick questions and get instant game recommendations matched to your PC, squad size, and mood." />
+    <meta property="twitter:image" content="https://gamematch-app.onrender.com/og-image.png" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://gamematch-app.onrender.com/" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Microsoft Clarity -->
     <script type="text/javascript">
       (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
         t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-        })(window, document, "clarity", "script", "xa0ik3orkn");
-      </script>
-      <!-- Google tag (gtag.js) -->
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-SP9NTBDLLR"></script>
-      <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-         gtag('js', new Date());
+      })(window, document, "clarity", "script", "xa0ik3orkn");
+    </script>
 
-          gtag('config', 'G-SP9NTBDLLR');
-      </script>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SP9NTBDLLR"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-SP9NTBDLLR');
+    </script>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "GameMatch",
+      "description": "Find the perfect game to play tonight — solo or with friends.",
+      "url": "https://gamematch-app.onrender.com",
+      "applicationCategory": "GameApplication",
+      "operatingSystem": "Web",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
