@@ -6,7 +6,6 @@ const path = require('path');
 
 const app = express();
 
-// Allow requests from any origin in production (Render/Vercel URLs)
 app.use(cors({
   origin: process.env.CLIENT_URL || '*',
   methods: ['GET', 'POST'],
@@ -21,25 +20,46 @@ const rooms = {};
 // ─── Scoring ──────────────────────────────────────────────────────────────────
 
 function scoreGame(game, prefs) {
-  let score = 0;
   const { players, withFriends, genres, pcLevel } = prefs;
-  const pcLevels  = { low: 1, medium: 2, high: 3 };
-  const gamePc    = pcLevels[game.pcRequirements] || 1;
-  const userPc    = pcLevels[pcLevel] || 1;
+  const pcLevels = { low: 1, medium: 2, high: 3 };
+  const gamePc   = pcLevels[game.pcRequirements] || 1;
+  const userPc   = pcLevels[pcLevel] || 1;
+
+  // ── Hard filters (immediate exclude) ──
+  // 1. PC too demanding
   if (gamePc > userPc) return -1;
+
+  // 2. Player count doesn't fit
   const count = parseInt(players) || 1;
-  if (count < game.minPlayers || count > game.maxPlayers) return -1;
-  if (withFriends && game.coop)   score += 30;
-  if (!withFriends && !game.coop) score += 10;
-  if (withFriends && !game.coop)  score -= 5;
+  if (count > game.maxPlayers) return -1;
+  if (count < game.minPlayers) return -1;
+
+  // 3. Co-op hard filter - if playing with friends and more than 1 player,
+  //    only show games that actually support co-op
+  if (withFriends && count > 1 && !game.coop) return -1;
+
+  // ── Scoring ──
+  let score = 0;
+
+  // Co-op bonus
+  if (withFriends && game.coop) score += 40;
+  if (!withFriends && !game.coop) score += 15;
+
+  // Genre matches
   if (genres && genres.length > 0) {
     const matched = genres.filter(g => game.genre.includes(g)).length;
-    score += matched * 20;
-    if (matched === 0) score -= 10;
+    score += matched * 25;
+    // No genre match at all = deprioritize but don't exclude
+    if (matched === 0) score -= 5;
   }
-  if (gamePc === userPc) score += 5;
-  if (gamePc <  userPc)  score += 2;
+
+  // PC level - prefer exact match or lower requirement
+  if (gamePc === userPc) score += 8;
+  if (gamePc < userPc)   score += 4;
+
+  // Small random factor for variety between identical scores
   score += Math.random() * 3;
+
   return score;
 }
 
@@ -74,22 +94,31 @@ function intersect(memberPrefs) {
 app.get('/api/games', (req, res) => res.json(games));
 
 app.get('/api/games/popular', (req, res) => {
-  const ids = ['6','25','103','8','45','60','73','22'];
-  res.json(ids.map(id => games.find(g => g.id === id)).filter(Boolean));
+  const names = ['Hades', 'Baldur\'s Gate 3', 'Helldivers 2', 'Deep Rock Galactic',
+                 'Slay the Spire', 'Vampire Survivors', 'Lethal Company', 'Overcooked! 2'];
+  const result = names.map(name => games.find(g => g.name === name)).filter(Boolean);
+  res.json(result);
 });
 
 app.get('/api/games/trending', (req, res) => {
-  const ids = ['124','102','105','149','143','104','150','74'];
-  res.json(ids.map(id => games.find(g => g.id === id)).filter(Boolean));
+  const names = ['Warhammer 40,000: Space Marine 2', 'Palworld', 'Enshrouded',
+                 'Manor Lords', 'Balatro', 'Schedule I', 'Repo', 'Split Fiction'];
+  const result = names.map(name => games.find(g => g.name === name)).filter(Boolean);
+  res.json(result);
 });
 
 app.get('/api/games/top-rated', (req, res) => {
-  const ids = ['7','25','9','99','36','6','16','27'];
-  res.json(ids.map(id => games.find(g => g.id === id)).filter(Boolean));
+  const names = ['Elden Ring', 'Baldur\'s Gate 3', 'Hollow Knight', 'Outer Wilds',
+                 'Disco Elysium', 'Hades', 'Red Dead Redemption 2', 'God of War'];
+  const result = names.map(name => games.find(g => g.name === name)).filter(Boolean);
+  res.json(result);
 });
 
 app.get('/api/games/recent', (req, res) => {
-  const recent = [...games].sort((a, b) => parseInt(b.id) - parseInt(a.id)).slice(0, 8);
+  const recent = [...games]
+    .filter(g => g.releaseYear >= 2024)
+    .sort((a, b) => b.releaseYear - a.releaseYear || parseInt(b.id) - parseInt(a.id))
+    .slice(0, 8);
   res.json(recent);
 });
 
@@ -109,7 +138,8 @@ app.get('/api/games/:id', (req, res) => {
 app.post('/api/recommend', (req, res) => {
   const { players, withFriends, genres, pcLevel } = req.body;
   if (!pcLevel) return res.status(400).json({ error: 'pcLevel required' });
-  res.json(recommend({ players, withFriends, genres, pcLevel }));
+  const results = recommend({ players, withFriends, genres, pcLevel });
+  res.json(results);
 });
 
 app.get('/api/genres', (req, res) => {
@@ -124,7 +154,8 @@ app.get('/api/search', (req, res) => {
   const q = (req.query.q || '').toLowerCase().trim();
   if (!q) return res.json([]);
   const results = games
-    .filter(g => g.name.toLowerCase().includes(q) || g.genre.some(genre => genre.toLowerCase().includes(q)))
+    .filter(g => g.name.toLowerCase().includes(q) ||
+                 g.genre.some(genre => genre.toLowerCase().includes(q)))
     .slice(0, 8);
   res.json(results);
 });
@@ -148,20 +179,22 @@ app.post('/api/bored', (req, res) => {
     '1h':    ['30 min', '1 hour', '2+ hours'],
     '2h':    ['1 hour', '2+ hours'],
   };
-  const allowed = sessionMap[timeAvailable] || ['30 min', '1 hour'];
+  const allowed  = sessionMap[timeAvailable] || ['30 min', '1 hour'];
   const pcLevels = { low: 1, medium: 2, high: 3 };
   const userPc   = pcLevels[pcLevel] || 2;
 
   let candidates = games.filter(g => {
     if ((pcLevels[g.pcRequirements] || 1) > userPc) return false;
     if (!allowed.includes(g.averageSession)) return false;
-    if (withFriends && !g.coop) return false;
+    if (withFriends && !g.coop) return false;   // hard filter
     if (mood === 'familiar' && g.difficulty === 'Hard') return false;
     if (mood === 'new'      && g.difficulty === 'Easy') return false;
     return true;
   });
 
-  if (!candidates.length) candidates = games.filter(g => (pcLevels[g.pcRequirements] || 1) <= userPc);
+  if (!candidates.length) candidates = games.filter(g =>
+    (pcLevels[g.pcRequirements] || 1) <= userPc && (!withFriends || g.coop)
+  );
   if (!candidates.length) candidates = games;
 
   res.json(candidates.sort(() => Math.random() - 0.5).slice(0, 4));
@@ -195,12 +228,11 @@ app.post('/api/rooms/:id/join', (req, res) => {
   if (!room) return res.status(404).json({ error: 'Room not found' });
   const { nickname, prefs } = req.body;
   if (!nickname || !prefs) return res.status(400).json({ error: 'nickname and prefs required' });
-  const idx = room.members.findIndex(m => m.nickname === nickname);
+  const idx    = room.members.findIndex(m => m.nickname === nickname);
   const member = { nickname, prefs, joinedAt: Date.now() };
   if (idx >= 0) room.members[idx] = member;
   else room.members.push(member);
-  const recs = intersect(room.members.map(m => m.prefs));
-  res.json({ room, recommendations: recs });
+  res.json({ room, recommendations: intersect(room.members.map(m => m.prefs)) });
 });
 
 app.get('/api/rooms/:id/recommendations', (req, res) => {
@@ -210,14 +242,14 @@ app.get('/api/rooms/:id/recommendations', (req, res) => {
   res.json(intersect(room.members.map(m => m.prefs)));
 });
 
-// Cleanup old rooms every hour
 setInterval(() => {
   const now = Date.now();
   for (const id in rooms) if (now - rooms[id].createdAt > 3600000) delete rooms[id];
 }, 3600000);
 
-// ─── Health check (Render uses this) ──────────────────────────────────────────
+// ─── Health ───────────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => res.json({ ok: true, games: games.length }));
+app.get('/api/health', (req, res) => res.json({ ok: true, games: games.length }));
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001;
