@@ -59,6 +59,11 @@ export const translations = {
       feat3_title:'Friends Room', feat3_desc:'Everyone submits prefs — system finds the overlap.',
       popular_title:'Popular Right Now', trending_title:'Trending This Week',
       top_rated_title:'Top Rated', recent_title:'Recently Added', view_all:'View all',
+      daily_pick:'Game of the Day',
+      browse_by_genre:'Browse by genre',
+      stat_coop:'Co-op games',
+      friends_cta_title:'Playing with friends tonight?',
+      friends_cta_desc:'Create a room, everyone adds their preferences, and you instantly get games you all agree on.',
     },
     form: {
       title:"Tell us what you're looking for", sub:"We'll find your top 10 matches instantly.",
@@ -196,6 +201,11 @@ export const translations = {
       feat3_title:'Комната друзей', feat3_desc:'Каждый указывает предпочтения — система находит общие игры.',
       popular_title:'Сейчас популярно', trending_title:'В тренде на этой неделе',
       top_rated_title:'Лучшие оценки', recent_title:'Недавно добавлено', view_all:'Смотреть все',
+      daily_pick:'Игра дня',
+      browse_by_genre:'Поиск по жанрам',
+      stat_coop:'Кооп-игр',
+      friends_cta_title:'Играете с друзьями сегодня?',
+      friends_cta_desc:'Создайте комнату, каждый добавит предпочтения — и вы сразу получите игры, в которые согласны играть все.',
     },
     form: {
       title:'Что вы ищете?', sub:'Мы мгновенно найдём ваш топ-10.',
