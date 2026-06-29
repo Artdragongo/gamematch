@@ -13,51 +13,53 @@ const games = JSON.parse(fs.readFileSync(path.join(__dirname, 'games.json'), 'ut
 const rooms = {};
 const screenshotCache = {};
 
-// ─── View tracking (dynamic popularity) ──────────────────────
-const viewsFile = path.join(__dirname, 'views.json');
-let views = {};
-try { views = JSON.parse(fs.readFileSync(viewsFile, 'utf8')); } catch { views = {}; }
-
-function saveViews() {
-  try { fs.writeFileSync(viewsFile, JSON.stringify(views)); } catch {}
+// ─── Persistence helpers ──────────────────────────────────────
+function loadJson(file, def) {
+  try { return JSON.parse(fs.readFileSync(path.join(__dirname, file), 'utf8')); }
+  catch { return def; }
 }
+function saveJson(file, data) {
+  try { fs.writeFileSync(path.join(__dirname, file), JSON.stringify(data)); } catch {}
+}
+
+// View tracking
+let views     = loadJson('views.json',     {});
+let reactions = loadJson('reactions.json', {});
 
 function trackView(gameId) {
   const now = Date.now();
-  const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
   if (!views[gameId]) views[gameId] = [];
   views[gameId].push(now);
-  // Keep only last 30 days
-  views[gameId] = views[gameId].filter(t => t > now - 30 * 24 * 60 * 60 * 1000);
-  saveViews();
+  views[gameId] = views[gameId].filter(t => t > now - 30*24*60*60*1000);
+  saveJson('views.json', views);
 }
 
-function getTopByViews(days = 7, limit = 8) {
-  const since = Date.now() - days * 24 * 60 * 60 * 1000;
-  const scored = games.map(g => ({
-    g,
-    score: (views[g.id] || []).filter(t => t > since).length,
-  }));
-  return scored.sort((a, b) => b.score - a.score).slice(0, limit).map(x => x.g);
+function getTopByViews(days=7, limit=8) {
+  const since = Date.now() - days*24*60*60*1000;
+  return games
+    .map(g => ({ g, score: (views[g.id]||[]).filter(t=>t>since).length }))
+    .sort((a,b) => b.score - a.score)
+    .slice(0, limit)
+    .map(x => x.g);
 }
 
-// ─── Steam screenshot fetcher ─────────────────────────────────
+// ─── Steam screenshots ────────────────────────────────────────
 function fetchSteamScreenshots(appId) {
   return new Promise((resolve) => {
     if (screenshotCache[appId]) return resolve(screenshotCache[appId]);
     const url = `https://store.steampowered.com/api/appdetails?appids=${appId}&filters=screenshots`;
     https.get(url, { headers: { 'User-Agent': 'GameMatch/1.0' } }, (res) => {
       let data = '';
-      res.on('data', chunk => data += chunk);
+      res.on('data', c => data += c);
       res.on('end', () => {
         try {
           const json = JSON.parse(data);
-          const appData = json[appId];
-          if (appData?.success && appData.data?.screenshots) {
-            const urls = appData.data.screenshots.slice(0, 6).map(s => s.path_full.replace('\\/', '/'));
+          const d    = json[appId];
+          if (d?.success && d.data?.screenshots) {
+            const urls = d.data.screenshots.slice(0,6).map(s => s.path_full.replace('\\/','/'));
             screenshotCache[appId] = urls;
             resolve(urls);
-          } else { resolve([]); }
+          } else resolve([]);
         } catch { resolve([]); }
       });
     }).on('error', () => resolve([]));
@@ -78,7 +80,7 @@ function scoreGame(game, prefs) {
   let score = 0;
   if (withFriends && game.coop)   score += 40;
   if (!withFriends && !game.coop) score += 15;
-  if (genres && genres.length > 0) {
+  if (genres?.length > 0) {
     const matched = genres.filter(g => game.genre.includes(g)).length;
     score += matched * 25;
     if (matched === 0) score -= 5;
@@ -89,166 +91,177 @@ function scoreGame(game, prefs) {
   return score;
 }
 
-function recommend(prefs, limit = 10) {
-  return games.map(g => ({ g, score: scoreGame(g, prefs) })).filter(x => x.score >= 0).sort((a,b) => b.score - a.score).slice(0,limit).map(x => x.g);
+function recommend(prefs, limit=10) {
+  return games.map(g=>({g,score:scoreGame(g,prefs)})).filter(x=>x.score>=0).sort((a,b)=>b.score-a.score).slice(0,limit).map(x=>x.g);
 }
 
 function intersect(memberPrefs) {
-  return games.map(g => {
-    let total = 0;
-    for (const prefs of memberPrefs) {
-      const s = scoreGame(g, prefs);
-      if (s < 0) return { g, score: -1 };
-      total += s;
-    }
-    return { g, score: total };
-  }).filter(x => x.score >= 0).sort((a,b) => b.score - a.score).slice(0,10).map(x => x.g);
+  return games.map(g=>{
+    let total=0;
+    for(const p of memberPrefs){const s=scoreGame(g,p);if(s<0)return{g,score:-1};total+=s;}
+    return{g,score:total};
+  }).filter(x=>x.score>=0).sort((a,b)=>b.score-a.score).slice(0,10).map(x=>x.g);
 }
 
-// ─── Curated fallbacks (used when no view data yet) ───────────
-const POPULAR_NAMES  = ['Hades',"Baldur's Gate 3",'Helldivers 2','Deep Rock Galactic','Slay the Spire','Vampire Survivors','Lethal Company','Overcooked! 2'];
-const TRENDING_NAMES = ['Warhammer 40,000: Space Marine 2','Palworld','Balatro','Schedule I','Repo','Split Fiction','Monster Hunter Wilds','Enshrouded'];
-const TOP_RATED      = ['Elden Ring',"Baldur's Gate 3",'Hollow Knight','Outer Wilds','Disco Elysium','Hades','Red Dead Redemption 2','God of War'];
+// ─── Curated fallbacks ────────────────────────────────────────
+const POPULAR  = ['Hades',"Baldur's Gate 3",'Helldivers 2','Deep Rock Galactic','Slay the Spire','Vampire Survivors','Lethal Company','Overcooked! 2'];
+const TRENDING = ['Warhammer 40,000: Space Marine 2','Palworld','Balatro','Schedule I','Repo','Split Fiction','Monster Hunter Wilds','Enshrouded'];
+const TOP      = ['Elden Ring',"Baldur's Gate 3",'Hollow Knight','Outer Wilds','Disco Elysium','Hades','Red Dead Redemption 2','God of War'];
+const HIDDEN   = ['Noita','Loop Hero','Dome Keeper','Wildermyth','We Were Here Together','Barotrauma','Hardspace: Shipbreaker','Return of the Obra Dinn','Norco','Webfishing'];
 
-function byNames(names) { return names.map(n => games.find(g => g.name === n)).filter(Boolean); }
+function byNames(names) { return names.map(n=>games.find(g=>g.name===n)).filter(Boolean); }
 
-// ─── Game Routes ──────────────────────────────────────────────
-app.get('/api/games', (req, res) => res.json(games));
+// ─── Routes ───────────────────────────────────────────────────
+app.get('/api/games', (req,res) => res.json(games));
 
-// Popular = most viewed this week, fallback to curated
-app.get('/api/games/popular', (req, res) => {
-  const dynamic = getTopByViews(7, 8);
-  const result = dynamic.length >= 4 ? dynamic : byNames(POPULAR_NAMES);
-  res.json(result);
+app.get('/api/games/popular', (req,res) => {
+  const dyn = getTopByViews(7,8);
+  res.json(dyn.length >= 4 ? dyn : byNames(POPULAR));
 });
 
-// Trending = most viewed today + recent releases
-app.get('/api/games/trending', (req, res) => {
-  const dynamic = getTopByViews(1, 4);
-  const recent2024 = games.filter(g => g.releaseYear >= 2024).sort((a,b) => b.releaseYear - a.releaseYear).slice(0,4);
-  const combined = [...new Map([...dynamic, ...recent2024].map(g => [g.id, g])).values()].slice(0,8);
-  const result = combined.length >= 4 ? combined : byNames(TRENDING_NAMES);
-  res.json(result);
+app.get('/api/games/trending', (req,res) => {
+  const dyn    = getTopByViews(1,4);
+  const recent = games.filter(g=>g.releaseYear>=2024).sort((a,b)=>b.releaseYear-a.releaseYear).slice(0,4);
+  const combined = [...new Map([...dyn,...recent].map(g=>[g.id,g])).values()].slice(0,8);
+  res.json(combined.length>=4 ? combined : byNames(TRENDING));
 });
 
-app.get('/api/games/top-rated', (req, res) => res.json(byNames(TOP_RATED)));
+app.get('/api/games/top-rated', (req,res) => res.json(byNames(TOP)));
 
-app.get('/api/games/recent', (req, res) => {
-  const recent = [...games].filter(g => g.releaseYear >= 2024).sort((a,b) => b.releaseYear - a.releaseYear || parseInt(b.id) - parseInt(a.id)).slice(0,8);
-  res.json(recent);
+app.get('/api/games/hidden-gems', (req,res) => {
+  // Low view count but high recommendation score variety
+  const weekAgo = Date.now() - 7*24*60*60*1000;
+  const lowViews = games.filter(g => ((views[g.id]||[]).filter(t=>t>weekAgo).length) < 3);
+  const gems = byNames(HIDDEN).filter(g => lowViews.find(l=>l.id===g.id));
+  res.json(gems.length >= 4 ? gems : byNames(HIDDEN));
 });
 
-// Stats for homepage
-app.get('/api/stats', (req, res) => {
-  const totalViews = Object.values(views).reduce((sum, arr) => sum + arr.length, 0);
-  const weekViews  = Object.values(views).reduce((sum, arr) => sum + arr.filter(t => t > Date.now() - 7*24*60*60*1000).length, 0);
-  res.json({ totalGames: games.length, totalViews, weekViews, coopGames: games.filter(g=>g.coop).length });
+app.get('/api/games/recent', (req,res) => {
+  res.json([...games].filter(g=>g.releaseYear>=2024).sort((a,b)=>b.releaseYear-a.releaseYear||parseInt(b.id)-parseInt(a.id)).slice(0,8));
 });
 
-// Random game of the day (changes daily, consistent within a day)
-app.get('/api/games/daily', (req, res) => {
-  const dayIndex = Math.floor(Date.now() / (24*60*60*1000));
-  const idx = dayIndex % games.length;
+app.get('/api/games/daily', (req,res) => {
+  const idx = Math.floor(Date.now()/(24*60*60*1000)) % games.length;
   res.json(games[idx]);
 });
 
-app.get('/api/games/:id', async (req, res) => {
-  const game = games.find(g => g.id === req.params.id);
-  if (!game) return res.status(404).json({ error: 'Game not found' });
-  trackView(req.params.id);  // track every detail page view
-  const similar = games.filter(g => g.id !== game.id).map(g => ({ g, score: g.genre.filter(genre => game.genre.includes(genre)).length })).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,4).map(x=>x.g);
-  res.json({ ...game, similar });
+app.get('/api/stats', (req,res) => {
+  const totalViews = Object.values(views).reduce((s,a)=>s+a.length,0);
+  const weekViews  = Object.values(views).reduce((s,a)=>s+a.filter(t=>t>Date.now()-7*24*60*60*1000).length,0);
+  const totalReactions = Object.values(reactions).reduce((s,r)=>s+Object.values(r).reduce((a,b)=>a+b,0),0);
+  res.json({ totalGames:games.length, totalViews, weekViews, coopGames:games.filter(g=>g.coop).length, totalReactions });
 });
 
-app.get('/api/games/:id/screenshots', async (req, res) => {
-  const game = games.find(g => g.id === req.params.id);
-  if (!game?.steamLink) return res.json([]);
-  const match = game.steamLink.match(/\/app\/(\d+)\//);
-  if (!match) return res.json([]);
-  res.json(await fetchSteamScreenshots(match[1]));
+app.get('/api/games/:id', (req,res) => {
+  const game = games.find(g=>g.id===req.params.id);
+  if(!game) return res.status(404).json({error:'Game not found'});
+  trackView(req.params.id);
+  const similar = games.filter(g=>g.id!==game.id).map(g=>({g,score:g.genre.filter(genre=>game.genre.includes(genre)).length})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,4).map(x=>x.g);
+  // "Also played" - games viewed by people who also viewed this game (approximated by genre+mode similarity)
+  const alsoPlayed = games
+    .filter(g => g.id !== game.id && !similar.find(s=>s.id===g.id))
+    .map(g => {
+      let score = g.genre.filter(genre=>game.genre.includes(genre)).length * 2;
+      if (g.coop === game.coop) score += 1;
+      if (g.pcRequirements === game.pcRequirements) score += 1;
+      if (Math.abs((g.releaseYear||0)-(game.releaseYear||0)) <= 3) score += 1;
+      return {g, score};
+    })
+    .filter(x=>x.score>2)
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,4)
+    .map(x=>x.g);
+  res.json({...game, similar, alsoPlayed});
 });
 
-app.post('/api/recommend', (req, res) => {
+app.get('/api/games/:id/screenshots', async (req,res) => {
+  const game = games.find(g=>g.id===req.params.id);
+  if(!game?.steamLink) return res.json([]);
+  const m = game.steamLink.match(/\/app\/(\d+)\//);
+  if(!m) return res.json([]);
+  res.json(await fetchSteamScreenshots(m[1]));
+});
+
+// Reactions
+app.get('/api/games/:id/reactions', (req,res) => {
+  res.json(reactions[req.params.id] || {playing:0,finished:0,want:0,skip:0});
+});
+
+app.post('/api/games/:id/reactions', (req,res) => {
+  const { reaction, prev } = req.body;
+  const id = req.params.id;
+  if (!reactions[id]) reactions[id] = {playing:0,finished:0,want:0,skip:0};
+  if (prev && reactions[id][prev] > 0) reactions[id][prev]--;
+  if (reaction) reactions[id][reaction] = (reactions[id][reaction]||0) + 1;
+  saveJson('reactions.json', reactions);
+  res.json(reactions[id]);
+});
+
+app.post('/api/recommend', (req,res) => {
   const { players, withFriends, genres, pcLevel } = req.body;
-  if (!pcLevel) return res.status(400).json({ error: 'pcLevel required' });
-  res.json(recommend({ players, withFriends, genres, pcLevel }));
+  if (!pcLevel) return res.status(400).json({error:'pcLevel required'});
+  res.json(recommend({players,withFriends,genres,pcLevel}));
 });
 
-app.get('/api/genres', (req, res) => {
-  const set = new Set(); games.forEach(g => g.genre.forEach(genre => set.add(genre))); res.json([...set].sort());
+app.get('/api/genres', (req,res) => {
+  const set=new Set(); games.forEach(g=>g.genre.forEach(genre=>set.add(genre))); res.json([...set].sort());
 });
 
-app.get('/api/search', (req, res) => {
-  const q = (req.query.q||'').toLowerCase().trim();
-  if (!q) return res.json([]);
-  res.json(games.filter(g => g.name.toLowerCase().includes(q) || g.genre.some(genre => genre.toLowerCase().includes(q))).slice(0,8));
+app.get('/api/search', (req,res) => {
+  const q=(req.query.q||'').toLowerCase().trim();
+  if(!q) return res.json([]);
+  res.json(games.filter(g=>g.name.toLowerCase().includes(q)||g.genre.some(genre=>genre.toLowerCase().includes(q))).slice(0,8));
 });
 
-app.get('/api/compare', (req, res) => {
-  const { a, b } = req.query;
-  const gameA = games.find(g => g.id === a);
-  const gameB = games.find(g => g.id === b);
-  if (!gameA || !gameB) return res.status(404).json({ error: 'Game not found' });
-  res.json({ a: gameA, b: gameB });
+app.get('/api/compare', (req,res) => {
+  const gameA=games.find(g=>g.id===req.query.a);
+  const gameB=games.find(g=>g.id===req.query.b);
+  if(!gameA||!gameB) return res.status(404).json({error:'Game not found'});
+  res.json({a:gameA,b:gameB});
 });
 
-app.post('/api/bored', (req, res) => {
-  const { withFriends, timeAvailable, mood, pcLevel } = req.body;
-  const sessionMap = { '15min':['15 min','30 min'],'30min':['30 min','1 hour'],'1h':['30 min','1 hour','2+ hours'],'2h':['1 hour','2+ hours'] };
-  const allowed  = sessionMap[timeAvailable] || ['30 min','1 hour'];
-  const pcLevels = { low:1, medium:2, high:3 };
-  const userPc   = pcLevels[pcLevel] || 2;
-  let candidates = games.filter(g => {
-    if ((pcLevels[g.pcRequirements]||1) > userPc) return false;
-    if (!allowed.includes(g.averageSession)) return false;
-    if (withFriends && !g.coop) return false;
-    if (mood==='familiar' && g.difficulty==='Hard') return false;
-    if (mood==='new' && g.difficulty==='Easy') return false;
-    return true;
-  });
-  if (!candidates.length) candidates = games.filter(g => (pcLevels[g.pcRequirements]||1) <= userPc && (!withFriends || g.coop));
-  if (!candidates.length) candidates = games;
-  res.json(candidates.sort(() => Math.random()-0.5).slice(0,4));
+app.post('/api/bored', (req,res) => {
+  const {withFriends,timeAvailable,mood,pcLevel}=req.body;
+  const sm={'15min':['15 min','30 min'],'30min':['30 min','1 hour'],'1h':['30 min','1 hour','2+ hours'],'2h':['1 hour','2+ hours']};
+  const allowed=sm[timeAvailable]||['30 min','1 hour'];
+  const pcL={low:1,medium:2,high:3};
+  const upc=pcL[pcLevel]||2;
+  let c=games.filter(g=>(pcL[g.pcRequirements]||1)<=upc&&allowed.includes(g.averageSession)&&(!withFriends||g.coop)&&!(mood==='familiar'&&g.difficulty==='Hard')&&!(mood==='new'&&g.difficulty==='Easy'));
+  if(!c.length) c=games.filter(g=>(pcL[g.pcRequirements]||1)<=upc&&(!withFriends||g.coop));
+  if(!c.length) c=games;
+  res.json(c.sort(()=>Math.random()-0.5).slice(0,4));
 });
 
-app.post('/api/feedback', (req, res) => {
-  const { message, email } = req.body || {};
-  if (!message) return res.status(400).json({ error:'message required' });
+app.post('/api/feedback', (req,res) => {
+  const{message,email}=req.body||{};
+  if(!message) return res.status(400).json({error:'message required'});
   console.log(`[FEEDBACK] ${new Date().toISOString()} | ${email||'anonymous'}: ${message}`);
-  res.json({ ok: true });
+  res.json({ok:true});
 });
 
-app.post('/api/rooms', (req, res) => {
-  const id = uuidv4().slice(0,6).toUpperCase();
-  rooms[id] = { id, members:[], createdAt:Date.now() };
-  res.json({ roomId: id });
+app.post('/api/rooms', (req,res) => { const id=uuidv4().slice(0,6).toUpperCase(); rooms[id]={id,members:[],createdAt:Date.now()}; res.json({roomId:id}); });
+app.get('/api/rooms/:id', (req,res) => { const r=rooms[req.params.id.toUpperCase()]; if(!r) return res.status(404).json({error:'Room not found'}); res.json(r); });
+app.post('/api/rooms/:id/join', (req,res) => {
+  const room=rooms[req.params.id.toUpperCase()];
+  if(!room) return res.status(404).json({error:'Room not found'});
+  const{nickname,prefs}=req.body;
+  if(!nickname||!prefs) return res.status(400).json({error:'nickname and prefs required'});
+  const idx=room.members.findIndex(m=>m.nickname===nickname);
+  const member={nickname,prefs,joinedAt:Date.now()};
+  if(idx>=0) room.members[idx]=member; else room.members.push(member);
+  res.json({room,recommendations:intersect(room.members.map(m=>m.prefs))});
 });
-app.get('/api/rooms/:id', (req, res) => {
-  const room = rooms[req.params.id.toUpperCase()];
-  if (!room) return res.status(404).json({ error:'Room not found' });
-  res.json(room);
-});
-app.post('/api/rooms/:id/join', (req, res) => {
-  const room = rooms[req.params.id.toUpperCase()];
-  if (!room) return res.status(404).json({ error:'Room not found' });
-  const { nickname, prefs } = req.body;
-  if (!nickname || !prefs) return res.status(400).json({ error:'nickname and prefs required' });
-  const idx = room.members.findIndex(m => m.nickname === nickname);
-  const member = { nickname, prefs, joinedAt:Date.now() };
-  if (idx >= 0) room.members[idx] = member; else room.members.push(member);
-  res.json({ room, recommendations: intersect(room.members.map(m => m.prefs)) });
-});
-app.get('/api/rooms/:id/recommendations', (req, res) => {
-  const room = rooms[req.params.id.toUpperCase()];
-  if (!room) return res.status(404).json({ error:'Room not found' });
-  if (!room.members.length) return res.json([]);
-  res.json(intersect(room.members.map(m => m.prefs)));
+app.get('/api/rooms/:id/recommendations', (req,res) => {
+  const room=rooms[req.params.id.toUpperCase()];
+  if(!room) return res.status(404).json({error:'Room not found'});
+  if(!room.members.length) return res.json([]);
+  res.json(intersect(room.members.map(m=>m.prefs)));
 });
 
-setInterval(() => { const now = Date.now(); for (const id in rooms) if (now - rooms[id].createdAt > 3600000) delete rooms[id]; }, 3600000);
+setInterval(()=>{ const now=Date.now(); for(const id in rooms) if(now-rooms[id].createdAt>3600000) delete rooms[id]; },3600000);
 
-app.get('/health',     (req, res) => res.json({ ok:true, games:games.length }));
-app.get('/api/health', (req, res) => res.json({ ok:true, games:games.length }));
+app.get('/health',     (req,res)=>res.json({ok:true,games:games.length}));
+app.get('/api/health', (req,res)=>res.json({ok:true,games:games.length}));
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => { console.log(`\n🎮 GameMatch API on port ${PORT} | ${games.length} games\n`); });
+const PORT=process.env.PORT||3001;
+app.listen(PORT,'0.0.0.0',()=>console.log(`\n🎮 GameMatch on port ${PORT} | ${games.length} games\n`));

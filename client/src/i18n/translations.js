@@ -99,7 +99,8 @@ export const translations = {
       not_on_steam:'Not on Steam — search online', details:'Game details',
       players:'Players', mode:'Mode', pc:'PC level', genres:'Genres',
       difficulty:'Difficulty', session:'Avg. session', similar:'Similar games',
-      coop_mode:'Solo + Co-op', solo_mode:'Solo only', developer:'Developer', year:'Released',
+      coop_mode:'Solo + Co-op',
+      also_played:'People also played', solo_mode:'Solo only', developer:'Developer', year:'Released',
     },
     bored: {
       title:"Not sure what to play?", sub:"Answer a few quick questions and we'll pick something right now.",
@@ -184,6 +185,24 @@ export const translations = {
     },
     genres: genres_en,
   },
+    share: {
+      button: 'Share results',
+      copied: 'Link copied!',
+    },
+    quickmatch: {
+      title: 'Quick Match',
+      sub: '2 taps to a recommendation',
+      full: 'Full search',
+      solo_desc: 'Just me, playing alone',
+      friends_desc: 'Co-op, multiplayer or local',
+    },
+    reactions: {
+      title: 'Quick reaction',
+      playing: 'Playing',
+      finished: 'Finished',
+      want: 'Want to play',
+      not_for_me: 'Not for me',
+    },
 
   ru: {
     nav: {
@@ -243,7 +262,8 @@ export const translations = {
       not_on_steam:'Нет в Steam — найдите самостоятельно', details:'Детали игры',
       players:'Игроки', mode:'Режим', pc:'Уровень ПК', genres:'Жанры',
       difficulty:'Сложность', session:'Длина сессии', similar:'Похожие игры',
-      coop_mode:'Соло + кооп', solo_mode:'Только соло', developer:'Разработчик', year:'Год выхода',
+      coop_mode:'Соло + кооп',
+      also_played:'С этим также играют', solo_mode:'Только соло', developer:'Разработчик', year:'Год выхода',
     },
     bored: {
       title:'Не знаешь во что поиграть?', sub:'Ответь на пару вопросов — и мы сразу что-нибудь подберём.',

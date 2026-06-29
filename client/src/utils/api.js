@@ -25,3 +25,4 @@ export const fetchRoomRecs         = (id)       => req(`/api/rooms/${id}/recomme
 export const searchGames         = (q)        => req(`/api/search?q=${encodeURIComponent(q)}`);
 export const compareGames        = (a, b)     => req(`/api/compare?a=${a}&b=${b}`);
 export const submitFeedback      = (data)     => req('/api/feedback', { method: 'POST', body: JSON.stringify(data) });
+export const fetchHiddenGems     = ()      => req('/api/games/hidden-gems');
