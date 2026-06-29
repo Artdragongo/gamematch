@@ -216,7 +216,6 @@ export default function HomePage({ navigate }) {
       // Clean URL
       window.history.replaceState({}, '', '/');
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = async (formPrefs) => {
