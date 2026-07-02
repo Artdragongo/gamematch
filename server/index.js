@@ -10,7 +10,7 @@ app.use(cors({ origin: process.env.CLIENT_URL || '*', methods: ['GET','POST'], a
 app.use(express.json());
 
 const games = JSON.parse(fs.readFileSync(path.join(__dirname, 'games.json'), 'utf8'));
-const rooms = {};
+let rooms = loadJson('rooms.json', {});
 const screenshotCache = {};
 
 // ─── Persistence helpers ──────────────────────────────────────
@@ -265,26 +265,135 @@ app.post('/api/feedback', (req,res) => {
   res.json({ok:true});
 });
 
-app.post('/api/rooms', (req,res) => { const id=uuidv4().slice(0,6).toUpperCase(); rooms[id]={id,members:[],createdAt:Date.now()}; res.json({roomId:id}); });
-app.get('/api/rooms/:id', (req,res) => { const r=rooms[req.params.id.toUpperCase()]; if(!r) return res.status(404).json({error:'Room not found'}); res.json(r); });
-app.post('/api/rooms/:id/join', (req,res) => {
-  const room=rooms[req.params.id.toUpperCase()];
-  if(!room) return res.status(404).json({error:'Room not found'});
-  const{nickname,prefs}=req.body;
-  if(!nickname||!prefs) return res.status(400).json({error:'nickname and prefs required'});
-  const idx=room.members.findIndex(m=>m.nickname===nickname);
-  const member={nickname,prefs,joinedAt:Date.now()};
-  if(idx>=0) room.members[idx]=member; else room.members.push(member);
-  res.json({room,recommendations:intersect(room.members.map(m=>m.prefs))});
-});
-app.get('/api/rooms/:id/recommendations', (req,res) => {
-  const room=rooms[req.params.id.toUpperCase()];
-  if(!room) return res.status(404).json({error:'Room not found'});
-  if(!room.members.length) return res.json([]);
-  res.json(intersect(room.members.map(m=>m.prefs)));
+function saveRooms() { saveJson('rooms.json', rooms); }
+
+function generateRoomCode() {
+  let code;
+  do { code = uuidv4().slice(0,6).toUpperCase(); } while (rooms[code]);
+  return code;
+}
+
+app.post('/api/rooms', (req, res) => {
+  const { name } = req.body || {};
+  const id = generateRoomCode();
+  rooms[id] = {
+    id,
+    name: name?.trim().slice(0,40) || null,
+    members: [],
+    votes: {},         // { gameId: [nickname, nickname, ...] }
+    history: [],        // [{ gameId, gameName, coverImage, decidedAt, votedBy: [] }]
+    createdAt: Date.now(),
+    lastActive: Date.now(),
+  };
+  saveRooms();
+  res.json({ roomId: id });
 });
 
-setInterval(()=>{ const now=Date.now(); for(const id in rooms) if(now-rooms[id].createdAt>3600000) delete rooms[id]; },3600000);
+app.get('/api/rooms/:id', (req, res) => {
+  const room = rooms[req.params.id.toUpperCase()];
+  if (!room) return res.status(404).json({ error: 'Room not found' });
+  res.json(room);
+});
+
+// Rename a room (any member can set the name once)
+app.post('/api/rooms/:id/name', (req, res) => {
+  const room = rooms[req.params.id.toUpperCase()];
+  if (!room) return res.status(404).json({ error: 'Room not found' });
+  const { name } = req.body;
+  if (name?.trim()) room.name = name.trim().slice(0,40);
+  room.lastActive = Date.now();
+  saveRooms();
+  res.json(room);
+});
+
+app.post('/api/rooms/:id/join', (req, res) => {
+  const room = rooms[req.params.id.toUpperCase()];
+  if (!room) return res.status(404).json({ error: 'Room not found' });
+  const { nickname, prefs } = req.body;
+  if (!nickname || !prefs) return res.status(400).json({ error: 'nickname and prefs required' });
+  const idx = room.members.findIndex(m => m.nickname === nickname);
+  const member = { nickname, prefs, joinedAt: Date.now() };
+  if (idx >= 0) room.members[idx] = member; else room.members.push(member);
+  room.lastActive = Date.now();
+  saveRooms();
+  res.json({ room, recommendations: intersect(room.members.map(m => m.prefs)) });
+});
+
+app.get('/api/rooms/:id/recommendations', (req, res) => {
+  const room = rooms[req.params.id.toUpperCase()];
+  if (!room) return res.status(404).json({ error: 'Room not found' });
+  if (!room.members.length) return res.json([]);
+  res.json(intersect(room.members.map(m => m.prefs)));
+});
+
+// ── Voting ──────────────────────────────────────────────────
+// Toggle a member's vote on a specific game
+app.post('/api/rooms/:id/vote', (req, res) => {
+  const room = rooms[req.params.id.toUpperCase()];
+  if (!room) return res.status(404).json({ error: 'Room not found' });
+  const { gameId, nickname } = req.body;
+  if (!gameId || !nickname) return res.status(400).json({ error: 'gameId and nickname required' });
+
+  if (!room.votes[gameId]) room.votes[gameId] = [];
+  const already = room.votes[gameId].includes(nickname);
+
+  // Remove this nickname's vote from ALL games first (one vote per person)
+  for (const gid in room.votes) {
+    room.votes[gid] = room.votes[gid].filter(n => n !== nickname);
+  }
+  if (!already) room.votes[gameId].push(nickname);
+
+  room.lastActive = Date.now();
+  saveRooms();
+  res.json({ votes: room.votes });
+});
+
+app.get('/api/rooms/:id/votes', (req, res) => {
+  const room = rooms[req.params.id.toUpperCase()];
+  if (!room) return res.status(404).json({ error: 'Room not found' });
+  res.json({ votes: room.votes });
+});
+
+// ── Finalize tonight's pick + log to history ──────────────────
+app.post('/api/rooms/:id/finalize', (req, res) => {
+  const room = rooms[req.params.id.toUpperCase()];
+  if (!room) return res.status(404).json({ error: 'Room not found' });
+  const { gameId, gameName, coverImage } = req.body;
+  if (!gameId || !gameName) return res.status(400).json({ error: 'gameId and gameName required' });
+
+  const votedBy = room.votes[gameId] || [];
+  room.history.unshift({
+    gameId, gameName, coverImage,
+    decidedAt: Date.now(),
+    votedBy,
+  });
+  room.history = room.history.slice(0, 50); // cap history length
+  room.votes = {}; // reset votes for next session
+  room.lastActive = Date.now();
+  saveRooms();
+  res.json({ history: room.history });
+});
+
+app.get('/api/rooms/:id/history', (req, res) => {
+  const room = rooms[req.params.id.toUpperCase()];
+  if (!room) return res.status(404).json({ error: 'Room not found' });
+  res.json(room.history || []);
+});
+
+// Rooms are now PERMANENT — no more auto-delete after 1 hour.
+// Optional light cleanup: purge rooms untouched for 6+ months to keep the file small.
+setInterval(() => {
+  const now = Date.now();
+  let changed = false;
+  for (const id in rooms) {
+    if (now - (rooms[id].lastActive || rooms[id].createdAt) > 180*24*60*60*1000) {
+      delete rooms[id];
+      changed = true;
+    }
+  }
+  if (changed) saveRooms();
+}, 24*60*60*1000); // check once a day
+
 
 app.get('/health',     (req,res)=>res.json({ok:true,games:games.length}));
 app.get('/api/health', (req,res)=>res.json({ok:true,games:games.length}));

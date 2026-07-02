@@ -977,3 +977,12 @@ img { display: block; max-width: 100%; }
   .results-header { padding: 1.5rem 1rem 0.75rem; }
   .detail-page { padding: 1.5rem 1rem 4rem; }
 }
+/* Room voting + history additions */
+.room-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+@media (max-width: 700px) {
+  .room-results-grid { grid-template-columns: 1fr; }
+}
