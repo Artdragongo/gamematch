@@ -9,12 +9,11 @@ import PreferencesForm from '../components/PreferencesForm';
 import GameCard from '../components/GameCard';
 import QuickMatch from '../components/QuickMatch';
 import ShareButton from '../components/ShareButton';
-import { fetchRecommendations, fetchPopularGames, fetchTrendingGames,
-         fetchRecentGames, fetchTopRatedGames } from '../utils/api';
+import GameRowSkeleton from '../components/GameRowSkeleton';
+import { fetchRecommendations } from '../utils/api';
+import { useHomepageData } from '../hooks/useHomepageData';
 import { useLang } from '../i18n/LangContext';
 import { usePageTitle } from '../hooks/usePageTitle';
-
-const BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 /* ── Mini card image ── */
 function MiniCardImg({ src, alt }) {
@@ -137,7 +136,7 @@ function DailyPick({ game, onClick, t }) {
   );
 }
 
-/* ── Genre strip — uses Lucide icons, navigates with ?genre= param ── */
+/* ── Genre strip — Lucide icons, navigates with sessionStorage handoff ── */
 function GenreStrip({ navigate, t }) {
   const genres = [
     { key:'Action',       Icon: Swords   },
@@ -155,7 +154,6 @@ function GenreStrip({ navigate, t }) {
   ];
 
   const handleClick = (key) => {
-    // Pass genre via sessionStorage so BrowsePage can pick it up
     try { sessionStorage.setItem('gm_genre_filter', key); } catch {}
     navigate('browse');
   };
@@ -168,7 +166,7 @@ function GenreStrip({ navigate, t }) {
       </div>
       <div style={{ display:'flex', flexWrap:'wrap', gap:'0.45rem' }}>
         {genres.map(({ key, Icon }) => (
-          <button key={key} onClick={() => handleClick(key)}
+          <button key={key} type="button" onClick={() => handleClick(key)}
             style={{ display:'flex', alignItems:'center', gap:'0.5rem',
               padding:'0.45rem 1rem', background:'var(--surface)',
               border:'1px solid var(--border)', borderRadius:100,
@@ -220,12 +218,8 @@ function GameRow({ title, Icon, games, onGame, onViewAll, viewAll, showRanks }) 
   );
 }
 
-/* ── Live stats ── */
-function StatsBar({ t }) {
-  const [stats, setStats] = useState(null);
-  useEffect(() => {
-    fetch(`${BASE}/api/stats`).then(r=>r.json()).then(setStats).catch(()=>{});
-  }, []);
+/* ── Live stats — now reads a prop instead of fetching itself ── */
+function StatsBar({ stats, t }) {
   return (
     <div className="hero-stats">
       {[
@@ -246,30 +240,21 @@ function StatsBar({ t }) {
 /* ══════════════════════════════════════════════════════════ */
 export default function HomePage({ navigate }) {
   const { t } = useLang();
-  const [step,       setStep]       = useState('hero');
-  const [results,    setResults]    = useState([]);
-  const [prefs,      setPrefs]      = useState(null);
-  const [error,      setError]      = useState('');
-  const [popular,    setPopular]    = useState([]);
-  const [trending,   setTrending]   = useState([]);
-  const [recent,     setRecent]     = useState([]);
-  const [topRated,   setTopRated]   = useState([]);
-  const [hiddenGems, setHiddenGems] = useState([]);
-  const [dailyGame,  setDailyGame]  = useState(null);
+  const [step,    setStep]    = useState('hero');
+  const [results, setResults] = useState([]);
+  const [prefs,   setPrefs]   = useState(null);
+  const [error,   setError]   = useState('');
   const sharedHandled = useRef(false);
+
+  // ⚡ Single hook replaces 6 separate fetch calls.
+  // hp is null on the very first-ever visit (no cache), then instantly
+  // populated from localStorage on every visit after that, while fresh
+  // data refetches quietly in the background.
+  const { data: hp, isLoading } = useHomepageData();
 
   usePageTitle(step === 'results' ? t.results.title : null);
 
-  useEffect(() => {
-    fetchPopularGames().then(setPopular).catch(()=>{});
-    fetchTrendingGames().then(setTrending).catch(()=>{});
-    fetchRecentGames().then(setRecent).catch(()=>{});
-    fetchTopRatedGames().then(setTopRated).catch(()=>{});
-    fetch(`${BASE}/api/games/hidden-gems`).then(r=>r.json()).then(setHiddenGems).catch(()=>{});
-    fetch(`${BASE}/api/games/daily`).then(r=>r.json()).then(setDailyGame).catch(()=>{});
-  }, []);
-
-  // Handle shared URL on load — only once
+  // Handle shared results URL on load — only once
   useEffect(() => {
     if (sharedHandled.current) return;
     const params  = new URLSearchParams(window.location.search);
@@ -291,6 +276,7 @@ export default function HomePage({ navigate }) {
   };
 
   const goGame = g => navigate('game', { id: g.id });
+  const showSkeleton = isLoading && !hp;
 
   /* ── Hero ── */
   if (step === 'hero') return (
@@ -316,7 +302,7 @@ export default function HomePage({ navigate }) {
           </button>
         </div>
 
-        <StatsBar t={t}/>
+        <StatsBar stats={hp?.stats} t={t}/>
       </section>
 
       {/* Feature bar */}
@@ -340,26 +326,40 @@ export default function HomePage({ navigate }) {
 
       <div style={{ paddingTop:'2rem' }}>
         {/* Daily Pick */}
-        {dailyGame && (
+        {showSkeleton ? (
+          <div style={{ padding:'0 2rem', maxWidth:1400, margin:'0 auto 2.5rem' }}>
+            <div style={{ height:220, background:'var(--surface2)', borderRadius:'var(--r-lg)' }}/>
+          </div>
+        ) : hp?.daily && (
           <div style={{ padding:'0 2rem', maxWidth:1400, margin:'0 auto 2.5rem' }}>
             <div style={{ fontSize:'0.72rem', fontWeight:700, letterSpacing:'0.08em',
               textTransform:'uppercase', color:'var(--text-3)', marginBottom:'0.85rem',
               display:'flex', alignItems:'center', gap:'0.4rem' }}>
               <Calendar size={12}/> {t.hero.daily_pick || 'Game of the Day'}
             </div>
-            <DailyPick game={dailyGame} onClick={goGame} t={t}/>
+            <DailyPick game={hp.daily} onClick={goGame} t={t}/>
           </div>
         )}
 
         {/* Genre strip */}
         <GenreStrip navigate={navigate} t={t}/>
 
-        {/* Game rows */}
-        <GameRow title={t.hero.popular_title}   Icon={Star}       games={popular}   onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all} showRanks/>
-        <GameRow title={t.hero.trending_title}  Icon={TrendingUp} games={trending}  onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
-        <GameRow title={t.hero.top_rated_title} Icon={Award}      games={topRated}  onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all} showRanks/>
-        <GameRow title={t.hero.recent_title}    Icon={Clock}      games={recent}    onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
-        <GameRow title={t.hero.hidden_gems||'Hidden Gems'} Icon={Gem} games={hiddenGems} onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
+        {/* Game rows — skeleton on true first visit, real content otherwise */}
+        {showSkeleton ? (
+          <>
+            <GameRowSkeleton/>
+            <GameRowSkeleton/>
+            <GameRowSkeleton/>
+          </>
+        ) : (
+          <>
+            <GameRow title={t.hero.popular_title}   Icon={Star}       games={hp?.popular}    onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all} showRanks/>
+            <GameRow title={t.hero.trending_title}  Icon={TrendingUp} games={hp?.trending}   onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
+            <GameRow title={t.hero.top_rated_title} Icon={Award}      games={hp?.topRated}   onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all} showRanks/>
+            <GameRow title={t.hero.recent_title}    Icon={Clock}      games={hp?.recent}     onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
+            <GameRow title={t.hero.hidden_gems||'Hidden Gems'} Icon={Gem} games={hp?.hiddenGems} onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
+          </>
+        )}
 
         {/* Friends CTA */}
         <div style={{ padding:'0 2rem', maxWidth:1400, margin:'0 auto 3rem' }}>

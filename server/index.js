@@ -152,6 +152,32 @@ app.get('/api/stats', (req,res) => {
   res.json({ totalGames:games.length, totalViews, weekViews, coopGames:games.filter(g=>g.coop).length, totalReactions });
 });
 
+app.get('/api/homepage', (req, res) => {
+  const dynPopular  = getTopByViews(7, 8);
+  const dynTrending  = getTopByViews(1, 4);
+  const recent2024   = games.filter(g => g.releaseYear >= 2024).sort((a,b) => b.releaseYear - a.releaseYear).slice(0,4);
+  const trendCombined = [...new Map([...dynTrending, ...recent2024].map(g => [g.id, g])).values()].slice(0,8);
+
+  const weekAgo  = Date.now() - 7*24*60*60*1000;
+  const lowViews = games.filter(g => ((views[g.id]||[]).filter(t=>t>weekAgo).length) < 3);
+  const gems     = byNames(HIDDEN).filter(g => lowViews.find(l=>l.id===g.id));
+
+  const dayIndex = Math.floor(Date.now()/(24*60*60*1000)) % games.length;
+
+  res.json({
+    popular:   dynPopular.length  >= 4 ? dynPopular  : byNames(POPULAR),
+    trending:  trendCombined.length >= 4 ? trendCombined : byNames(TRENDING),
+    topRated:  byNames(TOP),
+    recent:    [...games].filter(g=>g.releaseYear>=2024).sort((a,b)=>b.releaseYear-a.releaseYear||parseInt(b.id)-parseInt(a.id)).slice(0,8),
+    hiddenGems: gems.length >= 4 ? gems : byNames(HIDDEN),
+    daily:     games[dayIndex],
+    stats: {
+      totalGames: games.length,
+      coopGames:  games.filter(g=>g.coop).length,
+    },
+  });
+});
+
 app.get('/api/games/:id', (req,res) => {
   const game = games.find(g=>g.id===req.params.id);
   if(!game) return res.status(404).json({error:'Game not found'});
