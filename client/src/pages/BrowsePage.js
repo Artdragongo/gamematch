@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X, SlidersHorizontal } from 'lucide-react';
 import { fetchAllGames } from '../utils/api';
 import GameCard from '../components/GameCard';
 import { useLang } from '../i18n/LangContext';
@@ -8,7 +8,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 const GENRES = [
   'Action','Adventure','RPG','FPS','Strategy','Simulation','Puzzle',
   'Platformer','Survival','Horror','Co-op','Party','Roguelike','Sandbox',
-  'Indie','Racing','Sports','Card Game','Souls-like','MOBA','Battle Royale',
+  'Indie','Racing','Sports','Card Game','Souls-like','MOBA','Battle Royale','Fighting',
 ];
 
 export default function BrowsePage({ navigate }) {
@@ -21,7 +21,15 @@ export default function BrowsePage({ navigate }) {
   const [coop,    setCoop]    = useState('');
   const [diff,    setDiff]    = useState('');
 
+  usePageTitle(t.browse.title);
+
   useEffect(() => {
+    // Pick up genre filter passed from homepage genre strip
+    try {
+      const saved = sessionStorage.getItem('gm_genre_filter');
+      if (saved) { setGenre(saved); sessionStorage.removeItem('gm_genre_filter'); }
+    } catch {}
+
     fetchAllGames()
       .then(g => { setGames(g); setLoading(false); })
       .catch(() => setLoading(false));
@@ -39,34 +47,29 @@ export default function BrowsePage({ navigate }) {
 
   const hasFilters = search || genre || pc || coop || diff;
   const clearAll   = () => { setSearch(''); setGenre(''); setPc(''); setCoop(''); setDiff(''); };
-
-  usePageTitle(t.browse.title);
-  const genreLabel = g => (t.genres && t.genres[g]) ? t.genres[g] : g;
+  const gl = g => t.genres?.[g] || g;
 
   return (
     <div>
       <div className="browse-header">
         <h2 className="browse-title">{t.browse.title}</h2>
-        <p style={{color:'var(--text-3)',fontSize:'0.875rem'}}>
+        <p style={{ color:'var(--text-3)', fontSize:'0.875rem' }}>
           {t.browse.sub(filtered.length, games.length)}
         </p>
       </div>
 
       <div className="browse-filters">
-        <div className="filter-search">
-          <Search size={13} style={{position:'absolute',left:'0.7rem',top:'50%',transform:'translateY(-50%)',color:'var(--text-4)',pointerEvents:'none'}}/>
-          <input
-            type="text"
-            className="filter-input"
+        <div className="filter-search" style={{ position:'relative' }}>
+          <Search size={13} style={{ position:'absolute', left:'0.7rem', top:'50%',
+            transform:'translateY(-50%)', color:'var(--text-4)', pointerEvents:'none' }}/>
+          <input type="text" className="filter-input"
             placeholder={t.browse.search_ph}
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
+            value={search} onChange={e => setSearch(e.target.value)}/>
         </div>
 
         <select className="filter-select" value={genre} onChange={e => setGenre(e.target.value)}>
           <option value="">{t.browse.all_genres}</option>
-          {GENRES.map(g => <option key={g} value={g}>{genreLabel(g)}</option>)}
+          {GENRES.map(g => <option key={g} value={g}>{gl(g)}</option>)}
         </select>
 
         <select className="filter-select" value={pc} onChange={e => setPc(e.target.value)}>
@@ -90,14 +93,46 @@ export default function BrowsePage({ navigate }) {
         </select>
 
         {hasFilters && (
-          <button className="btn btn-muted btn-sm" onClick={clearAll} style={{display:'flex',alignItems:'center',gap:'0.3rem'}}>
+          <button className="btn btn-muted btn-sm" onClick={clearAll}
+            style={{ display:'flex', alignItems:'center', gap:'0.3rem' }}>
             <X size={12}/> {t.browse.clear}
           </button>
         )}
       </div>
 
+      {/* Active filter chips */}
+      {hasFilters && (
+        <div style={{ padding:'0 2rem', maxWidth:1400, margin:'-0.25rem auto 0.75rem',
+          display:'flex', flexWrap:'wrap', gap:'0.4rem', alignItems:'center' }}>
+          <SlidersHorizontal size={12} style={{ color:'var(--text-4)' }}/>
+          {genre && (
+            <span className="result-chip" style={{ cursor:'pointer' }} onClick={()=>setGenre('')}>
+              {gl(genre)} <X size={10}/>
+            </span>
+          )}
+          {pc && (
+            <span className="result-chip" style={{ cursor:'pointer' }} onClick={()=>setPc('')}>
+              {{ low:t.form.pc_low_title, medium:t.form.pc_med_title, high:t.form.pc_hi_title }[pc]} <X size={10}/>
+            </span>
+          )}
+          {diff && (
+            <span className="result-chip" style={{ cursor:'pointer' }} onClick={()=>setDiff('')}>
+              {diff} <X size={10}/>
+            </span>
+          )}
+          {coop && (
+            <span className="result-chip" style={{ cursor:'pointer' }} onClick={()=>setCoop('')}>
+              {{ coop:t.browse.coop_only, solo:t.browse.solo_only }[coop]} <X size={10}/>
+            </span>
+          )}
+        </div>
+      )}
+
       {loading ? (
-        <div className="loading-wrap"><div className="spinner"/><div className="loading-text">{t.common.loading}</div></div>
+        <div className="loading-wrap">
+          <div className="spinner"/>
+          <div className="loading-text">{t.common.loading}</div>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="empty">
           <div className="empty-icon"><Search size={32}/></div>
@@ -107,12 +142,8 @@ export default function BrowsePage({ navigate }) {
       ) : (
         <div className="results-grid">
           {filtered.map(game => (
-            <GameCard
-              key={game.id}
-              game={game}
-              animate={false}
-              onClick={() => navigate('game',{id:game.id})}
-            />
+            <GameCard key={game.id} game={game} animate={false}
+              onClick={() => navigate('game', { id: game.id })}/>
           ))}
         </div>
       )}

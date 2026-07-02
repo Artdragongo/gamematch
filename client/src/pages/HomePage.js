@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Gamepad2, Monitor, Users, ArrowLeft, TrendingUp, Clock,
-         Star, ChevronRight, Award, Zap, Search, Calendar, Gem, Share2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Gamepad2, Monitor, Users, ArrowLeft, TrendingUp, Clock,
+  Star, ChevronRight, Award, Zap, Search, Calendar,
+  Gem, Swords, Map, Headphones, Brain, Target,
+  Cog, TreePine, Package, Trophy, Puzzle, Joystick
+} from 'lucide-react';
 import PreferencesForm from '../components/PreferencesForm';
 import GameCard from '../components/GameCard';
 import QuickMatch from '../components/QuickMatch';
@@ -12,20 +16,22 @@ import { usePageTitle } from '../hooks/usePageTitle';
 
 const BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
-/* ── Mini card image with fallback ── */
+/* ── Mini card image ── */
 function MiniCardImg({ src, alt }) {
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
   if (!src || failed) return (
-    <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg,#EEF2FF,#F3F4F6)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-      <span style={{ fontSize:'1.6rem', opacity:0.2 }}>🎮</span>
+    <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg,#EEF2FF,#F3F4F6)',
+      display:'flex', alignItems:'center', justifyContent:'center' }}>
+      <Gamepad2 size={28} style={{ opacity:0.15, color:'var(--text-3)' }}/>
     </div>
   );
   return (
     <>
       {!loaded && <div style={{ position:'absolute', inset:0, background:'var(--surface2)' }}/>}
       <img src={src} alt={alt} loading="lazy"
-        style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', opacity:loaded?1:0, transition:'opacity .2s' }}
+        style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover',
+          opacity:loaded?1:0, transition:'opacity .2s' }}
         onLoad={()=>setLoaded(true)} onError={()=>setFailed(true)}/>
     </>
   );
@@ -37,22 +43,22 @@ function MiniCard({ game, onClick, rank }) {
   const pcClass = { low:'tag-pc-low', medium:'tag-pc-med', high:'tag-pc-hi' }[game.pcRequirements] || 'tag-pc-med';
   const gl = g => t.genres?.[g] || g;
   return (
-    <div className="game-card" onClick={()=>onClick?.(game)} style={{cursor:'pointer'}}>
-      <div className="gc-img" style={{aspectRatio:'16/7'}}>
+    <div className="game-card" onClick={()=>onClick?.(game)} style={{ cursor:'pointer' }}>
+      <div className="gc-img" style={{ aspectRatio:'16/7' }}>
         <MiniCardImg src={game.coverImage} alt={game.name}/>
         <div className="gc-img-gradient"/>
         {rank && <div className="gc-rank">{rank}</div>}
       </div>
-      <div className="gc-body" style={{padding:'0.85rem 1rem', gap:'0.35rem'}}>
-        <div className="gc-title" style={{fontSize:'0.875rem'}}>{game.name}</div>
-        <div style={{fontSize:'0.72rem', color:'var(--text-4)'}}>{game.developer} · {game.releaseYear}</div>
+      <div className="gc-body" style={{ padding:'0.85rem 1rem', gap:'0.35rem' }}>
+        <div className="gc-title" style={{ fontSize:'0.875rem' }}>{game.name}</div>
+        <div style={{ fontSize:'0.72rem', color:'var(--text-4)' }}>{game.developer} · {game.releaseYear}</div>
         <div className="gc-tags">
-          {game.genre.slice(0,1).map(g=><span key={g} className="tag tag-genre">{gl(g)}</span>)}
-          <span className={`tag ${pcClass}`} style={{fontSize:'0.65rem'}}>
-            {{low:t.card.pc_low,medium:t.card.pc_med,high:t.card.pc_hi}[game.pcRequirements]}
+          {game.genre.slice(0,1).map(g => <span key={g} className="tag tag-genre">{gl(g)}</span>)}
+          <span className={`tag ${pcClass}`} style={{ fontSize:'0.65rem' }}>
+            {{ low:t.card.pc_low, medium:t.card.pc_med, high:t.card.pc_hi }[game.pcRequirements]}
           </span>
-          <span className={`tag ${game.coop?'tag-coop':'tag-solo'}`} style={{fontSize:'0.65rem'}}>
-            {game.coop?t.card.coop:t.card.solo}
+          <span className={`tag ${game.coop?'tag-coop':'tag-solo'}`} style={{ fontSize:'0.65rem' }}>
+            {game.coop ? t.card.coop : t.card.solo}
           </span>
         </div>
       </div>
@@ -71,69 +77,116 @@ function DailyPick({ game, onClick, t }) {
       display:'grid', gridTemplateColumns:'1fr 1fr', minHeight:220,
       boxShadow:'var(--sh-lg)',
     }} onClick={()=>onClick(game)}>
-      <div style={{padding:'2rem', display:'flex', flexDirection:'column', justifyContent:'space-between'}}>
+      <div style={{ padding:'2rem', display:'flex', flexDirection:'column', justifyContent:'space-between' }}>
         <div>
-          <div style={{display:'inline-flex', alignItems:'center', gap:'0.4rem', background:'rgba(255,255,255,0.15)', borderRadius:100, padding:'0.25rem 0.75rem', fontSize:'0.7rem', fontWeight:700, color:'#fff', letterSpacing:'0.06em', marginBottom:'1rem'}}>
-            <Star size={10}/> {t.hero.daily_pick||'GAME OF THE DAY'}
+          <div style={{ display:'inline-flex', alignItems:'center', gap:'0.4rem',
+            background:'rgba(255,255,255,0.15)', borderRadius:100,
+            padding:'0.25rem 0.75rem', fontSize:'0.7rem', fontWeight:700,
+            color:'#fff', letterSpacing:'0.06em', marginBottom:'1rem' }}>
+            <Calendar size={10}/> {t.hero.daily_pick || 'Game of the Day'}
           </div>
-          <h2 style={{fontFamily:'var(--font-heading)', fontSize:'clamp(1.2rem,2.5vw,1.9rem)', fontWeight:800, color:'#fff', letterSpacing:'-0.02em', marginBottom:'0.45rem', lineHeight:1.2}}>
+          <h2 style={{ fontFamily:'var(--font-heading)', fontSize:'clamp(1.2rem,2.5vw,1.9rem)',
+            fontWeight:800, color:'#fff', letterSpacing:'-0.02em',
+            marginBottom:'0.45rem', lineHeight:1.2 }}>
             {game.name}
           </h2>
-          <p style={{fontSize:'0.82rem', color:'rgba(255,255,255,0.65)', lineHeight:1.6, marginBottom:'0.85rem'}}>
+          <p style={{ fontSize:'0.82rem', color:'rgba(255,255,255,0.65)', lineHeight:1.6, marginBottom:'0.85rem' }}>
             {game.shortDescription?.slice(0,120)}…
           </p>
-          <div style={{display:'flex', gap:'0.4rem', flexWrap:'wrap'}}>
-            {game.genre.slice(0,2).map(g=>(
-              <span key={g} style={{background:'rgba(255,255,255,0.15)', color:'#fff', padding:'0.2rem 0.6rem', borderRadius:100, fontSize:'0.7rem', fontWeight:600}}>{gl(g)}</span>
+          <div style={{ display:'flex', gap:'0.4rem', flexWrap:'wrap' }}>
+            {game.genre.slice(0,2).map(g => (
+              <span key={g} style={{ background:'rgba(255,255,255,0.15)', color:'#fff',
+                padding:'0.2rem 0.6rem', borderRadius:100, fontSize:'0.7rem', fontWeight:600 }}>
+                {gl(g)}
+              </span>
             ))}
           </div>
         </div>
-        <div style={{display:'flex', gap:'0.5rem', marginTop:'1.25rem', flexWrap:'wrap'}}>
+        <div style={{ display:'flex', gap:'0.5rem', marginTop:'1.25rem', flexWrap:'wrap' }}>
           {game.steamLink && (
-            <a href={game.steamLink} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()}>
-              <button style={{background:'rgba(255,255,255,0.15)', border:'1px solid rgba(255,255,255,0.3)', color:'#fff', padding:'0.4rem 0.9rem', borderRadius:'var(--r-sm)', fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:'var(--font-body)'}}>
+            <a href={game.steamLink} target="_blank" rel="noopener noreferrer"
+              onClick={e=>e.stopPropagation()}>
+              <button style={{ background:'rgba(255,255,255,0.15)', border:'1px solid rgba(255,255,255,0.3)',
+                color:'#fff', padding:'0.4rem 0.9rem', borderRadius:'var(--r-sm)',
+                fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:'var(--font-body)' }}>
                 Steam ↗
               </button>
             </a>
           )}
-          <button style={{background:'#fff', border:'none', color:'#1e3a5f', padding:'0.4rem 0.9rem', borderRadius:'var(--r-sm)', fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:'var(--font-body)'}}>
+          <button style={{ background:'#fff', border:'none', color:'#1e3a5f',
+            padding:'0.4rem 0.9rem', borderRadius:'var(--r-sm)',
+            fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:'var(--font-body)' }}>
             {t.card.details} →
           </button>
         </div>
       </div>
-      <div style={{position:'relative', overflow:'hidden'}}>
+      <div style={{ position:'relative', overflow:'hidden' }}>
         {game.coverImage
-          ? <img src={game.coverImage} alt={game.name} style={{width:'100%', height:'100%', objectFit:'cover', opacity:0.65}} onError={e=>e.target.style.opacity=0}/>
-          : <div style={{width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'4rem', opacity:0.2}}>🎮</div>
+          ? <img src={game.coverImage} alt={game.name}
+              style={{ width:'100%', height:'100%', objectFit:'cover', opacity:0.65 }}
+              onError={e=>e.target.style.opacity=0}/>
+          : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center',
+              justifyContent:'center', opacity:0.15 }}>
+              <Gamepad2 size={64} color="#fff"/>
+            </div>
         }
-        <div style={{position:'absolute', inset:0, background:'linear-gradient(to right,#1e3a5f 0%,transparent 60%)'}}/>
+        <div style={{ position:'absolute', inset:0,
+          background:'linear-gradient(to right,#1e3a5f 0%,transparent 60%)' }}/>
       </div>
     </div>
   );
 }
 
-/* ── Genre strip ── */
-function GenreStrip({ onGenre, t }) {
+/* ── Genre strip — uses Lucide icons, navigates with ?genre= param ── */
+function GenreStrip({ navigate, t }) {
   const genres = [
-    {key:'Action',icon:'⚔️'},{key:'RPG',icon:'🧙'},{key:'Co-op',icon:'👥'},
-    {key:'Horror',icon:'👻'},{key:'Strategy',icon:'♟️'},{key:'Roguelike',icon:'🎲'},
-    {key:'Simulation',icon:'🏗️'},{key:'Survival',icon:'🏕️'},{key:'Indie',icon:'💎'},
-    {key:'FPS',icon:'🎯'},{key:'Puzzle',icon:'🧩'},{key:'Platformer',icon:'🕹️'},
-    {key:'Racing',icon:'🏎️'},{key:'Sports',icon:'⚽'},{key:'Fighting',icon:'🥊'},
+    { key:'Action',       Icon: Swords   },
+    { key:'RPG',          Icon: Trophy   },
+    { key:'Co-op',        Icon: Users    },
+    { key:'Horror',       Icon: Headphones },
+    { key:'Strategy',     Icon: Brain    },
+    { key:'Roguelike',    Icon: Joystick },
+    { key:'Simulation',   Icon: Cog      },
+    { key:'Survival',     Icon: TreePine },
+    { key:'Indie',        Icon: Package  },
+    { key:'FPS',          Icon: Target   },
+    { key:'Puzzle',       Icon: Puzzle   },
+    { key:'Adventure',    Icon: Map      },
   ];
+
+  const handleClick = (key) => {
+    // Pass genre via sessionStorage so BrowsePage can pick it up
+    try { sessionStorage.setItem('gm_genre_filter', key); } catch {}
+    navigate('browse');
+  };
+
   return (
-    <div style={{padding:'0 2rem', maxWidth:1400, margin:'0 auto 2.5rem'}}>
-      <div style={{fontSize:'0.72rem', fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--text-3)', marginBottom:'0.85rem'}}>
-        {t.hero.browse_by_genre||'Browse by genre'}
+    <div style={{ padding:'0 2rem', maxWidth:1400, margin:'0 auto 2.5rem' }}>
+      <div style={{ fontSize:'0.72rem', fontWeight:700, letterSpacing:'0.08em',
+        textTransform:'uppercase', color:'var(--text-3)', marginBottom:'0.85rem' }}>
+        {t.hero.browse_by_genre || 'Browse by genre'}
       </div>
-      <div style={{display:'flex', flexWrap:'wrap', gap:'0.45rem'}}>
-        {genres.map(({key,icon})=>(
-          <button key={key} onClick={()=>onGenre(key)}
-            style={{display:'flex', alignItems:'center', gap:'0.4rem', padding:'0.4rem 0.9rem', background:'var(--surface)', border:'1px solid var(--border)', borderRadius:100, fontSize:'0.8rem', fontWeight:600, color:'var(--text-2)', cursor:'pointer', transition:'all 0.15s', fontFamily:'var(--font-body)'}}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor='var(--primary)';e.currentTarget.style.color='var(--primary)';e.currentTarget.style.background='var(--primary-light)';}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--border)';e.currentTarget.style.color='var(--text-2)';e.currentTarget.style.background='var(--surface)';}}
+      <div style={{ display:'flex', flexWrap:'wrap', gap:'0.45rem' }}>
+        {genres.map(({ key, Icon }) => (
+          <button key={key} onClick={() => handleClick(key)}
+            style={{ display:'flex', alignItems:'center', gap:'0.5rem',
+              padding:'0.45rem 1rem', background:'var(--surface)',
+              border:'1px solid var(--border)', borderRadius:100,
+              fontSize:'0.82rem', fontWeight:600, color:'var(--text-2)',
+              cursor:'pointer', transition:'all 0.15s', fontFamily:'var(--font-body)' }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = 'var(--primary)';
+              e.currentTarget.style.color       = 'var(--primary)';
+              e.currentTarget.style.background  = 'var(--primary-light)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = 'var(--border)';
+              e.currentTarget.style.color       = 'var(--text-2)';
+              e.currentTarget.style.background  = 'var(--surface)';
+            }}
           >
-            <span>{icon}</span> {t.genres?.[key]||key}
+            <Icon size={13}/>
+            {t.genres?.[key] || key}
           </button>
         ))}
       </div>
@@ -142,81 +195,94 @@ function GenreStrip({ onGenre, t }) {
 }
 
 /* ── Section row ── */
-function GameRow({ title, icon, games, onGame, onViewAll, viewAll, showRanks }) {
+function GameRow({ title, Icon, games, onGame, onViewAll, viewAll, showRanks }) {
   if (!games?.length) return null;
   return (
-    <section style={{marginBottom:'2.5rem'}}>
+    <section style={{ marginBottom:'2.5rem' }}>
       <div className="section-header">
-        <span className="section-title" style={{display:'flex', alignItems:'center', gap:'0.45rem'}}>{icon}{title}</span>
-        <button onClick={onViewAll} style={{display:'flex', alignItems:'center', gap:'0.3rem', font:'600 0.8rem var(--font-body)', color:'var(--primary)', background:'none', border:'none', cursor:'pointer'}}>
+        <span className="section-title" style={{ display:'flex', alignItems:'center', gap:'0.5rem' }}>
+          {Icon && <Icon size={15} style={{ color:'var(--primary)', flexShrink:0 }}/>}
+          {title}
+        </span>
+        <button onClick={onViewAll}
+          style={{ display:'flex', alignItems:'center', gap:'0.3rem',
+            font:'600 0.8rem var(--font-body)', color:'var(--primary)',
+            background:'none', border:'none', cursor:'pointer' }}>
           {viewAll} <ChevronRight size={13}/>
         </button>
       </div>
       <div className="card-row">
-        {games.slice(0,4).map((g,i)=>(
-          <MiniCard key={g.id} game={g} onClick={onGame} rank={showRanks?i+1:null}/>
+        {games.slice(0,4).map((g,i) => (
+          <MiniCard key={g.id} game={g} onClick={onGame} rank={showRanks ? i+1 : null}/>
         ))}
       </div>
     </section>
   );
 }
 
-/* ── Stats bar ── */
+/* ── Live stats ── */
 function StatsBar({ t }) {
   const [stats, setStats] = useState(null);
-  useEffect(()=>{ fetch(`${BASE}/api/stats`).then(r=>r.json()).then(setStats).catch(()=>{}); },[]);
+  useEffect(() => {
+    fetch(`${BASE}/api/stats`).then(r=>r.json()).then(setStats).catch(()=>{});
+  }, []);
   return (
     <div className="hero-stats">
       {[
-        [stats?.totalGames||'220+', t.hero.stat_games],
-        ['<20s', t.hero.stat_time],
-        [stats?.coopGames?`${stats.coopGames}+`:'130+', t.hero.stat_coop||'Co-op games'],
+        [stats?.totalGames || '220+', t.hero.stat_games],
+        ['<20s',                       t.hero.stat_time],
+        [stats?.coopGames ? `${stats.coopGames}+` : '130+', t.hero.stat_coop || 'Co-op'],
         [t.hero.stat_free, ''],
-      ].map(([n,l],i)=>(
-        <div key={i}><div className="hero-stat-n">{n}</div>{l&&<div className="hero-stat-l">{l}</div>}</div>
+      ].map(([n, l], i) => (
+        <div key={i}>
+          <div className="hero-stat-n">{n}</div>
+          {l && <div className="hero-stat-l">{l}</div>}
+        </div>
       ))}
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════ */
 export default function HomePage({ navigate }) {
   const { t } = useLang();
-  const [step,       setStep]      = useState('hero');
-  const [results,    setResults]   = useState([]);
-  const [prefs,      setPrefs]     = useState(null);
-  const [error,      setError]     = useState('');
-  const [popular,    setPopular]   = useState([]);
-  const [trending,   setTrending]  = useState([]);
-  const [recent,     setRecent]    = useState([]);
-  const [topRated,   setTopRated]  = useState([]);
-  const [hiddenGems, setHiddenGems]= useState([]);
-  const [dailyGame,  setDailyGame] = useState(null);
+  const [step,       setStep]       = useState('hero');
+  const [results,    setResults]    = useState([]);
+  const [prefs,      setPrefs]      = useState(null);
+  const [error,      setError]      = useState('');
+  const [popular,    setPopular]    = useState([]);
+  const [trending,   setTrending]   = useState([]);
+  const [recent,     setRecent]     = useState([]);
+  const [topRated,   setTopRated]   = useState([]);
+  const [hiddenGems, setHiddenGems] = useState([]);
+  const [dailyGame,  setDailyGame]  = useState(null);
+  const sharedHandled = useRef(false);
 
-  usePageTitle(step==='results' ? t.results.title : null);
+  usePageTitle(step === 'results' ? t.results.title : null);
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchPopularGames().then(setPopular).catch(()=>{});
     fetchTrendingGames().then(setTrending).catch(()=>{});
     fetchRecentGames().then(setRecent).catch(()=>{});
     fetchTopRatedGames().then(setTopRated).catch(()=>{});
     fetch(`${BASE}/api/games/hidden-gems`).then(r=>r.json()).then(setHiddenGems).catch(()=>{});
     fetch(`${BASE}/api/games/daily`).then(r=>r.json()).then(setDailyGame).catch(()=>{});
-  },[]);
+  }, []);
 
-  // Handle shared URL params on load
-  useEffect(()=>{
-    const params = new URLSearchParams(window.location.search);
-    const genres  = params.get('genres')?.split(',').filter(Boolean) || [];
+  // Handle shared URL on load — only once
+  useEffect(() => {
+    if (sharedHandled.current) return;
+    const params  = new URLSearchParams(window.location.search);
     const pc      = params.get('pc');
+    const genres  = params.get('genres')?.split(',').filter(Boolean) || [];
     const coop    = params.get('coop') === '1';
     const players = params.get('players') || '1';
     if (pc) {
-      handleSubmit({ players, withFriends: coop, genres, pcLevel: pc });
-      // Clean URL
+      sharedHandled.current = true;
       window.history.replaceState({}, '', '/');
+      handleSubmit({ players, withFriends: coop, genres, pcLevel: pc });
     }
-  }, []);
+  });
 
   const handleSubmit = async (formPrefs) => {
     setPrefs(formPrefs); setStep('loading'); setError('');
@@ -224,25 +290,27 @@ export default function HomePage({ navigate }) {
     catch { setError(t.common.error_server); setStep('form'); }
   };
 
-  const goGame = g => navigate('game',{id:g.id});
+  const goGame = g => navigate('game', { id: g.id });
 
   /* ── Hero ── */
   if (step === 'hero') return (
     <>
       <section className="hero">
-        <div className="hero-eyebrow"><Gamepad2 size={12}/> {t.hero.badge}</div>
+        <div className="hero-eyebrow">
+          <Gamepad2 size={12}/> {t.hero.badge}
+        </div>
         <h1>{t.hero.title1} <span className="accent">{t.hero.title2}</span></h1>
         <p className="hero-sub">{t.hero.sub}</p>
 
         {/* Quick Match */}
-        <div style={{marginBottom:'1.25rem'}}>
+        <div style={{ marginBottom:'1.25rem' }}>
           <QuickMatch
             onResults={(res, p) => { setResults(res); setPrefs(p); setStep('results'); }}
             onFullSearch={() => setStep('form')}
           />
         </div>
 
-        <div style={{textAlign:'center', marginBottom:'1rem'}}>
+        <div style={{ textAlign:'center', marginBottom:'1rem' }}>
           <button className="btn btn-muted" onClick={() => navigate('bored')}>
             <Zap size={13}/> {t.hero.cta_bored}
           </button>
@@ -254,45 +322,58 @@ export default function HomePage({ navigate }) {
       {/* Feature bar */}
       <div className="feature-bar">
         <div className="feature-bar-inner">
-          {[[Monitor,t.hero.feat1_title,t.hero.feat1_desc],[Users,t.hero.feat2_title,t.hero.feat2_desc],[Gamepad2,t.hero.feat3_title,t.hero.feat3_desc]].map(([Icon,title,desc])=>(
+          {[
+            [Monitor,  t.hero.feat1_title, t.hero.feat1_desc],
+            [Users,    t.hero.feat2_title, t.hero.feat2_desc],
+            [Gamepad2, t.hero.feat3_title, t.hero.feat3_desc],
+          ].map(([Icon, title, desc]) => (
             <div className="feature-item" key={title}>
               <div className="feature-icon"><Icon size={16}/></div>
-              <div><div className="feature-title">{title}</div><div className="feature-desc">{desc}</div></div>
+              <div>
+                <div className="feature-title">{title}</div>
+                <div className="feature-desc">{desc}</div>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{paddingTop:'2rem'}}>
+      <div style={{ paddingTop:'2rem' }}>
         {/* Daily Pick */}
         {dailyGame && (
-          <div style={{padding:'0 2rem', maxWidth:1400, margin:'0 auto 2.5rem'}}>
-            <div style={{fontSize:'0.72rem', fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--text-3)', marginBottom:'0.85rem', display:'flex', alignItems:'center', gap:'0.4rem'}}>
-              <Calendar size={12}/> {t.hero.daily_pick||'Game of the Day'}
+          <div style={{ padding:'0 2rem', maxWidth:1400, margin:'0 auto 2.5rem' }}>
+            <div style={{ fontSize:'0.72rem', fontWeight:700, letterSpacing:'0.08em',
+              textTransform:'uppercase', color:'var(--text-3)', marginBottom:'0.85rem',
+              display:'flex', alignItems:'center', gap:'0.4rem' }}>
+              <Calendar size={12}/> {t.hero.daily_pick || 'Game of the Day'}
             </div>
             <DailyPick game={dailyGame} onClick={goGame} t={t}/>
           </div>
         )}
 
         {/* Genre strip */}
-        <GenreStrip onGenre={genre => navigate('browse')} t={t}/>
+        <GenreStrip navigate={navigate} t={t}/>
 
         {/* Game rows */}
-        <GameRow title={t.hero.popular_title}   icon={<Star size={14}/>}       games={popular}   onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all} showRanks/>
-        <GameRow title={t.hero.trending_title}  icon={<TrendingUp size={14}/>} games={trending}  onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
-        <GameRow title={t.hero.top_rated_title} icon={<Award size={14}/>}      games={topRated}  onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all} showRanks/>
-        <GameRow title={t.hero.recent_title}    icon={<Clock size={14}/>}      games={recent}    onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
-        <GameRow title={t.hero.hidden_gems||'Hidden Gems 💎'} icon={<Gem size={14}/>} games={hiddenGems} onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
+        <GameRow title={t.hero.popular_title}   Icon={Star}       games={popular}   onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all} showRanks/>
+        <GameRow title={t.hero.trending_title}  Icon={TrendingUp} games={trending}  onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
+        <GameRow title={t.hero.top_rated_title} Icon={Award}      games={topRated}  onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all} showRanks/>
+        <GameRow title={t.hero.recent_title}    Icon={Clock}      games={recent}    onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
+        <GameRow title={t.hero.hidden_gems||'Hidden Gems'} Icon={Gem} games={hiddenGems} onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
 
-        {/* Friends CTA banner */}
-        <div style={{padding:'0 2rem', maxWidth:1400, margin:'0 auto 3rem'}}>
-          <div style={{background:'var(--primary-light)', border:'1px solid var(--primary-mid)', borderRadius:'var(--r-lg)', padding:'2rem 2.5rem', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'1.5rem'}}>
+        {/* Friends CTA */}
+        <div style={{ padding:'0 2rem', maxWidth:1400, margin:'0 auto 3rem' }}>
+          <div style={{ background:'var(--primary-light)', border:'1px solid var(--primary-mid)',
+            borderRadius:'var(--r-lg)', padding:'2rem 2.5rem',
+            display:'flex', alignItems:'center', justifyContent:'space-between',
+            flexWrap:'wrap', gap:'1.5rem' }}>
             <div>
-              <div style={{fontFamily:'var(--font-heading)', fontSize:'1.2rem', fontWeight:800, color:'var(--text)', letterSpacing:'-0.02em', marginBottom:'0.35rem'}}>
-                {t.hero.friends_cta_title||'Playing with friends tonight?'}
+              <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.2rem', fontWeight:800,
+                color:'var(--text)', letterSpacing:'-0.02em', marginBottom:'0.35rem' }}>
+                {t.hero.friends_cta_title || 'Playing with friends tonight?'}
               </div>
-              <p style={{fontSize:'0.875rem', color:'var(--text-3)', maxWidth:480}}>
-                {t.hero.friends_cta_desc||'Create a room, everyone adds their preferences, and you instantly get games you all agree on.'}
+              <p style={{ fontSize:'0.875rem', color:'var(--text-3)', maxWidth:480 }}>
+                {t.hero.friends_cta_desc || 'Create a room, everyone adds their preferences, and you get games you all agree on.'}
               </p>
             </div>
             <button className="btn btn-primary btn-lg" onClick={()=>navigate('room-landing')}>
@@ -308,7 +389,9 @@ export default function HomePage({ navigate }) {
   if (step === 'form') return (
     <div className="form-page">
       <div className="form-page-header">
-        <button className="back-btn" onClick={()=>setStep('hero')}><ArrowLeft size={14}/> {t.common.back}</button>
+        <button className="back-btn" onClick={()=>setStep('hero')}>
+          <ArrowLeft size={14}/> {t.common.back}
+        </button>
         <h2 className="form-page-title">{t.form.title}</h2>
         <p className="form-page-sub">{t.form.sub}</p>
         {error && <div className="alert alert-error" style={{marginTop:'1rem'}}>{error}</div>}
@@ -319,7 +402,10 @@ export default function HomePage({ navigate }) {
 
   /* ── Loading ── */
   if (step === 'loading') return (
-    <div className="loading-wrap"><div className="spinner"/><div className="loading-text">{t.common.loading}</div></div>
+    <div className="loading-wrap">
+      <div className="spinner"/>
+      <div className="loading-text">{t.common.loading}</div>
+    </div>
   );
 
   /* ── Results ── */
@@ -331,14 +417,26 @@ export default function HomePage({ navigate }) {
           <div className="results-header-sub">{t.results.sub(results.length)}</div>
         </div>
         <div className="results-chips">
-          <span className="result-chip">{prefs?.withFriends?<Users size={11}/>:<Monitor size={11}/>}{prefs?.withFriends?`${prefs.players}p`:t.form.style_solo}</span>
-          <span className="result-chip"><Monitor size={11}/> {prefs?.pcLevel}</span>
-          {prefs?.genres?.length>0 && <span className="result-chip">{prefs.genres.slice(0,2).map(g=>t.genres?.[g]||g).join(', ')}{prefs.genres.length>2?` +${prefs.genres.length-2}`:''}</span>}
-          <button className="btn btn-muted btn-sm" onClick={()=>setStep('form')}>{t.results.adjust}</button>
+          <span className="result-chip">
+            {prefs?.withFriends ? <Users size={11}/> : <Monitor size={11}/>}
+            {prefs?.withFriends ? `${prefs.players}p` : t.form.style_solo}
+          </span>
+          <span className="result-chip">
+            <Monitor size={11}/> {prefs?.pcLevel}
+          </span>
+          {prefs?.genres?.length > 0 && (
+            <span className="result-chip">
+              {prefs.genres.slice(0,2).map(g=>t.genres?.[g]||g).join(', ')}
+              {prefs.genres.length>2 ? ` +${prefs.genres.length-2}` : ''}
+            </span>
+          )}
+          <button className="btn btn-muted btn-sm" onClick={()=>setStep('form')}>
+            {t.results.adjust}
+          </button>
         </div>
       </div>
 
-      {results.length===0 ? (
+      {results.length === 0 ? (
         <div className="empty">
           <div className="empty-icon"><Gamepad2 size={36}/></div>
           <p className="empty-text">{t.results.no_results}<br/>{t.results.no_results_hint}</p>
@@ -347,12 +445,19 @@ export default function HomePage({ navigate }) {
       ) : (
         <>
           <div className="results-grid">
-            {results.map((game,i)=><GameCard key={game.id} game={game} rank={i+1} onClick={()=>navigate('game',{id:game.id})}/>)}
+            {results.map((game,i) => (
+              <GameCard key={game.id} game={game} rank={i+1}
+                onClick={()=>navigate('game',{id:game.id})}/>
+            ))}
           </div>
           <div className="results-actions">
-            <button className="btn btn-secondary" onClick={()=>setStep('form')}><ArrowLeft size={14}/> {t.results.adjust}</button>
+            <button className="btn btn-secondary" onClick={()=>setStep('form')}>
+              <ArrowLeft size={14}/> {t.results.adjust}
+            </button>
             <ShareButton prefs={prefs} results={results}/>
-            <button className="btn btn-primary" onClick={()=>navigate('room-landing')}><Users size={14}/> {t.results.group_cta}</button>
+            <button className="btn btn-primary" onClick={()=>navigate('room-landing')}>
+              <Users size={14}/> {t.results.group_cta}
+            </button>
           </div>
         </>
       )}

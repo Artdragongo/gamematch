@@ -59,6 +59,7 @@ export const translations = {
       feat3_title:'Friends Room', feat3_desc:'Everyone submits prefs — system finds the overlap.',
       popular_title:'Popular Right Now', trending_title:'Trending This Week',
       top_rated_title:'Top Rated', recent_title:'Recently Added', view_all:'View all',
+      hidden_gems:'Hidden Gems',
       daily_pick:'Game of the Day',
       browse_by_genre:'Browse by genre',
       stat_coop:'Co-op games',
@@ -100,6 +101,7 @@ export const translations = {
       players:'Players', mode:'Mode', pc:'PC level', genres:'Genres',
       difficulty:'Difficulty', session:'Avg. session', similar:'Similar games',
       coop_mode:'Solo + Co-op',
+      my_status:'My status',
       also_played:'People also played', solo_mode:'Solo only', developer:'Developer', year:'Released',
     },
     bored: {

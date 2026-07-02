@@ -1,31 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Monitor, Users, Clock, Zap, ExternalLink,
-         Search, Calendar, Code2, ChevronLeft, ChevronRight } from 'lucide-react';
+         Search, Calendar, Code2, ChevronLeft, ChevronRight,
+         BookOpen, Heart, ThumbsDown } from 'lucide-react';
 import { fetchGame } from '../utils/api';
 import { useLang } from '../i18n/LangContext';
 import { usePageTitle } from '../hooks/usePageTitle';
-import GameReactions from '../components/GameReactions';
+import { useGameList } from '../hooks/useGameList';
 
-const BASE      = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-const PC_CLASS  = { low:'tag-pc-low', medium:'tag-pc-med', high:'tag-pc-hi' };
+const BASE     = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const PC_CLASS = { low:'tag-pc-low', medium:'tag-pc-med', high:'tag-pc-hi' };
 
-/* ── Cover image ── */
+/* ── Cover ── */
 function CoverImage({ src, alt }) {
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
   if (!src || failed) return (
-    <div style={{ width:'100%', aspectRatio:'16/6', background:'linear-gradient(135deg,#EEF2FF,#E0E7FF)', display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'var(--r-lg)', marginBottom:'1.5rem', fontSize:'3rem', color:'#C7D2FE' }}>🎮</div>
+    <div style={{ width:'100%', aspectRatio:'16/6',
+      background:'linear-gradient(135deg,#EEF2FF,#E0E7FF)',
+      display:'flex', alignItems:'center', justifyContent:'center',
+      borderRadius:'var(--r-lg)', marginBottom:'1.5rem',
+      fontSize:'3rem', color:'#C7D2FE' }}>🎮</div>
   );
   return (
-    <div style={{ width:'100%', aspectRatio:'16/6', borderRadius:'var(--r-lg)', overflow:'hidden', marginBottom:'1.5rem', background:'var(--surface2)', position:'relative' }}>
-      {!loaded && <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}><div className="spinner"/></div>}
-      <img src={src} alt={alt} style={{ width:'100%', height:'100%', objectFit:'cover', opacity:loaded?1:0, transition:'opacity 0.3s' }} onLoad={()=>setLoaded(true)} onError={()=>setFailed(true)}/>
+    <div style={{ width:'100%', aspectRatio:'16/6', borderRadius:'var(--r-lg)',
+      overflow:'hidden', marginBottom:'1.5rem', background:'var(--surface2)', position:'relative' }}>
+      {!loaded && <div style={{ position:'absolute', inset:0, display:'flex',
+        alignItems:'center', justifyContent:'center' }}><div className="spinner"/></div>}
+      <img src={src} alt={alt} style={{ width:'100%', height:'100%', objectFit:'cover',
+        opacity:loaded?1:0, transition:'opacity 0.3s' }}
+        onLoad={()=>setLoaded(true)} onError={()=>setFailed(true)}/>
     </div>
   );
 }
 
-/* ── Screenshots slider ── */
+/* ── Screenshots ── */
 function Screenshots({ gameId }) {
   const [shots,    setShots]    = useState([]);
   const [current,  setCurrent]  = useState(0);
@@ -42,77 +51,174 @@ function Screenshots({ gameId }) {
 
   if (loading) return (
     <div style={{ marginTop:'1.5rem' }}>
-      <div style={{ fontSize:'0.7rem', fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--text-3)', marginBottom:'0.75rem' }}>Screenshots</div>
+      <div style={{ fontSize:'0.7rem', fontWeight:700, letterSpacing:'0.08em',
+        textTransform:'uppercase', color:'var(--text-3)', marginBottom:'0.75rem' }}>
+        Screenshots
+      </div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'0.5rem' }}>
-        {[1,2,3].map(i=><div key={i} style={{ aspectRatio:'16/9', background:'var(--surface2)', borderRadius:'var(--r-sm)' }}/>)}
+        {[1,2,3].map(i => <div key={i} style={{ aspectRatio:'16/9',
+          background:'var(--surface2)', borderRadius:'var(--r-sm)' }}/>)}
       </div>
     </div>
   );
+
   if (!shots.length) return null;
 
   return (
     <div style={{ marginTop:'1.5rem' }}>
-      <div style={{ fontSize:'0.7rem', fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--text-3)', marginBottom:'0.75rem' }}>Screenshots</div>
+      <div style={{ fontSize:'0.7rem', fontWeight:700, letterSpacing:'0.08em',
+        textTransform:'uppercase', color:'var(--text-3)', marginBottom:'0.75rem' }}>
+        Screenshots
+      </div>
 
-      {/* Main */}
-      <div style={{ position:'relative', aspectRatio:'16/9', borderRadius:'var(--r-lg)', overflow:'hidden', background:'var(--surface2)', marginBottom:'0.5rem', cursor:'pointer' }} onClick={()=>setLightbox(current)}>
-        <img src={shots[current]} alt={`Screenshot ${current+1}`} style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e=>e.target.style.display='none'}/>
+      {/* Main shot */}
+      <div onClick={() => setLightbox(current)}
+        style={{ position:'relative', aspectRatio:'16/9', borderRadius:'var(--r-lg)',
+          overflow:'hidden', background:'var(--surface2)', marginBottom:'0.5rem', cursor:'pointer' }}>
+        <img src={shots[current]} alt={`Screenshot ${current+1}`}
+          style={{ width:'100%', height:'100%', objectFit:'cover' }}
+          onError={e => e.target.style.display='none'}/>
         {shots.length > 1 && <>
           <button onClick={e=>{e.stopPropagation();setCurrent(c=>(c-1+shots.length)%shots.length);}}
-            style={{ position:'absolute', left:'0.5rem', top:'50%', transform:'translateY(-50%)', background:'rgba(0,0,0,0.5)', border:'none', borderRadius:'50%', width:32, height:32, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', color:'#fff' }}>
+            style={{ position:'absolute', left:'0.5rem', top:'50%', transform:'translateY(-50%)',
+              background:'rgba(0,0,0,0.5)', border:'none', borderRadius:'50%',
+              width:32, height:32, display:'flex', alignItems:'center', justifyContent:'center',
+              cursor:'pointer', color:'#fff' }}>
             <ChevronLeft size={18}/>
           </button>
           <button onClick={e=>{e.stopPropagation();setCurrent(c=>(c+1)%shots.length);}}
-            style={{ position:'absolute', right:'0.5rem', top:'50%', transform:'translateY(-50%)', background:'rgba(0,0,0,0.5)', border:'none', borderRadius:'50%', width:32, height:32, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', color:'#fff' }}>
+            style={{ position:'absolute', right:'0.5rem', top:'50%', transform:'translateY(-50%)',
+              background:'rgba(0,0,0,0.5)', border:'none', borderRadius:'50%',
+              width:32, height:32, display:'flex', alignItems:'center', justifyContent:'center',
+              cursor:'pointer', color:'#fff' }}>
             <ChevronRight size={18}/>
           </button>
         </>}
-        <div style={{ position:'absolute', bottom:'0.5rem', right:'0.75rem', background:'rgba(0,0,0,0.5)', color:'#fff', fontSize:'0.7rem', padding:'0.2rem 0.5rem', borderRadius:4 }}>
+        <div style={{ position:'absolute', bottom:'0.5rem', right:'0.75rem',
+          background:'rgba(0,0,0,0.5)', color:'#fff', fontSize:'0.7rem',
+          padding:'0.2rem 0.5rem', borderRadius:4 }}>
           {current+1}/{shots.length}
         </div>
       </div>
 
-      {/* Thumbs */}
-      <div style={{ display:'grid', gridTemplateColumns:`repeat(${Math.min(shots.length,6)},1fr)`, gap:'0.4rem' }}>
-        {shots.map((src,i)=>(
-          <div key={i} onClick={()=>setCurrent(i)} style={{ aspectRatio:'16/9', borderRadius:'var(--r-sm)', overflow:'hidden', cursor:'pointer', border:i===current?'2px solid var(--primary)':'2px solid transparent', opacity:i===current?1:0.6, transition:'all 0.15s' }}>
-            <img src={src} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e=>e.target.parentElement.style.display='none'}/>
+      {/* Thumbnails */}
+      <div style={{ display:'grid',
+        gridTemplateColumns:`repeat(${Math.min(shots.length,6)},1fr)`, gap:'0.4rem' }}>
+        {shots.map((src,i) => (
+          <div key={i} onClick={() => setCurrent(i)}
+            style={{ aspectRatio:'16/9', borderRadius:'var(--r-sm)', overflow:'hidden',
+              cursor:'pointer', opacity:i===current?1:0.6,
+              border:i===current?'2px solid var(--primary)':'2px solid transparent',
+              transition:'all 0.15s' }}>
+            <img src={src} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }}
+              onError={e=>e.target.parentElement.style.display='none'}/>
           </div>
         ))}
       </div>
 
       {/* Lightbox */}
       {lightbox !== null && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.93)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem' }} onClick={()=>setLightbox(null)}>
+        <div onClick={() => setLightbox(null)}
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.93)',
+            zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center',
+            padding:'2rem' }}>
           <button onClick={e=>{e.stopPropagation();setLightbox(l=>(l-1+shots.length)%shots.length);}}
-            style={{ position:'fixed', left:'1rem', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.1)', border:'none', borderRadius:'50%', width:48, height:48, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', color:'#fff' }}>
+            style={{ position:'fixed', left:'1rem', top:'50%', transform:'translateY(-50%)',
+              background:'rgba(255,255,255,0.1)', border:'none', borderRadius:'50%',
+              width:48, height:48, display:'flex', alignItems:'center', justifyContent:'center',
+              cursor:'pointer', color:'#fff' }}>
             <ChevronLeft size={24}/>
           </button>
-          <img src={shots[lightbox]} alt="" style={{ maxWidth:'90vw', maxHeight:'85vh', objectFit:'contain', borderRadius:'var(--r)' }} onClick={e=>e.stopPropagation()}/>
+          <img src={shots[lightbox]} alt=""
+            style={{ maxWidth:'90vw', maxHeight:'85vh', objectFit:'contain', borderRadius:'var(--r)' }}
+            onClick={e=>e.stopPropagation()}/>
           <button onClick={e=>{e.stopPropagation();setLightbox(l=>(l+1)%shots.length);}}
-            style={{ position:'fixed', right:'1rem', top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.1)', border:'none', borderRadius:'50%', width:48, height:48, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', color:'#fff' }}>
+            style={{ position:'fixed', right:'1rem', top:'50%', transform:'translateY(-50%)',
+              background:'rgba(255,255,255,0.1)', border:'none', borderRadius:'50%',
+              width:48, height:48, display:'flex', alignItems:'center', justifyContent:'center',
+              cursor:'pointer', color:'#fff' }}>
             <ChevronRight size={24}/>
           </button>
-          <button onClick={()=>setLightbox(null)} style={{ position:'fixed', top:'1rem', right:'1rem', background:'rgba(255,255,255,0.1)', border:'none', borderRadius:'50%', width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', color:'#fff', fontSize:'1.2rem' }}>✕</button>
+          <button onClick={() => setLightbox(null)}
+            style={{ position:'fixed', top:'1rem', right:'1rem',
+              background:'rgba(255,255,255,0.1)', border:'none', borderRadius:'50%',
+              width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center',
+              cursor:'pointer', color:'#fff', fontSize:'1.2rem' }}>✕
+          </button>
         </div>
       )}
     </div>
   );
 }
 
-/* ── Also Played row ── */
+/* ── Game list status (replaces GameReactions) ── */
+function GameStatus({ gameId, t }) {
+  const { getStatus, setStatus } = useGameList();
+  const status = getStatus(gameId);
+
+  const options = [
+    { key:'played', Icon:BookOpen, label: t.card.add_played,   activeClass:'played' },
+    { key:'want',   Icon:Heart,    label: t.card.add_want,      activeClass:'want'   },
+    { key:'skip',   Icon:ThumbsDown, label: t.card.add_skip,   activeClass:'skip'   },
+  ];
+
+  const activeLabels = {
+    played: t.card.status_played,
+    want:   t.card.status_want,
+    skip:   t.card.status_skip,
+  };
+
+  return (
+    <div style={{ marginTop:'1.5rem', paddingTop:'1.25rem', borderTop:'1px solid var(--border)' }}>
+      <div style={{ fontSize:'0.72rem', fontWeight:700, letterSpacing:'0.07em',
+        textTransform:'uppercase', color:'var(--text-3)', marginBottom:'0.75rem' }}>
+        {t.detail.my_status || 'My status'}
+      </div>
+      <div style={{ display:'flex', gap:'0.5rem', flexWrap:'wrap' }}>
+        {options.map(({ key, Icon, label, activeClass }) => {
+          const active = status === key;
+          return (
+            <button key={key}
+              onClick={() => setStatus(gameId, key)}
+              className={`gc-list-btn ${active ? activeClass : ''}`}
+              style={{ flex:'none', padding:'0.45rem 1rem', fontSize:'0.82rem',
+                display:'flex', alignItems:'center', gap:'0.4rem' }}>
+              <Icon size={13}/>
+              {active ? activeLabels[key] : label}
+            </button>
+          );
+        })}
+      </div>
+      {status && (
+        <button onClick={() => setStatus(gameId, null)}
+          style={{ marginTop:'0.5rem', font:'500 0.75rem var(--font-body)',
+            color:'var(--text-4)', background:'none', border:'none', cursor:'pointer' }}>
+          {t.list.remove || 'Remove'}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* ── Also Played ── */
 function AlsoPlayed({ games, navigate, t }) {
   if (!games?.length) return null;
   const gl = g => t.genres?.[g] || g;
   return (
     <div style={{ gridColumn:'1/-1', marginTop:'0.5rem' }}>
-      <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.05rem', fontWeight:800, letterSpacing:'-0.02em', marginBottom:'0.85rem', color:'var(--text)' }}>
+      <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.05rem', fontWeight:800,
+        letterSpacing:'-0.02em', marginBottom:'0.85rem', color:'var(--text)' }}>
         {t.detail.also_played || 'People also played'}
       </div>
       <div className="similar-grid">
-        {games.map(sg=>(
-          <div key={sg.id} className="similar-card" onClick={()=>navigate('game',{id:sg.id})}>
-            {sg.coverImage && <img src={sg.coverImage} alt={sg.name} style={{ width:'100%', aspectRatio:'16/7', objectFit:'cover', borderRadius:'var(--r-sm)', marginBottom:'0.6rem' }} onError={e=>e.target.style.display='none'}/>}
+        {games.map(sg => (
+          <div key={sg.id} className="similar-card" onClick={() => navigate('game',{id:sg.id})}>
+            {sg.coverImage && (
+              <img src={sg.coverImage} alt={sg.name}
+                style={{ width:'100%', aspectRatio:'16/7', objectFit:'cover',
+                  borderRadius:'var(--r-sm)', marginBottom:'0.6rem' }}
+                onError={e=>e.target.style.display='none'}/>
+            )}
             <div className="similar-card-name">{sg.name}</div>
             <div className="similar-card-sub">{sg.genre.slice(0,2).map(g=>gl(g)).join(', ')}</div>
             <div style={{ marginTop:'0.4rem' }}>
@@ -127,7 +233,7 @@ function AlsoPlayed({ games, navigate, t }) {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════ */
 export default function GameDetailPage({ gameId, navigate }) {
   const { t, lang } = useLang();
   const routerNav   = useNavigate();
@@ -149,23 +255,25 @@ export default function GameDetailPage({ gameId, navigate }) {
   if (error)   return <div className="detail-page"><div className="alert alert-error">{error}</div><button className="btn btn-secondary" style={{marginTop:'1rem'}} onClick={goBack}>{t.common.back}</button></div>;
   if (!game)   return null;
 
-  const pcLabel    = {low:t.card.pc_low,medium:t.card.pc_med,high:t.card.pc_hi}[game.pcRequirements];
-  const diffClass  = {Easy:'tag-diff-easy',Medium:'tag-diff-med',Hard:'tag-diff-hard'}[game.difficulty]||'tag-diff-med';
-  const diffLabel  = {Easy:t.card.easy,Medium:t.card.medium,Hard:t.card.hard}[game.difficulty]||game.difficulty;
-  const sessLabel  = {'15 min':t.card.session_15,'30 min':t.card.session_30,'1 hour':t.card.session_1h,'2+ hours':t.card.session_2h}[game.averageSession]||game.averageSession;
-  const playerStr  = game.minPlayers===game.maxPlayers ? t.card.players_single(game.minPlayers) : t.card.players_range(game.minPlayers,game.maxPlayers);
-  const description= lang==='ru'&&game.shortDescriptionRu ? game.shortDescriptionRu : game.shortDescription;
-  const gl         = g => t.genres?.[g]||g;
+  const pcLabel   = {low:t.card.pc_low,medium:t.card.pc_med,high:t.card.pc_hi}[game.pcRequirements];
+  const diffClass = {Easy:'tag-diff-easy',Medium:'tag-diff-med',Hard:'tag-diff-hard'}[game.difficulty]||'tag-diff-med';
+  const diffLabel = {Easy:t.card.easy,Medium:t.card.medium,Hard:t.card.hard}[game.difficulty]||game.difficulty;
+  const sessLabel = {'15 min':t.card.session_15,'30 min':t.card.session_30,'1 hour':t.card.session_1h,'2+ hours':t.card.session_2h}[game.averageSession]||game.averageSession;
+  const playerStr = game.minPlayers===game.maxPlayers ? t.card.players_single(game.minPlayers) : t.card.players_range(game.minPlayers,game.maxPlayers);
+  const description = lang==='ru'&&game.shortDescriptionRu ? game.shortDescriptionRu : game.shortDescription;
+  const gl = g => t.genres?.[g]||g;
 
   return (
     <div className="detail-page">
-      <button className="back-btn" onClick={goBack}><ArrowLeft size={14}/> {t.common.back}</button>
+      <button className="back-btn" onClick={goBack}>
+        <ArrowLeft size={14}/> {t.common.back}
+      </button>
 
       <CoverImage src={game.coverImage} alt={game.name}/>
 
       <h1 className="detail-title">{game.name}</h1>
       <div className="detail-meta">
-        {game.genre.map(g=><span key={g} className="tag tag-genre">{gl(g)}</span>)}
+        {game.genre.map(g => <span key={g} className="tag tag-genre">{gl(g)}</span>)}
         <span className={`tag ${PC_CLASS[game.pcRequirements]}`}>{pcLabel}</span>
         <span className={`tag ${game.coop?'tag-coop':'tag-solo'}`}>{game.coop?t.card.coop:t.card.solo}</span>
         {game.difficulty && <span className={`tag ${diffClass}`}>{diffLabel}</span>}
@@ -174,23 +282,28 @@ export default function GameDetailPage({ gameId, navigate }) {
       <div className="detail-body">
         {/* Main */}
         <div>
-          <div className="detail-card" style={{marginBottom:'1rem'}}>
+          <div className="detail-card" style={{ marginBottom:'1rem' }}>
             <div className="detail-section-label">{t.detail.about}</div>
             <p className="detail-desc">{description}</p>
+
             <div className="detail-actions">
               {game.steamLink
                 ? <a href={game.steamLink} target="_blank" rel="noopener noreferrer">
-                    <button className="btn btn-primary btn-lg"><ExternalLink size={14}/> {t.detail.open_steam}</button>
+                    <button className="btn btn-primary btn-lg">
+                      <ExternalLink size={14}/> {t.detail.open_steam}
+                    </button>
                   </a>
-                : <span style={{fontSize:'0.85rem',color:'var(--text-3)',padding:'0.5rem 0'}}>{t.detail.not_on_steam}</span>
+                : <span style={{fontSize:'0.85rem',color:'var(--text-3)',padding:'0.5rem 0'}}>
+                    {t.detail.not_on_steam}
+                  </span>
               }
-              <button className="btn btn-secondary btn-lg" onClick={()=>navigate('browse')}>
+              <button className="btn btn-secondary btn-lg" onClick={() => navigate('browse')}>
                 <Search size={14}/> {t.detail.find_similar}
               </button>
             </div>
 
-            {/* Reactions */}
-            <GameReactions gameId={game.id}/>
+            {/* My status — replaces GameReactions */}
+            <GameStatus gameId={game.id} t={t}/>
 
             {/* Screenshots */}
             {game.steamLink && <Screenshots gameId={game.id}/>}
@@ -198,7 +311,7 @@ export default function GameDetailPage({ gameId, navigate }) {
         </div>
 
         {/* Sidebar */}
-        <div className="detail-card" style={{alignSelf:'start'}}>
+        <div className="detail-card" style={{ alignSelf:'start' }}>
           <div className="detail-section-label">{t.detail.details}</div>
           {[
             [<Users size={13}/>,    t.detail.players,    playerStr],
@@ -222,14 +335,19 @@ export default function GameDetailPage({ gameId, navigate }) {
           </div>
         </div>
 
-        {/* Similar games */}
+        {/* Similar */}
         {game.similar?.length > 0 && (
           <div className="similar-section">
             <div className="similar-section-title">{t.detail.similar}</div>
             <div className="similar-grid">
               {game.similar.map(sg=>(
                 <div key={sg.id} className="similar-card" onClick={()=>navigate('game',{id:sg.id})}>
-                  {sg.coverImage && <img src={sg.coverImage} alt={sg.name} style={{width:'100%',aspectRatio:'16/7',objectFit:'cover',borderRadius:'var(--r-sm)',marginBottom:'0.6rem'}} onError={e=>e.target.style.display='none'}/>}
+                  {sg.coverImage && (
+                    <img src={sg.coverImage} alt={sg.name}
+                      style={{width:'100%',aspectRatio:'16/7',objectFit:'cover',
+                        borderRadius:'var(--r-sm)',marginBottom:'0.6rem'}}
+                      onError={e=>e.target.style.display='none'}/>
+                  )}
                   <div className="similar-card-name">{sg.name}</div>
                   <div className="similar-card-sub">{sg.genre.slice(0,2).map(g=>gl(g)).join(', ')}</div>
                   <div style={{marginTop:'0.4rem'}}>
