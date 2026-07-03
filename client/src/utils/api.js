@@ -9,6 +9,7 @@ async function req(path, opts = {}) {
   return res.json();
 }
 
+export const deleteRoom = (id) => req(`/api/rooms/${id}`, { method: 'DELETE' });
 export const fetchRecommendations  = (prefs)    => req('/api/recommend', { method: 'POST', body: JSON.stringify(prefs) });
 export const fetchBoredGames       = (prefs)    => req('/api/bored',     { method: 'POST', body: JSON.stringify(prefs) });
 export const fetchGame             = (id)       => req(`/api/games/${id}`);

@@ -87,7 +87,7 @@ function scoreGame(game, prefs) {
   }
   if (gamePc === userPc) score += 8;
   if (gamePc <  userPc)  score += 4;
-  score += Math.random() * 3;
+  score += (parseInt(game.id) % 7) * 0.4;
   return score;
 }
 
@@ -309,7 +309,8 @@ app.post('/api/rooms/:id/name', (req, res) => {
 app.post('/api/rooms/:id/join', (req, res) => {
   const room = rooms[req.params.id.toUpperCase()];
   if (!room) return res.status(404).json({ error: 'Room not found' });
-  const { nickname, prefs } = req.body;
+  let { nickname, prefs } = req.body;
+  nickname = (nickname || '').trim();
   if (!nickname || !prefs) return res.status(400).json({ error: 'nickname and prefs required' });
   const idx = room.members.findIndex(m => m.nickname === nickname);
   const member = { nickname, prefs, joinedAt: Date.now() };
@@ -317,6 +318,13 @@ app.post('/api/rooms/:id/join', (req, res) => {
   room.lastActive = Date.now();
   saveRooms();
   res.json({ room, recommendations: intersect(room.members.map(m => m.prefs)) });
+});
+app.delete('/api/rooms/:id', (req, res) => {
+  const id = req.params.id.toUpperCase();
+  if (!rooms[id]) return res.status(404).json({ error: 'Room not found' });
+  delete rooms[id];
+  saveRooms();
+  res.json({ ok: true });
 });
 
 app.get('/api/rooms/:id/recommendations', (req, res) => {

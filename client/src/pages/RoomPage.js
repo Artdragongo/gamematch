@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Users, Copy, Check, ArrowRight, Wifi, Link2, Trophy, Heart,
-         Clock, Sparkles, Edit2, ChevronRight, PartyPopper } from 'lucide-react';
+         Clock, Sparkles, Edit2, ChevronRight, PartyPopper, Trash2, Settings2 } from 'lucide-react';
 import { createRoom, fetchRoom, joinRoom, fetchRoomRecs } from '../utils/api';
 import PreferencesForm from '../components/PreferencesForm';
 import GameCard from '../components/GameCard';
@@ -49,7 +49,6 @@ export function RoomLandingPage({ navigate }) {
 
       {error && <div className="alert alert-error" style={{marginBottom:'1.25rem'}}>{error}</div>}
 
-      {/* My Rooms — remembered rooms for quick return */}
       {myRooms.length > 0 && (
         <div style={{ marginBottom:'2rem' }}>
           <div style={{ fontSize:'0.72rem', fontWeight:700, letterSpacing:'0.08em',
@@ -134,7 +133,7 @@ export function RoomLandingPage({ navigate }) {
   );
 }
 
-/* ── Vote button on a game card ── */
+/* ── Vote button ── */
 function VoteBadge({ count, active, onVote }) {
   return (
     <button onClick={onVote}
@@ -151,23 +150,56 @@ function VoteBadge({ count, active, onVote }) {
   );
 }
 
+/* ── Delete confirmation modal ── */
+function DeleteConfirm({ roomLabel, onConfirm, onCancel, t }) {
+  return (
+    <div onClick={onCancel} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)',
+      zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:'1.5rem' }}>
+      <div onClick={e=>e.stopPropagation()} style={{ background:'var(--surface)', borderRadius:'var(--r-lg)',
+        padding:'1.75rem', maxWidth:380, boxShadow:'var(--sh-lg)' }}>
+        <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.1rem', fontWeight:800,
+          color:'var(--text)', marginBottom:'0.5rem' }}>
+          {t.room.delete_confirm_title || 'Delete this room?'}
+        </div>
+        <p style={{ fontSize:'0.85rem', color:'var(--text-3)', marginBottom:'1.5rem', lineHeight:1.5 }}>
+          {t.room.delete_confirm_desc
+            ? t.room.delete_confirm_desc(roomLabel)
+            : `"${roomLabel}" and its game night history will be permanently deleted for everyone.`}
+        </p>
+        <div style={{ display:'flex', gap:'0.6rem' }}>
+          <button className="btn btn-secondary" style={{ flex:1 }} onClick={onCancel}>
+            {t.common.back === '← Back' ? 'Cancel' : t.common.back}
+          </button>
+          <button className="btn" style={{ flex:1, background:'var(--danger)', color:'#fff', border:'none' }}
+            onClick={onConfirm}>
+            <Trash2 size={13}/> {t.room.delete_confirm || 'Delete'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Active Room ──────────────────────────────────────────── */
 export function RoomPage({ roomId, navigate }) {
   const { t } = useLang();
-  const [room,       setRoom]       = useState(null);
-  const [step,       setStep]       = useState('nickname');
-  const [nickname,   setNickname]   = useState('');
-  const [recs,       setRecs]       = useState([]);
-  const [votes,      setVotes]      = useState({});
-  const [history,    setHistory]    = useState([]);
-  const [loading,    setLoading]    = useState(false);
-  const [error,      setError]      = useState('');
-  const [copied,     setCopied]     = useState(false);
-  const [isInvite,   setIsInvite]   = useState(false);
-  const [finalized,  setFinalized]  = useState(null);
-  const [editingName,setEditingName]= useState(false);
-  const [nameInput,  setNameInput]  = useState('');
-  const { remember } = useMyRooms();
+  const [room,        setRoom]        = useState(null);
+  const [step,        setStep]        = useState('checking'); // checking | nickname | prefs | results
+  const [nickname,    setNickname]    = useState('');
+  const [myPrefs,     setMyPrefs]     = useState(null);
+  const [recs,        setRecs]        = useState([]);
+  const [votes,       setVotes]       = useState({});
+  const [history,     setHistory]     = useState([]);
+  const [loading,     setLoading]     = useState(false);
+  const [error,       setError]       = useState('');
+  const [copied,      setCopied]      = useState(false);
+  const [isInvite,    setIsInvite]    = useState(false);
+  const [finalized,   setFinalized]   = useState(null);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput,   setNameInput]   = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const { remember, forget } = useMyRooms();
+  const memberCountRef = useRef(0);
 
   usePageTitle(room?.name ? room.name : `${t.room.landing_title} · ${roomId}`);
 
@@ -179,36 +211,81 @@ export function RoomPage({ roomId, navigate }) {
       setRoom(r);
       setVotes(r.votes || {});
       setHistory(r.history || []);
-    } catch { setError(t.room.not_found); }
+      return r;
+    } catch { setError(t.room.not_found); return null; }
   }, [roomId, t]);
 
+  // ── Initial load: check if this browser already has a saved nickname
+  // for THIS room. If so, and that nickname is already a member, skip
+  // straight to results instead of asking again. ──
   useEffect(() => {
-    loadRoom();
-    if (document.referrer === '' || !document.referrer.includes(window.location.hostname)) {
-      setIsInvite(true);
-    }
-  }, [loadRoom]);
+    (async () => {
+      const r = await loadRoom();
+      if (document.referrer === '' || !document.referrer.includes(window.location.hostname)) {
+        setIsInvite(true);
+      }
+      if (!r) return;
 
-  // Poll while on results
+      let savedNickname = '';
+      try {
+        const saved = JSON.parse(localStorage.getItem('gm_my_rooms') || '[]')
+          .find(x => x.roomId === roomId);
+        savedNickname = saved?.nickname || '';
+      } catch {}
+
+      memberCountRef.current = r.members.length;
+
+      if (savedNickname) {
+        const existing = r.members.find(m => m.nickname === savedNickname);
+        if (existing) {
+          setNickname(savedNickname);
+          setMyPrefs(existing.prefs);
+          const recData = await fetchRoomRecs(roomId).catch(() => []);
+          setRecs(recData);
+          setStep('results');
+          return;
+        }
+        // Saved nickname but not (yet) a member — prefill the field
+        setNickname(savedNickname);
+      }
+      setStep('nickname');
+    })();
+    // eslint-disable-next-line
+  }, [roomId]);
+
+  // ── Lightweight polling: only refetch recommendations when the
+  // member COUNT actually changes. This stops the constant reshuffle
+  // — recommendation order only updates when someone new joins. ──
   useEffect(() => {
     if (step !== 'results') return;
     const id = setInterval(async () => {
-      const r = await fetchRoomRecs(roomId).catch(() => []);
-      setRecs(r);
-      loadRoom();
-    }, 5000);
+      const r = await fetchRoom(roomId).catch(() => null);
+      if (!r) return;
+      setRoom(r);
+      setVotes(r.votes || {});
+      setHistory(r.history || []);
+      if (r.members.length !== memberCountRef.current) {
+        memberCountRef.current = r.members.length;
+        const recData = await fetchRoomRecs(roomId).catch(() => []);
+        setRecs(recData);
+      }
+    }, 6000);
     return () => clearInterval(id);
-  }, [step, roomId, loadRoom]);
+  }, [step, roomId]);
 
   const handleSubmitPrefs = async (prefs) => {
+    const trimmed = nickname.trim();
+    if (!trimmed) return;
     setLoading(true);
     try {
-      const result = await joinRoom(roomId, nickname, prefs);
+      const result = await joinRoom(roomId, trimmed, prefs);
       setRoom(result.room);
       setRecs(result.recommendations);
       setVotes(result.room.votes || {});
+      setMyPrefs(prefs);
+      memberCountRef.current = result.room.members.length;
       setStep('results');
-      remember(roomId, result.room.name, nickname);
+      remember(roomId, result.room.name, trimmed);
     } catch (e) { setError(e.message); }
     setLoading(false);
   };
@@ -256,21 +333,35 @@ export function RoomPage({ roomId, navigate }) {
     } catch { setEditingName(false); }
   };
 
+  const handleDeleteRoom = async () => {
+    try {
+      await fetch(`${BASE}/api/rooms/${roomId}`, { method: 'DELETE' });
+      forget(roomId);
+      navigate('room-landing');
+    } catch {}
+    setConfirmDelete(false);
+  };
+
   if (error) return (
     <div className="room-page">
       <div className="alert alert-error" style={{marginBottom:'1.25rem'}}>{error}</div>
       <button className="btn btn-secondary" onClick={() => navigate('room-landing')}>{t.common.back}</button>
     </div>
   );
-  if (!room) return <div className="loading-wrap"><div className="spinner"/><div className="loading-text">{t.common.loading}</div></div>;
 
-  // Vote leader (for showing crown on results)
+  if (step === 'checking' || !room) {
+    return <div className="loading-wrap"><div className="spinner"/><div className="loading-text">{t.common.loading}</div></div>;
+  }
+
   const topVoteCount = Math.max(0, ...Object.values(votes).map(v => v.length));
   const topVotedId = Object.entries(votes).find(([,v]) => v.length === topVoteCount && topVoteCount > 0)?.[0];
 
   return (
     <div className="room-page">
-      {/* Finalized celebration overlay */}
+      {confirmDelete && (
+        <DeleteConfirm roomLabel={room.name || roomId} onConfirm={handleDeleteRoom} onCancel={() => setConfirmDelete(false)} t={t}/>
+      )}
+
       {finalized && (
         <div onClick={() => setFinalized(null)}
           style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.75)', zIndex:1000,
@@ -299,7 +390,6 @@ export function RoomPage({ roomId, navigate }) {
         </div>
       )}
 
-      {/* Invite banner */}
       {isInvite && step === 'nickname' && (
         <div className="room-invite-banner">
           <div className="room-invite-icon"><Link2 size={18} color="#fff"/></div>
@@ -314,7 +404,7 @@ export function RoomPage({ roomId, navigate }) {
         </div>
       )}
 
-      {/* Room header — name + code */}
+      {/* Room header */}
       <div className="room-code-box">
         <div style={{ flex:1, minWidth:0 }}>
           {editingName ? (
@@ -348,9 +438,16 @@ export function RoomPage({ roomId, navigate }) {
           )}
         </div>
         <div className="room-code-right">
-          <button className="btn btn-secondary btn-sm" onClick={copyLink}>
-            {copied ? <><Check size={12}/> {t.room.copied}</> : <><Copy size={12}/> {t.room.copy_link}</>}
-          </button>
+          <div style={{ display:'flex', gap:'0.4rem' }}>
+            <button className="btn btn-secondary btn-sm" onClick={copyLink}>
+              {copied ? <><Check size={12}/> {t.room.copied}</> : <><Copy size={12}/> {t.room.copy_link}</>}
+            </button>
+            <button className="btn btn-secondary btn-sm" onClick={() => setConfirmDelete(true)}
+              title={t.room.delete_room || 'Delete room'}
+              style={{ color:'var(--danger)' }}>
+              <Trash2 size={12}/>
+            </button>
+          </div>
           {room.members.length > 0 && (
             <div className="live-badge">
               <div className="live-dot"/>
@@ -427,7 +524,7 @@ export function RoomPage({ roomId, navigate }) {
         </div>
       )}
 
-      {/* Step: Preferences */}
+      {/* Step: Preferences (also used for editing) */}
       {step === 'prefs' && (
         <div>
           <div style={{marginBottom:'1.75rem'}}>
@@ -444,7 +541,7 @@ export function RoomPage({ roomId, navigate }) {
               <div className="spinner"/><div className="loading-text">{t.room.submitting}</div>
             </div>
           ) : (
-            <PreferencesForm onSubmit={handleSubmitPrefs} compact/>
+            <PreferencesForm onSubmit={handleSubmitPrefs} initialPrefs={myPrefs} compact/>
           )}
         </div>
       )}
@@ -459,7 +556,12 @@ export function RoomPage({ roomId, navigate }) {
                 {t.room.vote_hint || 'Vote for your favorite — most votes wins tonight'}
               </div>
             </div>
-            <div className="live-badge"><div className="live-dot"/><Wifi size={11}/> {t.room.live}</div>
+            <div style={{ display:'flex', gap:'0.5rem', alignItems:'center' }}>
+              <button className="btn btn-muted btn-sm" onClick={() => setStep('prefs')}>
+                <Settings2 size={12}/> {t.room.edit_prefs || 'Edit my picks'}
+              </button>
+              <div className="live-badge"><div className="live-dot"/><Wifi size={11}/> {t.room.live}</div>
+            </div>
           </div>
 
           {recs.length === 0 ? (
