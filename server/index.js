@@ -6,7 +6,7 @@ const path  = require('path');
 const https = require('https');
 
 const app = express();
-app.use(cors({ origin: process.env.CLIENT_URL || '*', methods: ['GET','POST'], allowedHeaders: ['Content-Type'] }));
+app.use(cors({ origin: process.env.CLIENT_URL || '*', methods: ['GET','POST','DELETE','PATCH'], allowedHeaders: ['Content-Type'] }));
 app.use(express.json());
 
 const games = JSON.parse(fs.readFileSync(path.join(__dirname, 'games.json'), 'utf8'));

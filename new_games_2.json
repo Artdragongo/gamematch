@@ -1,0 +1,402 @@
+[
+  {
+    "id": "221", "name": "Persona 5 Royal",
+    "genre": ["RPG", "Adventure", "Strategy"],
+    "minPlayers": 1, "maxPlayers": 1, "coop": false, "pcRequirements": "medium",
+    "shortDescription": "Live a double life as a phantom thief stealing corrupted hearts. Stylish turn-based RPG with an unforgettable cast.",
+    "shortDescriptionRu": "Живите двойной жизнью фантомного вора, крадущего испорченные сердца. Стильная пошаговая RPG с незабываемыми персонажами.",
+    "steamLink": "https://store.steampowered.com/app/1687950/Persona_5_Royal/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1687950/header.jpg",
+    "difficulty": "Medium", "averageSession": "2+ hours", "developer": "Atlus", "releaseYear": 2022
+  },
+  {
+    "id": "222", "name": "Resident Evil 4 Remake",
+    "genre": ["Horror", "Action", "Survival"],
+    "minPlayers": 1, "maxPlayers": 1, "coop": false, "pcRequirements": "high",
+    "shortDescription": "Rescue the President's daughter from a rural cult in this masterful remake of a survival horror classic.",
+    "shortDescriptionRu": "Спасите дочь президента от сельского культа в этом мастерском ремейке классики survival horror.",
+    "steamLink": "https://store.steampowered.com/app/2050650/Resident_Evil_4/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/2050650/header.jpg",
+    "difficulty": "Hard", "averageSession": "2+ hours", "developer": "Capcom", "releaseYear": 2023
+  },
+  {
+    "id": "223", "name": "Fallout: New Vegas",
+    "genre": ["RPG", "Adventure", "Survival"],
+    "minPlayers": 1, "maxPlayers": 1, "coop": false, "pcRequirements": "low",
+    "shortDescription": "Navigate the factions of the post-apocalyptic Mojave Wasteland. Widely considered the best Fallout for its writing.",
+    "shortDescriptionRu": "Лавируйте между фракциями постапокалиптической пустоши Мохаве. Лучшая часть Fallout по мнению многих.",
+    "steamLink": "https://store.steampowered.com/app/22380/Fallout_New_Vegas/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/22380/header.jpg",
+    "difficulty": "Medium", "averageSession": "2+ hours", "developer": "Obsidian Entertainment", "releaseYear": 2010
+  },
+  {
+    "id": "224", "name": "It Takes Two",
+    "genre": ["Co-op", "Adventure", "Platformer"],
+    "minPlayers": 2, "maxPlayers": 2, "coop": true, "pcRequirements": "medium",
+    "shortDescription": "A married couple shrunk into dolls must work together to repair their relationship. Best-in-class co-op design.",
+    "shortDescriptionRu": "Супруги, превращённые в кукол, должны работать вместе, чтобы восстановить отношения. Лучший кооператив в жанре.",
+    "steamLink": "https://store.steampowered.com/app/1426210/It_Takes_Two/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1426210/header.jpg",
+    "difficulty": "Easy", "averageSession": "2+ hours", "developer": "Hazelight Studios", "releaseYear": 2021
+  },
+  {
+    "id": "225", "name": "Team Fortress 2",
+    "genre": ["FPS", "Co-op", "Competitive"],
+    "minPlayers": 2, "maxPlayers": 32, "coop": true, "pcRequirements": "low",
+    "shortDescription": "Nine wildly different classes, endless hats, and a decade-plus of chaotic team-based shooting. Free forever.",
+    "shortDescriptionRu": "Девять непохожих классов, бесконечные шляпы и десятилетие хаотичных командных перестрелок. Бесплатно навсегда.",
+    "steamLink": "https://store.steampowered.com/app/440/Team_Fortress_2/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/440/header.jpg",
+    "difficulty": "Medium", "averageSession": "1 hour", "developer": "Valve", "releaseYear": 2007
+  },
+  {
+    "id": "226", "name": "Forza Horizon 5",
+    "genre": ["Racing", "Sandbox", "Co-op"],
+    "minPlayers": 1, "maxPlayers": 8, "coop": true, "pcRequirements": "high",
+    "shortDescription": "Race across a vibrant, ever-changing open-world Mexico. The best-looking, most generous racing game around.",
+    "shortDescriptionRu": "Гоняйте по яркой, постоянно меняющейся Мексике в открытом мире. Красивейшая и щедрая гоночная игра.",
+    "steamLink": "https://store.steampowered.com/app/1551360/Forza_Horizon_5/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1551360/header.jpg",
+    "difficulty": "Easy", "averageSession": "1 hour", "developer": "Playground Games", "releaseYear": 2021
+  },
+  {
+    "id": "227", "name": "Civilization VI",
+    "genre": ["Strategy", "Turn-Based", "Multiplayer"],
+    "minPlayers": 1, "maxPlayers": 12, "coop": true, "pcRequirements": "medium",
+    "shortDescription": "Build an empire to stand the test of time. One more turn has ruined more sleep schedules than any other game.",
+    "shortDescriptionRu": "Постройте империю, способную выдержать испытание временем. «Ещё один ход» испортил больше графиков сна, чем любая другая игра.",
+    "steamLink": "https://store.steampowered.com/app/289070/Sid_Meiers_Civilization_VI/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/289070/header.jpg",
+    "difficulty": "Hard", "averageSession": "2+ hours", "developer": "Firaxis Games", "releaseYear": 2016
+  },
+  {
+    "id": "228", "name": "Age of Empires II: Definitive Edition",
+    "genre": ["Strategy", "RTS", "Historical"],
+    "minPlayers": 1, "maxPlayers": 8, "coop": true, "pcRequirements": "low",
+    "shortDescription": "The legendary real-time strategy game, remastered. Wololo your way through centuries of civilization building.",
+    "shortDescriptionRu": "Легендарная стратегия в реальном времени, переизданная. Вологайте свой путь через века развития цивилизаций.",
+    "steamLink": "https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/813780/header.jpg",
+    "difficulty": "Medium", "averageSession": "1 hour", "developer": "Forgotten Empires", "releaseYear": 2019
+  },
+  {
+    "id": "229", "name": "Terraria",
+    "genre": ["Sandbox", "Survival", "Co-op"],
+    "minPlayers": 1, "maxPlayers": 8, "coop": true, "pcRequirements": "low",
+    "shortDescription": "Dig, build, fight and explore in a 2D world with more content than most 3D games. Endlessly replayable.",
+    "shortDescriptionRu": "Копайте, стройте, сражайтесь и исследуйте в 2D-мире с контентом больше, чем во многих 3D-играх.",
+    "steamLink": "https://store.steampowered.com/app/105600/Terraria/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/105600/header.jpg",
+    "difficulty": "Medium", "averageSession": "2+ hours", "developer": "Re-Logic", "releaseYear": 2011
+  },
+  {
+    "id": "230", "name": "Sea of Thieves",
+    "genre": ["Adventure", "Co-op", "Action"],
+    "minPlayers": 1, "maxPlayers": 4, "coop": true, "pcRequirements": "medium",
+    "shortDescription": "Sail the seas with friends, hunt treasure, and battle other crews in this joyful pirate sandbox.",
+    "shortDescriptionRu": "Бороздите моря с друзьями, охотьтесь за сокровищами и сражайтесь с другими командами в этой радостной пиратской песочнице.",
+    "steamLink": "https://store.steampowered.com/app/1172620/Sea_of_Thieves_2023_Edition/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1172620/header.jpg",
+    "difficulty": "Medium", "averageSession": "1 hour", "developer": "Rare", "releaseYear": 2020
+  },
+  {
+    "id": "231", "name": "Valheim",
+    "genre": ["Survival", "Co-op", "Adventure"],
+    "minPlayers": 1, "maxPlayers": 10, "coop": true, "pcRequirements": "medium",
+    "shortDescription": "A brutal Viking survival game built for co-op. Chop, build, sail, and battle mythological beasts with friends.",
+    "shortDescriptionRu": "Жестокая игра на выживание викингов, созданная для кооператива. Рубите, стройте, плавайте и сражайтесь с мифическими зверями.",
+    "steamLink": "https://store.steampowered.com/app/892970/Valheim/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/892970/header.jpg",
+    "difficulty": "Medium", "averageSession": "2+ hours", "developer": "Iron Gate Studio", "releaseYear": 2021
+  },
+  {
+    "id": "232", "name": "Overwatch 2",
+    "genre": ["FPS", "Competitive", "Co-op"],
+    "minPlayers": 1, "maxPlayers": 5, "coop": true, "pcRequirements": "medium",
+    "shortDescription": "Team-based hero shooter with a huge and growing cast. Fast, colorful, and endlessly re-balanced.",
+    "shortDescriptionRu": "Командный геройский шутер с большим и растущим составом. Быстрый, яркий и постоянно перебалансируемый.",
+    "steamLink": "https://store.steampowered.com/app/2357570/Overwatch_2/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/2357570/header.jpg",
+    "difficulty": "Medium", "averageSession": "30 min", "developer": "Blizzard Entertainment", "releaseYear": 2022
+  },
+  {
+    "id": "233", "name": "Cyberpunk 2077",
+    "genre": ["RPG", "FPS", "Adventure"],
+    "minPlayers": 1, "maxPlayers": 1, "coop": false, "pcRequirements": "high",
+    "shortDescription": "Become a cyber-enhanced mercenary in dystopian Night City. After years of patches, a genuinely great RPG.",
+    "shortDescriptionRu": "Станьте кибернаёмником в антиутопичном Найт-Сити. После лет патчей — по-настоящему отличная RPG.",
+    "steamLink": "https://store.steampowered.com/app/1091500/Cyberpunk_2077/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/header.jpg",
+    "difficulty": "Medium", "averageSession": "2+ hours", "developer": "CD Projekt Red", "releaseYear": 2020
+  },
+  {
+    "id": "234", "name": "The Witcher 3: Wild Hunt",
+    "genre": ["RPG", "Adventure", "Action"],
+    "minPlayers": 1, "maxPlayers": 1, "coop": false, "pcRequirements": "medium",
+    "shortDescription": "Hunt monsters and navigate morally grey politics as Geralt of Rivia. One of the greatest RPGs ever made.",
+    "shortDescriptionRu": "Охотьтесь на монстров и лавируйте в морально неоднозначной политике за Геральта из Ривии. Одна из величайших RPG.",
+    "steamLink": "https://store.steampowered.com/app/292030/The_Witcher_3_Wild_Hunt/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/292030/header.jpg",
+    "difficulty": "Medium", "averageSession": "2+ hours", "developer": "CD Projekt Red", "releaseYear": 2015
+  },
+  {
+    "id": "235", "name": "Portal 2",
+    "genre": ["Puzzle", "Co-op", "FPS"],
+    "minPlayers": 1, "maxPlayers": 2, "coop": true, "pcRequirements": "low",
+    "shortDescription": "Mind-bending physics puzzles with a brilliantly written AI antagonist. The co-op campaign is a masterpiece on its own.",
+    "shortDescriptionRu": "Головоломки на физике, ломающие мозг, с блестяще написанным ИИ-антагонистом. Кооп-кампания — отдельный шедевр.",
+    "steamLink": "https://store.steampowered.com/app/620/Portal_2/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/620/header.jpg",
+    "difficulty": "Medium", "averageSession": "1 hour", "developer": "Valve", "releaseYear": 2011
+  },
+  {
+    "id": "236", "name": "Left 4 Dead 2",
+    "genre": ["FPS", "Horror", "Co-op"],
+    "minPlayers": 1, "maxPlayers": 4, "coop": true, "pcRequirements": "low",
+    "shortDescription": "Four survivors, endless zombie hordes, and a director AI that keeps every run different. Still the co-op zombie king.",
+    "shortDescriptionRu": "Четыре выживших, бесконечные орды зомби и ИИ-режиссёр, делающий каждый забег уникальным.",
+    "steamLink": "https://store.steampowered.com/app/550/Left_4_Dead_2/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/550/header.jpg",
+    "difficulty": "Medium", "averageSession": "1 hour", "developer": "Valve", "releaseYear": 2009
+  },
+  {
+    "id": "237", "name": "Stardew Valley",
+    "genre": ["Simulation", "RPG", "Co-op"],
+    "minPlayers": 1, "maxPlayers": 4, "coop": true, "pcRequirements": "low",
+    "shortDescription": "Inherit a rundown farm and build a life in a charming valley. Farm, fish, mine, and fall in love with the community.",
+    "shortDescriptionRu": "Унаследуйте заброшенную ферму и постройте жизнь в очаровательной долине. Фермерство, рыбалка, шахты и любовь к сообществу.",
+    "steamLink": "https://store.steampowered.com/app/413150/Stardew_Valley/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/413150/header.jpg",
+    "difficulty": "Easy", "averageSession": "1 hour", "developer": "ConcernedApe", "releaseYear": 2016
+  },
+  {
+    "id": "238", "name": "Dying Light 2",
+    "genre": ["Horror", "Action", "Co-op"],
+    "minPlayers": 1, "maxPlayers": 4, "coop": true, "pcRequirements": "high",
+    "shortDescription": "Parkour across a zombie-infested city where your choices reshape the world. Best-in-class movement system.",
+    "shortDescriptionRu": "Паркурьте по городу, кишащему зомби, где ваш выбор меняет мир. Лучшая система передвижения в жанре.",
+    "steamLink": "https://store.steampowered.com/app/534380/Dying_Light_2_Stay_Human/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/534380/header.jpg",
+    "difficulty": "Hard", "averageSession": "2+ hours", "developer": "Techland", "releaseYear": 2022
+  },
+  {
+    "id": "239", "name": "Rust",
+    "genre": ["Survival", "Multiplayer", "Competitive"],
+    "minPlayers": 1, "maxPlayers": 100, "coop": true, "pcRequirements": "high",
+    "shortDescription": "A ruthless multiplayer survival game where trust is a liability. Build, raid, betray, repeat.",
+    "shortDescriptionRu": "Безжалостная многопользовательская игра на выживание, где доверие — это уязвимость.",
+    "steamLink": "https://store.steampowered.com/app/252490/Rust/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/252490/header.jpg",
+    "difficulty": "Hard", "averageSession": "2+ hours", "developer": "Facepunch Studios", "releaseYear": 2018
+  },
+  {
+    "id": "240", "name": "Payday 3",
+    "genre": ["FPS", "Co-op", "Stealth"],
+    "minPlayers": 1, "maxPlayers": 4, "coop": true, "pcRequirements": "medium",
+    "shortDescription": "Plan and execute elaborate heists with your crew. Go loud with guns blazing or stay silent and stealthy.",
+    "shortDescriptionRu": "Планируйте и проводите сложные ограбления со своей командой. Действуйте шумно или тихо и незаметно.",
+    "steamLink": "https://store.steampowered.com/app/1272080/PAYDAY_3/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1272080/header.jpg",
+    "difficulty": "Medium", "averageSession": "1 hour", "developer": "Starbreeze Studios", "releaseYear": 2023
+  },
+  {
+    "id": "241", "name": "Football Manager 2024",
+    "genre": ["Sports", "Simulation", "Strategy"],
+    "minPlayers": 1, "maxPlayers": 1, "coop": false, "pcRequirements": "low",
+    "shortDescription": "Manage every detail of a football club — tactics, transfers, press conferences. The ultimate depth simulator.",
+    "shortDescriptionRu": "Управляйте каждой деталью футбольного клуба — тактика, трансферы, пресс-конференции.",
+    "steamLink": "https://store.steampowered.com/app/2252570/Football_Manager_2024/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/2252570/header.jpg",
+    "difficulty": "Hard", "averageSession": "2+ hours", "developer": "Sports Interactive", "releaseYear": 2023
+  },
+  {
+    "id": "242", "name": "Mortal Kombat 1",
+    "genre": ["Fighting", "Competitive", "Action"],
+    "minPlayers": 1, "maxPlayers": 2, "coop": false, "pcRequirements": "medium",
+    "shortDescription": "Brutal, cinematic fighting with a rebooted timeline and gruesome fatalities. Deep single-player story mode included.",
+    "shortDescriptionRu": "Жестокие кинематографичные бои с перезапущенной временной линией и жуткими добиваниями.",
+    "steamLink": "https://store.steampowered.com/app/1971870/Mortal_Kombat_1/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1971870/header.jpg",
+    "difficulty": "Medium", "averageSession": "30 min", "developer": "NetherRealm Studios", "releaseYear": 2023
+  },
+  {
+    "id": "243", "name": "Street Fighter 6",
+    "genre": ["Fighting", "Competitive"],
+    "minPlayers": 1, "maxPlayers": 2, "coop": false, "pcRequirements": "medium",
+    "shortDescription": "The pinnacle of modern fighting games. Deep mechanics wrapped in an accessible, stylish package.",
+    "shortDescriptionRu": "Вершина современных файтингов. Глубокая механика в доступной, стильной обёртке.",
+    "steamLink": "https://store.steampowered.com/app/1364780/Street_Fighter_6/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1364780/header.jpg",
+    "difficulty": "Hard", "averageSession": "30 min", "developer": "Capcom", "releaseYear": 2023
+  },
+  {
+    "id": "244", "name": "Sid Meier's Civilization V",
+    "genre": ["Strategy", "Turn-Based", "Historical"],
+    "minPlayers": 1, "maxPlayers": 8, "coop": true, "pcRequirements": "low",
+    "shortDescription": "A more accessible entry point into the Civilization series. Still holds up brilliantly over a decade later.",
+    "shortDescriptionRu": "Более доступная точка входа в серию Civilization. Отлично держится спустя больше десяти лет.",
+    "steamLink": "https://store.steampowered.com/app/8930/Sid_Meiers_Civilization_V/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/8930/header.jpg",
+    "difficulty": "Medium", "averageSession": "2+ hours", "developer": "Firaxis Games", "releaseYear": 2010
+  },
+  {
+    "id": "245", "name": "Untitled Goose Game",
+    "genre": ["Puzzle", "Indie", "Co-op"],
+    "minPlayers": 1, "maxPlayers": 2, "coop": true, "pcRequirements": "low",
+    "shortDescription": "Be a horrible goose ruining everyone's day. Short, silly, and endlessly quotable co-op puzzler.",
+    "shortDescriptionRu": "Будьте ужасным гусём, портящим жизнь всем вокруг. Короткая, дурашливая кооп-головоломка.",
+    "steamLink": "https://store.steampowered.com/app/837470/Untitled_Goose_Game/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/837470/header.jpg",
+    "difficulty": "Easy", "averageSession": "1 hour", "developer": "House House", "releaseYear": 2019
+  },
+  {
+    "id": "246", "name": "Raft",
+    "genre": ["Survival", "Co-op", "Adventure"],
+    "minPlayers": 1, "maxPlayers": 4, "coop": true, "pcRequirements": "low",
+    "shortDescription": "Survive on a small raft in the middle of the ocean. Expand your floating base while fending off hungry sharks.",
+    "shortDescriptionRu": "Выживайте на маленьком плоту посреди океана, расширяя свою плавучую базу и отбиваясь от акул.",
+    "steamLink": "https://store.steampowered.com/app/648800/Raft/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/648800/header.jpg",
+    "difficulty": "Medium", "averageSession": "1 hour", "developer": "Redbeet Interactive", "releaseYear": 2022
+  },
+  {
+    "id": "247", "name": "Human: Fall Flat",
+    "genre": ["Puzzle", "Co-op", "Platformer"],
+    "minPlayers": 1, "maxPlayers": 8, "coop": true, "pcRequirements": "low",
+    "shortDescription": "Floppy physics-based puzzle-solving with a wobbly avatar. Peak couch co-op chaos.",
+    "shortDescriptionRu": "Физические головоломки с неуклюжим персонажем. Идеальный хаос для дивана с друзьями.",
+    "steamLink": "https://store.steampowered.com/app/477160/Human_Fall_Flat/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/477160/header.jpg",
+    "difficulty": "Easy", "averageSession": "1 hour", "developer": "No Brakes Games", "releaseYear": 2016
+  },
+  {
+    "id": "248", "name": "Risk of Rain 2",
+    "genre": ["Roguelike", "Co-op", "Action"],
+    "minPlayers": 1, "maxPlayers": 4, "coop": true, "pcRequirements": "low",
+    "shortDescription": "Fight through hordes of aliens as the game gets exponentially harder and you get exponentially stronger.",
+    "shortDescriptionRu": "Сражайтесь с ордами пришельцев, пока игра становится экспоненциально сложнее, а вы — сильнее.",
+    "steamLink": "https://store.steampowered.com/app/632360/Risk_of_Rain_2/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/632360/header.jpg",
+    "difficulty": "Medium", "averageSession": "1 hour", "developer": "Hopoo Games", "releaseYear": 2020
+  },
+  {
+    "id": "249", "name": "Sons of the Forest",
+    "genre": ["Survival", "Horror", "Co-op"],
+    "minPlayers": 1, "maxPlayers": 8, "coop": true, "pcRequirements": "high",
+    "shortDescription": "Survive a cannibal-infested island after a plane crash. Gorgeous, terrifying, and deeply crafted.",
+    "shortDescriptionRu": "Выживите на острове, кишащем каннибалами, после крушения самолёта. Красиво, страшно и продумано.",
+    "steamLink": "https://store.steampowered.com/app/1326470/Sons_Of_The_Forest/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1326470/header.jpg",
+    "difficulty": "Hard", "averageSession": "2+ hours", "developer": "Endnight Games", "releaseYear": 2024
+  },
+  {
+    "id": "250", "name": "Marvel's Spider-Man Remastered",
+    "genre": ["Action", "Adventure"],
+    "minPlayers": 1, "maxPlayers": 1, "coop": false, "pcRequirements": "high",
+    "shortDescription": "Swing through New York as Spider-Man in one of the best superhero games ever made. Traversal alone is worth it.",
+    "shortDescriptionRu": "Летайте на паутине по Нью-Йорку в роли Человека-паука. Одна из лучших супергеройских игр.",
+    "steamLink": "https://store.steampowered.com/app/1817070/Marvels_SpiderMan_Remastered/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1817070/header.jpg",
+    "difficulty": "Easy", "averageSession": "1 hour", "developer": "Insomniac Games", "releaseYear": 2022
+  },
+  {
+    "id": "251", "name": "Company of Heroes 3",
+    "genre": ["Strategy", "RTS", "Historical"],
+    "minPlayers": 1, "maxPlayers": 8, "coop": true, "pcRequirements": "medium",
+    "shortDescription": "Squad-based WWII real-time strategy with tactical destruction and dynamic campaign maps.",
+    "shortDescriptionRu": "Отрядная стратегия времён Второй мировой в реальном времени с тактическими разрушениями.",
+    "steamLink": "https://store.steampowered.com/app/1677280/Company_of_Heroes_3/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1677280/header.jpg",
+    "difficulty": "Hard", "averageSession": "1 hour", "developer": "Relic Entertainment", "releaseYear": 2023
+  },
+  {
+    "id": "252", "name": "Muck",
+    "genre": ["Survival", "Roguelike", "Co-op"],
+    "minPlayers": 1, "maxPlayers": 4, "coop": true, "pcRequirements": "low",
+    "shortDescription": "A tiny, chaotic survival roguelike. Loot chests, fight bosses, and try not to laugh at how janky-good it is.",
+    "shortDescriptionRu": "Крошечный, хаотичный рогалик на выживание. Собирайте сундуки, сражайтесь с боссами.",
+    "steamLink": "https://store.steampowered.com/app/1625450/Muck/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1625450/header.jpg",
+    "difficulty": "Medium", "averageSession": "30 min", "developer": "Dani", "releaseYear": 2021
+  },
+  {
+    "id": "253", "name": "Baldur's Gate 3",
+    "genre": ["RPG", "Strategy", "Co-op"],
+    "minPlayers": 1, "maxPlayers": 4, "coop": true, "pcRequirements": "high",
+    "shortDescription": "An enormous D&D-based RPG with genuinely reactive storytelling. Widely considered the best RPG in years.",
+    "shortDescriptionRu": "Огромная RPG на основе D&D с по-настоящему реактивным повествованием. Лучшая RPG за многие годы.",
+    "steamLink": "https://store.steampowered.com/app/1086940/Baldurs_Gate_3/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/header.jpg",
+    "difficulty": "Hard", "averageSession": "2+ hours", "developer": "Larian Studios", "releaseYear": 2023
+  },
+  {
+    "id": "254", "name": "Vampire Survivors",
+    "genre": ["Roguelike", "Action", "Indie"],
+    "minPlayers": 1, "maxPlayers": 4, "coop": true, "pcRequirements": "low",
+    "shortDescription": "Survive waves of monsters that grow exponentially as your build spirals out of control. Deceptively deep and addictive.",
+    "shortDescriptionRu": "Выживайте против волн монстров, пока ваша сборка не выйдет из-под контроля. Обманчиво глубоко и затягивающе.",
+    "steamLink": "https://store.steampowered.com/app/1794680/Vampire_Survivors/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1794680/header.jpg",
+    "difficulty": "Easy", "averageSession": "30 min", "developer": "poncle", "releaseYear": 2022
+  },
+  {
+    "id": "255", "name": "Total War: Warhammer III",
+    "genre": ["Strategy", "RTS", "Fantasy"],
+    "minPlayers": 1, "maxPlayers": 8, "coop": true, "pcRequirements": "high",
+    "shortDescription": "Massive-scale fantasy battles combined with deep turn-based campaign management. A genre giant.",
+    "shortDescriptionRu": "Масштабные фэнтезийные битвы в сочетании с глубоким пошаговым управлением кампанией.",
+    "steamLink": "https://store.steampowered.com/app/1142710/Total_War_WARHAMMER_III/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/1142710/header.jpg",
+    "difficulty": "Hard", "averageSession": "2+ hours", "developer": "Creative Assembly", "releaseYear": 2022
+  },
+  {
+    "id": "256", "name": "Among Us",
+    "genre": ["Party", "Co-op", "Indie"],
+    "minPlayers": 4, "maxPlayers": 15, "coop": true, "pcRequirements": "low",
+    "shortDescription": "Find the impostor before they sabotage the ship. The social deduction game that took over the world.",
+    "shortDescriptionRu": "Найдите предателя, прежде чем он саботирует корабль. Игра на социальную дедукцию, покорившая мир.",
+    "steamLink": "https://store.steampowered.com/app/945360/Among_Us/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/945360/header.jpg",
+    "difficulty": "Easy", "averageSession": "15 min", "developer": "Innersloth", "releaseYear": 2018
+  },
+  {
+    "id": "257", "name": "Jackbox Party Pack 10",
+    "genre": ["Party", "Co-op", "Trivia"],
+    "minPlayers": 3, "maxPlayers": 10, "coop": true, "pcRequirements": "low",
+    "shortDescription": "Five hilarious party games playable with phones as controllers. Perfect for any group hangout.",
+    "shortDescriptionRu": "Пять уморительных вечеринок-игр, управляемых с телефонов. Идеально для любой компании.",
+    "steamLink": "https://store.steampowered.com/app/2551800/The_Jackbox_Party_Pack_10/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/2551800/header.jpg",
+    "difficulty": "Easy", "averageSession": "1 hour", "developer": "Jackbox Games", "releaseYear": 2023
+  },
+  {
+    "id": "258", "name": "Sea Salt",
+    "genre": ["Strategy", "Horror", "Roguelike"],
+    "minPlayers": 1, "maxPlayers": 1, "coop": false, "pcRequirements": "low",
+    "shortDescription": "Command a horde of Lovecraftian horrors against pitiful humans in this real-time strategy roguelite.",
+    "shortDescriptionRu": "Командуйте ордой лавкрафтовских ужасов против жалких людей в этой стратегии в реальном времени.",
+    "steamLink": "https://store.steampowered.com/app/886920/Sea_Salt/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/886920/header.jpg",
+    "difficulty": "Medium", "averageSession": "30 min", "developer": "Massive Monster", "releaseYear": 2019
+  },
+  {
+    "id": "259", "name": "Deep Rock Galactic",
+    "genre": ["FPS", "Co-op", "Survival"],
+    "minPlayers": 1, "maxPlayers": 4, "coop": true, "pcRequirements": "medium",
+    "shortDescription": "Space dwarves mining procedurally generated caves. Rock and Stone! One of the best co-op games of the decade.",
+    "shortDescriptionRu": "Космические гномы, добывающие руду в процедурно генерируемых пещерах. Одна из лучших кооп-игр десятилетия.",
+    "steamLink": "https://store.steampowered.com/app/548430/Deep_Rock_Galactic/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/548430/header.jpg",
+    "difficulty": "Medium", "averageSession": "1 hour", "developer": "Ghost Ship Games", "releaseYear": 2020
+  },
+  {
+    "id": "260", "name": "Slay the Spire",
+    "genre": ["Card Game", "Roguelike", "Strategy"],
+    "minPlayers": 1, "maxPlayers": 1, "coop": false, "pcRequirements": "low",
+    "shortDescription": "Deckbuilding meets roguelike dungeon crawling. The genre-defining card game that spawned countless imitators.",
+    "shortDescriptionRu": "Постройка колоды встречается с рогаликом. Игра, определившая жанр карточных рогаликов.",
+    "steamLink": "https://store.steampowered.com/app/646570/Slay_the_Spire/",
+    "coverImage": "https://cdn.cloudflare.steamstatic.com/steam/apps/646570/header.jpg",
+    "difficulty": "Hard", "averageSession": "1 hour", "developer": "MegaCrit", "releaseYear": 2019
+  }
+]
