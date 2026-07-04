@@ -47,7 +47,7 @@ function getTopByViews(days=7, limit=8) {
 function fetchSteamScreenshots(appId) {
   return new Promise((resolve) => {
     if (screenshotCache[appId]) return resolve(screenshotCache[appId]);
-    const url = `https://store.steampowered.com/api/appdetails?appids=${appId}&filters=screenshots`;
+    const url = `https://store.steampowered.com/api/appdetails?appids=${appId}&cc=us&l=en&filters=screenshots`;
     https.get(url, { headers: { 'User-Agent': 'GameMatch/1.0' } }, (res) => {
       let data = '';
       res.on('data', c => data += c);
