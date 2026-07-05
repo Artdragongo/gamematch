@@ -2,59 +2,100 @@
  * Run from C:\Users\drago\gamematch (project root):
  * node verify_images.js
  *
- * For every game with a steamLink, asks Steam's OWN public API what
- * game actually lives at that App ID, and compares it against your
- * game's name. If they don't match (or the request fails), the
- * coverImage is set to null — the site's existing fallback shows a
- * clean placeholder icon instead of a WRONG picture.
+ * v2 — fixes two problems from the first version:
  *
- * This is slow on purpose (500ms between requests) to avoid getting
- * rate-limited by Steam. For ~460 games expect this to take 4-5 min.
- * Safe to re-run any time — it always re-checks and self-corrects.
+ * 1. RATE LIMITING: Steam blocks rapid sequential requests. This version
+ *    waits 1.5s between requests (vs 400ms before) and retries up to
+ *    3 times with backoff if a request fails, instead of giving up
+ *    immediately and marking hundreds of genuinely-fine games as
+ *    "unverifiable."
+ *
+ * 2. FALSE POSITIVES: handles Steam's own renames/reformats
+ *    (e.g. "Hitman 3" -> "HITMAN World of Assassination") and Roman
+ *    numeral vs digit differences (e.g. "2" vs "II") so correct games
+ *    don't get their images wrongly cleared.
+ *
+ * Expect this to take 10-15 minutes for a ~630 game catalog. That's
+ * intentional — going slower is what makes the results trustworthy.
  */
-const fs   = require('fs');
-const path = require('path');
+const fs    = require('fs');
+const path  = require('path');
 const https = require('https');
 
 const gamesPath = path.join(__dirname, 'server', 'games.json');
 const games = JSON.parse(fs.readFileSync(gamesPath, 'utf8'));
 
-function fetchAppName(appId) {
+// Known Steam-side renames that would otherwise look like mismatches
+const KNOWN_RENAMES = {
+  "hitman 3": "hitman world of assassination",
+  "gta v online": "grand theft auto v legacy",
+  "grand theft auto v online": "grand theft auto v legacy",
+};
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function fetchAppName(appId, attempt = 1) {
   return new Promise((resolve) => {
     const url = `https://store.steampowered.com/api/appdetails?appids=${appId}&cc=us&l=en&filters=basic`;
-    https.get(url, { headers: { 'User-Agent': 'GameMatch/1.0' } }, (res) => {
+    https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0 GameMatch/2.0' } }, (res) => {
       let data = '';
       res.on('data', c => data += c);
-      res.on('end', () => {
+      res.on('end', async () => {
         try {
           const json = JSON.parse(data);
           const d = json[appId];
-          resolve(d?.success ? d.data?.name || null : null);
-        } catch { resolve(null); }
+          if (d?.success) return resolve(d.data?.name || null);
+          // success:false could be rate-limiting OR a genuinely delisted app.
+          // Retry a couple times before giving up.
+          if (attempt < 3) {
+            await sleep(2000 * attempt);
+            return resolve(await fetchAppName(appId, attempt + 1));
+          }
+          resolve(null);
+        } catch {
+          if (attempt < 3) {
+            await sleep(2000 * attempt);
+            return resolve(await fetchAppName(appId, attempt + 1));
+          }
+          resolve(null);
+        }
       });
-    }).on('error', () => resolve(null));
+    }).on('error', async () => {
+      if (attempt < 3) {
+        await sleep(2000 * attempt);
+        return resolve(await fetchAppName(appId, attempt + 1));
+      }
+      resolve(null);
+    });
   });
 }
 
+// Roman numeral <-> digit normalization for the common small ones
+const ROMAN_MAP = { ' ii': ' 2', ' iii': ' 3', ' iv': ' 4', ' v': ' 5', ' vi': ' 6' };
+
 function normalize(s) {
-  return (s || '')
+  let n = (s || '')
     .toLowerCase()
     .replace(/[:'’\-–—.,!?®™]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
+  for (const [roman, digit] of Object.entries(ROMAN_MAP)) {
+    if (n.endsWith(roman.trim())) n = n.slice(0, -roman.trim().length).trim() + digit;
+  }
+  return n;
 }
 
-function namesRoughlyMatch(a, b) {
-  const na = normalize(a), nb = normalize(b);
-  if (na === nb) return true;
-  // Allow substring match either direction (handles subtitles/editions)
-  return na.includes(nb) || nb.includes(na);
+function namesMatch(gameName, steamName) {
+  const ng = normalize(gameName);
+  const ns = normalize(steamName);
+  if (ng === ns) return true;
+  if (ng.includes(ns) || ns.includes(ng)) return true;
+  if (KNOWN_RENAMES[ng] === ns || KNOWN_RENAMES[ns] === ng) return true;
+  return false;
 }
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 (async () => {
-  let checked = 0, fixed = 0, ok = 0, noLink = 0;
+  let checked = 0, fixed = 0, ok = 0, noLink = 0, uncertain = 0;
 
   for (const g of games) {
     if (!g.steamLink) { noLink++; continue; }
@@ -66,25 +107,25 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
     checked++;
 
     if (!steamName) {
-      console.log(`  ⚠ Could not verify "${g.name}" (App ID ${appId}) — leaving as-is`);
-    } else if (!namesRoughlyMatch(g.name, steamName)) {
-      console.log(`  ❌ MISMATCH: "${g.name}" → Steam says App ID ${appId} is "${steamName}". Clearing image.`);
+      uncertain++;
+      console.log(`  ⚠ Still unverifiable after retries: "${g.name}" (App ID ${appId}) — left untouched`);
+    } else if (!namesMatch(g.name, steamName)) {
+      console.log(`  ❌ MISMATCH: "${g.name}" → App ID ${appId} is actually "${steamName}". Clearing image.`);
       g.coverImage = null;
       fixed++;
     } else {
-      // Confirmed correct — make sure coverImage uses the right URL
       g.coverImage = `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg`;
       ok++;
     }
 
-    await sleep(400); // be gentle with Steam's API
-    if (checked % 20 === 0) console.log(`  ...checked ${checked} so far`);
+    await sleep(1500); // slow and polite — this is what fixes the rate-limit problem
+    if (checked % 20 === 0) console.log(`  ...checked ${checked}/${games.length} so far`);
   }
 
   fs.writeFileSync(gamesPath, JSON.stringify(games, null, 2));
   console.log(`\n✅ Done.`);
-  console.log(`   Verified OK:        ${ok}`);
-  console.log(`   Fixed (mismatches): ${fixed}`);
-  console.log(`   No Steam link:      ${noLink}`);
-  console.log(`   Total checked:      ${checked}`);
+  console.log(`   Verified OK:          ${ok}`);
+  console.log(`   Fixed (real mismatch): ${fixed}`);
+  console.log(`   Still uncertain:      ${uncertain}  (left as-is, safe to re-run later)`);
+  console.log(`   No Steam link:        ${noLink}`);
 })();
