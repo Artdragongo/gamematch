@@ -60,6 +60,15 @@ export const translations = {
       popular_title:'Popular Right Now', trending_title:'Trending This Week',
       top_rated_title:'Top Rated', recent_title:'Recently Added', view_all:'View all',
       hidden_gems:'Hidden Gems',
+      hiw4_desc:'Find new favorites and share with friends',
+      hiw4_title:'Play & enjoy',
+      hiw3_desc:'Get personalized recommendations instantly',
+      hiw3_title:'See your picks',
+      hiw2_desc:'Our engine filters games that actually fit',
+      hiw2_title:'We find matches',
+      hiw1_desc:'Tell us your setup, mood, and squad size',
+      hiw1_title:'Answer questions',
+      hiw_title:'How it works',
       daily_pick:'Game of the Day',
       browse_by_genre:'Browse by genre',
       stat_coop:'Co-op games',
@@ -209,6 +218,12 @@ export const translations = {
     share: {
       button: 'Share results',
       copied: 'Link copied!',
+    },
+    quickaccess: {
+      recent_desc: 'Recent releases',
+      coop_desc: 'Play together',
+      solo_desc: 'Just for you',
+      gems_desc: 'Underrated picks',
     },
     quickmatch: {
       title: 'Quick Match',
