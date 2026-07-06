@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Gamepad2, Monitor, Users, ArrowLeft, TrendingUp, Clock,
   Star, ChevronRight, Award, Zap, Search, Calendar,
-  Gem, ClipboardList, Sparkles, PartyPopper, User as UserIcon
+  Gem, ClipboardList, Sparkles, PartyPopper, User as UserIcon, Check
 } from 'lucide-react';
 import PreferencesForm from '../components/PreferencesForm';
 import GameCard from '../components/GameCard';
@@ -14,26 +14,13 @@ import { useHomepageData } from '../hooks/useHomepageData';
 import { useLang } from '../i18n/LangContext';
 import { usePageTitle } from '../hooks/usePageTitle';
 
-/* ── Design tokens (hardcoded — cannot silently fail from a CSS
-   patch not applying). Matches the soft-blue premium palette. ── */
 const C = {
-  primary: '#3B82F6',
-  primaryHover: '#2563EB',
-  primaryLight: '#EFF6FF',
-  primaryMid: '#BFDBFE',
-  bg: '#F8FAFC',
-  surface: '#FFFFFF',
-  surface2: '#F1F5F9',
-  border: '#E5E9F0',
-  text: '#0F172A',
-  text2: '#334155',
-  text3: '#64748B',
-  text4: '#94A3B8',
-  radiusSm: '10px',
-  radius: '14px',
-  radiusLg: '20px',
+  primary: '#3B82F6', primaryHover: '#2563EB', primaryLight: '#EFF6FF', primaryMid: '#BFDBFE',
+  bg: '#F8FAFC', surface: '#FFFFFF', surface2: '#F1F5F9', border: '#E5E9F0',
+  text: '#0F172A', text2: '#334155', text3: '#64748B', text4: '#94A3B8',
+  radiusSm: '10px', radius: '14px', radiusLg: '20px',
   shadow: '0 4px 16px rgba(59,130,246,0.08), 0 2px 6px rgba(15,23,42,0.04)',
-  shadowLg: '0 16px 40px rgba(59,130,246,0.12), 0 4px 12px rgba(15,23,42,0.06)',
+  shadowLg: '0 20px 48px rgba(59,130,246,0.14), 0 6px 16px rgba(15,23,42,0.06)',
 };
 
 /* ── Mini card image ── */
@@ -63,7 +50,6 @@ const TIER_COLORS = {
   high:   { bg:'#FEF2F2', fg:'#DC2626' },
 };
 
-/* ── Mini card — genre + real PC-tier badge ── */
 function MiniCard({ game, onClick, rank }) {
   const { t } = useLang();
   const gl = g => t.genres?.[g] || g;
@@ -89,7 +75,6 @@ function MiniCard({ game, onClick, rank }) {
   );
 }
 
-/* ── Section row ── */
 function GameRow({ title, Icon, games, onGame, onViewAll, viewAll, showRanks }) {
   if (!games?.length) return null;
   return (
@@ -115,7 +100,60 @@ function GameRow({ title, Icon, games, onGame, onViewAll, viewAll, showRanks }) 
   );
 }
 
-/* ── Hero — fully inline, two-column, decorative visual on the right ── */
+/* ── Hand-drawn original controller illustration (no product photo,
+   no third-party IP — built entirely from primitive SVG shapes) ── */
+function ControllerIllustration({ size = 150 }) {
+  return (
+    <svg width={size} height={size * 0.62} viewBox="0 0 240 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#FFFFFF"/>
+          <stop offset="100%" stopColor="#EFF6FF"/>
+        </linearGradient>
+        <radialGradient id="stickGrad" cx="35%" cy="35%" r="70%">
+          <stop offset="0%" stopColor="#60A5FA"/>
+          <stop offset="100%" stopColor="#2563EB"/>
+        </radialGradient>
+      </defs>
+
+      {/* Grips (drawn first, sit behind the body bar) */}
+      <ellipse cx="42" cy="98" rx="34" ry="38" fill="url(#bodyGrad)" stroke="#BFDBFE" strokeWidth="2"/>
+      <ellipse cx="198" cy="98" rx="34" ry="38" fill="url(#bodyGrad)" stroke="#BFDBFE" strokeWidth="2"/>
+
+      {/* Shoulder bumpers */}
+      <rect x="20" y="30" width="46" height="16" rx="8" fill="#DBEAFE"/>
+      <rect x="174" y="30" width="46" height="16" rx="8" fill="#DBEAFE"/>
+
+      {/* Main body bar */}
+      <rect x="18" y="42" width="204" height="72" rx="36" fill="url(#bodyGrad)" stroke="#BFDBFE" strokeWidth="2"/>
+
+      {/* Glossy highlight */}
+      <ellipse cx="90" cy="58" rx="55" ry="14" fill="#FFFFFF" opacity="0.55"/>
+
+      {/* D-pad (left) */}
+      <rect x="57" y="73" width="10" height="26" rx="3" fill="#3B82F6"/>
+      <rect x="49" y="81" width="26" height="10" rx="3" fill="#3B82F6"/>
+
+      {/* Face buttons (right, diamond layout) */}
+      <circle cx="172" cy="70" r="7" fill="none" stroke="#3B82F6" strokeWidth="2.5"/>
+      <circle cx="172" cy="94" r="7" fill="none" stroke="#3B82F6" strokeWidth="2.5"/>
+      <circle cx="160" cy="82" r="7" fill="none" stroke="#3B82F6" strokeWidth="2.5"/>
+      <circle cx="184" cy="82" r="7" fill="none" stroke="#3B82F6" strokeWidth="2.5"/>
+
+      {/* Menu buttons (center) */}
+      <circle cx="112" cy="58" r="4" fill="#93C5FD"/>
+      <circle cx="128" cy="58" r="4" fill="#93C5FD"/>
+
+      {/* Thumbsticks (on the grips) */}
+      <circle cx="42" cy="100" r="18" fill="#F1F5F9" stroke="#BFDBFE" strokeWidth="2"/>
+      <circle cx="42" cy="100" r="9" fill="url(#stickGrad)"/>
+      <circle cx="198" cy="100" r="18" fill="#F1F5F9" stroke="#BFDBFE" strokeWidth="2"/>
+      <circle cx="198" cy="100" r="9" fill="url(#stickGrad)"/>
+    </svg>
+  );
+}
+
+/* ── Hero — text left, illustrated controller right, tightly composed ── */
 function Hero({ t, stats }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
   useEffect(() => {
@@ -124,53 +162,76 @@ function Hero({ t, stats }) {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  const trustChips = [
+    t.hero.feat1_title, t.hero.feat2_title, t.hero.feat3_title,
+  ].filter(Boolean);
+
   return (
     <section style={{
-      maxWidth: 1200, margin: '0 auto', padding: isMobile ? '2.5rem 1.25rem 1rem' : '4rem 2rem 2rem',
-      display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.1fr 0.9fr',
-      gap: isMobile ? '2rem' : '3rem', alignItems: 'center',
+      maxWidth: 1200, margin: '0 auto', padding: isMobile ? '2.5rem 1.25rem 0' : '3.5rem 2rem 0',
+      display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.15fr 0.85fr',
+      gap: isMobile ? '2rem' : '2.5rem', alignItems: 'center',
       textAlign: isMobile ? 'center' : 'left',
     }}>
-      <div style={{ maxWidth: isMobile ? '100%' : 520, margin: isMobile ? '0 auto' : 0 }}>
+      <div style={{ maxWidth: isMobile ? '100%' : 540, margin: isMobile ? '0 auto' : 0 }}>
         <div style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 14px',
           background:C.primaryLight, border:`1px solid ${C.primaryMid}`, borderRadius:100,
-          fontSize:'0.78rem', fontWeight:600, color:C.primary, marginBottom:'1.5rem' }}>
+          fontSize:'0.78rem', fontWeight:600, color:C.primary, marginBottom:'1.25rem' }}>
           <Gamepad2 size={12}/> {t.hero.badge}
         </div>
         <h1 style={{ fontFamily:'var(--font-heading)', fontWeight:800, letterSpacing:'-0.03em',
-          fontSize:'clamp(2.2rem,4.5vw,3.4rem)', lineHeight:1.1, color:C.text, marginBottom:'1.1rem' }}>
+          fontSize:'clamp(2.1rem,4.2vw,3.2rem)', lineHeight:1.12, color:C.text, marginBottom:'1rem' }}>
           {t.hero.title1} <span style={{ color:C.primary }}>{t.hero.title2}</span>
         </h1>
-        <p style={{ fontSize:'1.05rem', color:C.text3, lineHeight:1.7 }}>{t.hero.sub}</p>
+        <p style={{ fontSize:'1.02rem', color:C.text3, lineHeight:1.7, marginBottom:'1.4rem' }}>{t.hero.sub}</p>
+
+        {/* Trust chips — fills the space that used to be empty */}
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'0.5rem', justifyContent: isMobile ? 'center' : 'flex-start' }}>
+          {trustChips.map((label, i) => (
+            <span key={i} style={{ display:'inline-flex', alignItems:'center', gap:5,
+              fontSize:'0.78rem', fontWeight:600, color:C.text2,
+              background:C.surface, border:`1px solid ${C.border}`, borderRadius:100, padding:'0.35rem 0.8rem' }}>
+              <Check size={12} style={{ color:C.primary }}/> {label}
+            </span>
+          ))}
+        </div>
       </div>
 
       {!isMobile && (
-        <div style={{ position:'relative', aspectRatio:'1/0.85', display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <div style={{ position:'absolute', inset:'8%',
-            background:`radial-gradient(circle at 35% 30%, ${C.primaryLight} 0%, ${C.bg} 70%)`,
+        <div style={{ position:'relative', height:280, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <div style={{ position:'absolute', inset:'6%',
+            background:`radial-gradient(circle at 35% 30%, ${C.primaryLight} 0%, ${C.bg} 72%)`,
             borderRadius:'50% 45% 55% 50% / 55% 50% 50% 45%' }}/>
-          <div style={{ position:'absolute', width:36, height:36, borderRadius:'50%', top:'6%', left:'10%',
+          {/* Extra floating shapes to give the area more life */}
+          <div style={{ position:'absolute', width:34, height:34, borderRadius:'50%', top:'2%', left:'8%',
             background:C.primaryLight, border:`1px solid ${C.primaryMid}` }}/>
-          <div style={{ position:'absolute', width:20, height:20, borderRadius:'50%', bottom:'18%', left:'2%',
+          <div style={{ position:'absolute', width:18, height:18, borderRadius:'50%', bottom:'12%', left:'0%',
             background:C.primaryLight, border:`1px solid ${C.primaryMid}` }}/>
-          <div style={{ position:'relative', width:'62%', aspectRatio:1,
-            background:`linear-gradient(145deg, #fff, ${C.primaryLight})`,
-            borderRadius:C.radiusLg, display:'flex', alignItems:'center', justifyContent:'center',
+          <div style={{ position:'absolute', width:12, height:12, borderRadius:'50%', bottom:'34%', right:'2%',
+            background:'#DBEAFE' }}/>
+          <div style={{ position:'absolute', width:22, height:22, borderRadius:'50%', top:'10%', right:'14%',
+            background:'#DBEAFE', opacity:0.7 }}/>
+
+          <div style={{ position:'relative', width:'88%', maxWidth:280, aspectRatio:'1.3/1',
+            background:'#fff', borderRadius:C.radiusLg, display:'flex', alignItems:'center', justifyContent:'center',
             boxShadow:C.shadowLg, border:`1px solid ${C.primaryMid}` }}>
-            <Gamepad2 size={92} style={{ color:C.primary, opacity:0.85 }} strokeWidth={1.3}/>
+            <ControllerIllustration size={168}/>
           </div>
-          <div style={{ position:'absolute', bottom:'8%', right:'4%', background:'#fff',
-            borderRadius:C.radius, padding:'0.7rem 1.1rem', boxShadow:C.shadowLg,
-            display:'flex', alignItems:'center', gap:'0.6rem', border:`1px solid ${C.border}` }}>
-            <div style={{ width:34, height:34, borderRadius:10, background:C.primaryLight,
+
+          <div style={{ position:'absolute', bottom:'2%', right:'-2%', background:'#fff',
+            borderRadius:C.radius, padding:'0.65rem 1rem', boxShadow:C.shadowLg,
+            display:'flex', alignItems:'center', gap:'0.55rem', border:`1px solid ${C.border}` }}>
+            <div style={{ width:32, height:32, borderRadius:9, background:C.primaryLight,
               display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <Sparkles size={16} style={{ color:C.primary }}/>
+              <Sparkles size={15} style={{ color:C.primary }}/>
             </div>
             <div>
-              <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.15rem', fontWeight:800, color:C.text }}>
+              <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.05rem', fontWeight:800, color:C.text, lineHeight:1 }}>
                 {stats?.totalGames || '600+'}
               </div>
-              <div style={{ fontSize:'0.68rem', color:C.text3, fontWeight:600 }}>games ready</div>
+              <div style={{ fontSize:'0.65rem', color:C.text3, fontWeight:600 }}>
+                {t.hero.games_ready || 'games ready'}
+              </div>
             </div>
           </div>
         </div>
@@ -179,7 +240,6 @@ function Hero({ t, stats }) {
   );
 }
 
-/* ── How It Works — fully inline ── */
 function HowItWorks({ t }) {
   const hiw = t.hero || {};
   const steps = [
@@ -225,7 +285,6 @@ function HowItWorks({ t }) {
   );
 }
 
-/* ── Stats tiles — fully inline ── */
 function StatsTiles({ stats, t }) {
   const tiles = [
     { Icon: Gamepad2, num: stats?.totalGames || '600+', label: t.hero.stat_games },
@@ -253,7 +312,6 @@ function StatsTiles({ stats, t }) {
   );
 }
 
-/* ── Quick access chips — fully inline ── */
 function QuickAccessGrid({ navigate, t }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 700);
   useEffect(() => {
@@ -329,24 +387,23 @@ export default function HomePage({ navigate }) {
   const goGame = g => navigate('game', { id: g.id });
   const showSkeleton = isLoading && !hp;
 
-  /* ── Hero ── */
   if (step === 'hero') return (
     <>
       <Hero t={t} stats={hp?.stats}/>
 
-      <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 2rem 1.5rem' }}>
+      <div style={{ maxWidth:1200, margin:'0 auto', padding:'1.75rem 2rem 1.5rem' }}>
         <QuickMatch
           onResults={(res, p) => { setResults(res); setPrefs(p); setStep('results'); }}
           onFullSearch={() => setStep('form')}
         />
-        <div style={{ textAlign:'center', marginTop:'1rem' }}>
+        <div style={{ textAlign:'center', marginTop:'0.9rem' }}>
           <button className="btn btn-muted" onClick={() => navigate('bored')}>
             <Zap size={13}/> {t.hero.cta_bored}
           </button>
         </div>
       </div>
 
-      <div style={{ paddingTop:'1rem' }}>
+      <div style={{ paddingTop:'1.5rem' }}>
         {showSkeleton ? <GameRowSkeleton/> : (
           <GameRow title={t.hero.popular_title} Icon={Star} games={hp?.popular}
             onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all} showRanks/>
@@ -366,7 +423,6 @@ export default function HomePage({ navigate }) {
         <HowItWorks t={t}/>
         <StatsTiles stats={hp?.stats} t={t}/>
 
-        {/* Friends CTA */}
         <div style={{ padding:'0 2rem', maxWidth:1000, margin:'0 auto 3rem' }}>
           <div style={{ background:`linear-gradient(135deg, ${C.primaryLight}, ${C.surface})`,
             border:`1px solid ${C.primaryMid}`, borderRadius:C.radiusLg, padding:'2rem 2.5rem',
@@ -390,7 +446,6 @@ export default function HomePage({ navigate }) {
     </>
   );
 
-  /* ── Form ── */
   if (step === 'form') return (
     <div className="form-page">
       <div className="form-page-header">
@@ -405,7 +460,6 @@ export default function HomePage({ navigate }) {
     </div>
   );
 
-  /* ── Loading ── */
   if (step === 'loading') return (
     <div className="loading-wrap">
       <div className="spinner"/>
@@ -413,7 +467,6 @@ export default function HomePage({ navigate }) {
     </div>
   );
 
-  /* ── Results ── */
   if (step === 'results') return (
     <div>
       <div className="results-header">
