@@ -149,38 +149,86 @@ function GameRow({ title, Icon, games, onGame, onViewAll, viewAll, showRanks }) 
   );
 }
 
-/* ── Controller illustration — bigger, richer ── */
+/* ── Controller illustration — layered gradients + drop shadow for real volume,
+   instead of flat outlines. Same silhouette/brand palette, just rendered with depth. ── */
 function ControllerIllustration({ size = 210 }) {
   return (
     <svg width={size} height={size * 0.62} viewBox="0 0 240 150" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="bodyGrad2" x1="0" y1="0" x2="0" y2="1">
+        <radialGradient id="shellGrad3" cx="32%" cy="24%" r="90%">
           <stop offset="0%" stopColor="#FFFFFF"/>
-          <stop offset="100%" stopColor="#EFF6FF"/>
-        </linearGradient>
-        <radialGradient id="stickGrad2" cx="35%" cy="35%" r="70%">
-          <stop offset="0%" stopColor="#60A5FA"/>
-          <stop offset="100%" stopColor="#2563EB"/>
+          <stop offset="55%" stopColor="#F3F8FF"/>
+          <stop offset="100%" stopColor="#DCEAFE"/>
         </radialGradient>
+        <linearGradient id="gripAccent3" x1="15%" y1="0%" x2="85%" y2="100%">
+          <stop offset="0%" stopColor="#93C5FD"/>
+          <stop offset="45%" stopColor="#3B82F6"/>
+          <stop offset="100%" stopColor="#1D4ED8"/>
+        </linearGradient>
+        <radialGradient id="stickGrad3" cx="35%" cy="30%" r="75%">
+          <stop offset="0%" stopColor="#93C5FD"/>
+          <stop offset="55%" stopColor="#3B82F6"/>
+          <stop offset="100%" stopColor="#1D4ED8"/>
+        </radialGradient>
+        <radialGradient id="buttonGrad3" cx="35%" cy="30%" r="80%">
+          <stop offset="0%" stopColor="#FFFFFF"/>
+          <stop offset="70%" stopColor="#E4EEFC"/>
+          <stop offset="100%" stopColor="#BFDBFE"/>
+        </radialGradient>
+        <linearGradient id="triggerGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#EFF6FF"/>
+          <stop offset="100%" stopColor="#BFDBFE"/>
+        </linearGradient>
+        <filter id="ctrlShadow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#2563EB" floodOpacity="0.22"/>
+        </filter>
+        <filter id="ctrlBlur"><feGaussianBlur stdDeviation="3.5"/></filter>
       </defs>
-      <ellipse cx="42" cy="98" rx="34" ry="38" fill="url(#bodyGrad2)" stroke="#BFDBFE" strokeWidth="2"/>
-      <ellipse cx="198" cy="98" rx="34" ry="38" fill="url(#bodyGrad2)" stroke="#BFDBFE" strokeWidth="2"/>
-      <rect x="20" y="30" width="46" height="16" rx="8" fill="#DBEAFE"/>
-      <rect x="174" y="30" width="46" height="16" rx="8" fill="#DBEAFE"/>
-      <rect x="18" y="42" width="204" height="72" rx="36" fill="url(#bodyGrad2)" stroke="#BFDBFE" strokeWidth="2"/>
-      <ellipse cx="90" cy="58" rx="55" ry="14" fill="#FFFFFF" opacity="0.55"/>
-      <rect x="57" y="73" width="10" height="26" rx="3" fill="#3B82F6"/>
-      <rect x="49" y="81" width="26" height="10" rx="3" fill="#3B82F6"/>
-      <circle cx="172" cy="70" r="7" fill="none" stroke="#3B82F6" strokeWidth="2.5"/>
-      <circle cx="172" cy="94" r="7" fill="none" stroke="#3B82F6" strokeWidth="2.5"/>
-      <circle cx="160" cy="82" r="7" fill="none" stroke="#3B82F6" strokeWidth="2.5"/>
-      <circle cx="184" cy="82" r="7" fill="none" stroke="#3B82F6" strokeWidth="2.5"/>
-      <circle cx="112" cy="58" r="4" fill="#93C5FD"/>
-      <circle cx="128" cy="58" r="4" fill="#93C5FD"/>
-      <circle cx="42" cy="100" r="18" fill="#F1F5F9" stroke="#BFDBFE" strokeWidth="2"/>
-      <circle cx="42" cy="100" r="9" fill="url(#stickGrad2)"/>
-      <circle cx="198" cy="100" r="18" fill="#F1F5F9" stroke="#BFDBFE" strokeWidth="2"/>
-      <circle cx="198" cy="100" r="9" fill="url(#stickGrad2)"/>
+
+      <g filter="url(#ctrlShadow)">
+        {/* blue accent rim peeking out from underneath, so the shell reads as having real thickness */}
+        <ellipse cx="42" cy="102" rx="34" ry="38" fill="url(#gripAccent3)"/>
+        <ellipse cx="198" cy="102" rx="34" ry="38" fill="url(#gripAccent3)"/>
+        <rect x="18" y="46" width="204" height="72" rx="36" fill="url(#gripAccent3)"/>
+
+        {/* main shell, sitting slightly above the accent rim */}
+        <ellipse cx="42" cy="98" rx="34" ry="38" fill="url(#shellGrad3)" stroke="#BFDBFE" strokeWidth="1.5"/>
+        <ellipse cx="198" cy="98" rx="34" ry="38" fill="url(#shellGrad3)" stroke="#BFDBFE" strokeWidth="1.5"/>
+        <rect x="18" y="42" width="204" height="72" rx="36" fill="url(#shellGrad3)" stroke="#BFDBFE" strokeWidth="1.5"/>
+
+        {/* specular highlight across the top, like light hitting curved plastic */}
+        <ellipse cx="88" cy="56" rx="58" ry="15" fill="#FFFFFF" opacity="0.65" filter="url(#ctrlBlur)"/>
+
+        {/* domed shoulder triggers */}
+        <rect x="20" y="28" width="46" height="17" rx="8.5" fill="url(#triggerGrad3)" stroke="#BFDBFE" strokeWidth="1"/>
+        <rect x="174" y="28" width="46" height="17" rx="8.5" fill="url(#triggerGrad3)" stroke="#BFDBFE" strokeWidth="1"/>
+
+        {/* embossed d-pad */}
+        <rect x="57" y="73" width="10" height="26" rx="3" fill="url(#buttonGrad3)" stroke="#BFDBFE" strokeWidth="1"/>
+        <rect x="49" y="81" width="26" height="10" rx="3" fill="url(#buttonGrad3)" stroke="#BFDBFE" strokeWidth="1"/>
+
+        {/* domed face buttons with tiny glints */}
+        <circle cx="172" cy="70" r="7.5" fill="url(#buttonGrad3)" stroke="#93C5FD" strokeWidth="1.5"/>
+        <circle cx="172" cy="94" r="7.5" fill="url(#buttonGrad3)" stroke="#93C5FD" strokeWidth="1.5"/>
+        <circle cx="160" cy="82" r="7.5" fill="url(#buttonGrad3)" stroke="#93C5FD" strokeWidth="1.5"/>
+        <circle cx="184" cy="82" r="7.5" fill="url(#buttonGrad3)" stroke="#93C5FD" strokeWidth="1.5"/>
+        <circle cx="170" cy="68" r="2" fill="#fff" opacity="0.8"/>
+        <circle cx="170" cy="92" r="2" fill="#fff" opacity="0.8"/>
+        <circle cx="158" cy="80" r="2" fill="#fff" opacity="0.8"/>
+        <circle cx="182" cy="80" r="2" fill="#fff" opacity="0.8"/>
+
+        <circle cx="112" cy="58" r="4" fill="#93C5FD"/>
+        <circle cx="128" cy="58" r="4" fill="#93C5FD"/>
+
+        {/* analog sticks: recessed well + raised gradient cap + glint, for real depth */}
+        <circle cx="42" cy="100" r="18" fill="#EAF1FC" stroke="#BFDBFE" strokeWidth="2"/>
+        <circle cx="42" cy="100" r="9.5" fill="url(#stickGrad3)"/>
+        <circle cx="39" cy="97" r="2.6" fill="#fff" opacity="0.7"/>
+
+        <circle cx="198" cy="100" r="18" fill="#EAF1FC" stroke="#BFDBFE" strokeWidth="2"/>
+        <circle cx="198" cy="100" r="9.5" fill="url(#stickGrad3)"/>
+        <circle cx="195" cy="97" r="2.6" fill="#fff" opacity="0.7"/>
+      </g>
     </svg>
   );
 }

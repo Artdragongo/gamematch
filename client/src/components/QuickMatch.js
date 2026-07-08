@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Zap, User, Users, Monitor, SlidersHorizontal, ArrowLeft } from 'lucide-react';
+import { Zap, User, Users, Monitor, SlidersHorizontal, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 import { fetchRecommendations } from '../utils/api';
 
@@ -11,46 +11,101 @@ const C = {
   shadowHover: '0 14px 34px rgba(59,130,246,0.18), 0 6px 14px rgba(15,23,42,0.07)',
 };
 
-function ChoiceTile({ icon, title, desc, onClick, compact, accent }) {
+// Same semantic colors as the pcRequirements badges elsewhere on the site,
+// so "low/medium/high" reads the same way here as it does on game cards.
+const TIERS = {
+  low:    { fg: '#16A34A', bg: '#F0FDF4', mid: '#BBF7D0', grad: 'linear-gradient(135deg,#22C55E,#16A34A)' },
+  medium: { fg: '#D97706', bg: '#FFFBEB', mid: '#FDE68A', grad: 'linear-gradient(135deg,#F59E0B,#D97706)' },
+  high:   { fg: '#DC2626', bg: '#FEF2F2', mid: '#FECACA', grad: 'linear-gradient(135deg,#F87171,#DC2626)' },
+};
+
+/* Big, unmistakable "pick a path" card — not a form row. */
+function ModeCard({ icon, title, desc, onClick, gradient }) {
   const [hover, setHover] = useState(false);
-  const a = accent || { fg: C.primary, light: C.primaryLight, mid: C.primaryMid };
   return (
     <button
       onClick={onClick}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={{
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        gap: compact ? '0.6rem' : '0.8rem',
-        padding: compact ? '1.3rem 0.85rem' : '1.9rem 1.25rem',
-        border: `1.5px solid ${hover ? a.mid : C.border}`,
-        borderRadius: '18px',
-        cursor: 'pointer', textAlign: 'center', fontFamily: 'inherit',
-        background: hover ? a.light : C.surface,
-        boxShadow: hover ? C.shadowHover : 'none',
-        transform: hover ? 'translateY(-3px)' : 'none',
-        transition: 'all 0.2s',
+        position: 'relative', overflow: 'hidden', textAlign: 'left',
+        display: 'flex', flexDirection: 'column', gap: '1rem',
+        padding: '1.6rem 1.5rem', minHeight: 152,
+        border: 'none', borderRadius: 20, cursor: 'pointer', fontFamily: 'inherit',
+        background: gradient,
+        boxShadow: hover ? '0 18px 38px rgba(15,23,42,0.16)' : '0 6px 16px rgba(15,23,42,0.08)',
+        transform: hover ? 'translateY(-4px)' : 'translateY(0)',
+        transition: 'all 0.25s cubic-bezier(.2,.8,.2,1)',
         width: '100%',
       }}
     >
+      {/* oversized watermark icon for texture, purely decorative */}
+      <div aria-hidden style={{
+        position: 'absolute', right: -18, bottom: -22, color: '#fff',
+        opacity: 0.14, transform: hover ? 'rotate(-6deg) scale(1.08)' : 'rotate(-10deg)',
+        transition: 'all 0.3s', pointerEvents: 'none',
+      }}>
+        {React.cloneElement(icon, { size: 108, strokeWidth: 1.5 })}
+      </div>
+
       <div style={{
-        width: compact ? 46 : 56, height: compact ? 46 : 56, borderRadius: '50%',
-        background: hover ? '#fff' : a.light,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: a.fg, flexShrink: 0, transition: 'all 0.2s',
+        width: 44, height: 44, borderRadius: 13, background: 'rgba(255,255,255,0.22)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0,
       }}>
         {icon}
       </div>
-      <div>
-        <div style={{ fontWeight: 700, fontSize: compact ? '0.92rem' : '1.05rem', color: C.text, marginBottom: 3 }}>
+
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{ fontWeight: 800, fontSize: '1.15rem', color: '#fff', marginBottom: 4, letterSpacing: '-0.01em' }}>
           {title}
         </div>
         {desc && (
-          <div style={{ fontSize: compact ? '0.74rem' : '0.82rem', color: C.text3, lineHeight: 1.45 }}>
+          <div style={{ fontSize: '0.84rem', color: 'rgba(255,255,255,0.86)', lineHeight: 1.5 }}>
             {desc}
           </div>
         )}
       </div>
+
+      <div style={{
+        position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 5,
+        fontSize: '0.78rem', fontWeight: 700, color: '#fff', marginTop: 'auto',
+        opacity: hover ? 1 : 0.8, transform: hover ? 'translateX(3px)' : 'none', transition: 'all 0.2s',
+      }}>
+        <ArrowRight size={14} />
+      </div>
+    </button>
+  );
+}
+
+/* Compact tile for the PC-tier step, color-coded like the rest of the site. */
+function TierTile({ icon, title, onClick, tier }) {
+  const [hover, setHover] = useState(false);
+  const c = TIERS[tier];
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem',
+        padding: '1.2rem 0.75rem',
+        border: `1.5px solid ${hover ? c.mid : C.border}`,
+        borderRadius: 16, cursor: 'pointer', textAlign: 'center', fontFamily: 'inherit',
+        background: hover ? c.bg : C.surface,
+        boxShadow: hover ? '0 10px 24px rgba(15,23,42,0.08)' : 'none',
+        transform: hover ? 'translateY(-2px)' : 'none',
+        transition: 'all 0.2s', width: '100%',
+      }}
+    >
+      <div style={{
+        width: 44, height: 44, borderRadius: '50%',
+        background: hover ? c.grad : c.bg,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: hover ? '#fff' : c.fg, transition: 'all 0.2s',
+      }}>
+        {icon}
+      </div>
+      <div style={{ fontWeight: 700, fontSize: '0.9rem', color: C.text }}>{title}</div>
     </button>
   );
 }
@@ -85,9 +140,6 @@ export default function QuickMatch({ onResults, onFullSearch }) {
 
   const reset = () => { setStep(0); setMode(null); };
 
-  const blueAccent   = { fg: C.primary, light: C.primaryLight, mid: C.primaryMid };
-  const indigoAccent = { fg: C.indigo,  light: C.indigoLight,  mid: C.indigoMid  };
-
   return (
     <div className="gm-fade" style={{
       background: C.surface, border: `1px solid ${C.border}`,
@@ -121,19 +173,19 @@ export default function QuickMatch({ onResults, onFullSearch }) {
 
       {step === 0 && (
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
-          <ChoiceTile
-            icon={<User size={24}/>}
+          <ModeCard
+            icon={<User size={22}/>}
             title={t.form.style_solo}
             desc={qm.solo_desc || 'Just me, playing alone'}
             onClick={() => handleMode(false)}
-            accent={blueAccent}
+            gradient={`linear-gradient(135deg, ${C.primary}, #2563EB)`}
           />
-          <ChoiceTile
-            icon={<Users size={24}/>}
+          <ModeCard
+            icon={<Users size={22}/>}
             title={t.form.style_friends}
             desc={qm.friends_desc || 'Co-op, multiplayer or local'}
             onClick={() => handleMode(true)}
-            accent={indigoAccent}
+            gradient={`linear-gradient(135deg, ${C.indigo}, #4F46E5)`}
           />
         </div>
       )}
@@ -150,13 +202,12 @@ export default function QuickMatch({ onResults, onFullSearch }) {
               { key:'medium', label:t.form.pc_med_title },
               { key:'high',   label:t.form.pc_hi_title  },
             ].map(opt => (
-              <ChoiceTile
+              <TierTile
                 key={opt.key}
-                compact
+                tier={opt.key}
                 icon={<Monitor size={19}/>}
                 title={opt.label}
                 onClick={() => handlePc(opt.key)}
-                accent={blueAccent}
               />
             ))}
           </div>
