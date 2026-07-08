@@ -18,12 +18,61 @@ const C = {
   primary: '#3B82F6', primaryHover: '#2563EB', primaryLight: '#EFF6FF', primaryMid: '#BFDBFE',
   bg: '#F8FAFC', surface: '#FFFFFF', surface2: '#F1F5F9', border: '#E5E9F0',
   text: '#0F172A', text2: '#334155', text3: '#64748B', text4: '#94A3B8',
-  radiusSm: '10px', radius: '14px', radiusLg: '20px',
-  shadow: '0 4px 16px rgba(59,130,246,0.08), 0 2px 6px rgba(15,23,42,0.04)',
-  shadowLg: '0 20px 48px rgba(59,130,246,0.14), 0 6px 16px rgba(15,23,42,0.06)',
+  radiusSm: '10px', radius: '16px', radiusLg: '22px',
+  shadow: '0 6px 20px rgba(59,130,246,0.09), 0 2px 6px rgba(15,23,42,0.04)',
+  shadowLg: '0 24px 56px rgba(59,130,246,0.15), 0 8px 20px rgba(15,23,42,0.07)',
 };
 
-/* ── Mini card image ── */
+const MAX_W = 1400; // matches the width of the game-cover rows everywhere else
+
+/* ── Bilingual copy hardcoded directly here — cannot go stale or
+   depend on a separate translation patch ever being run again. ── */
+const COPY = {
+  en: {
+    hiwTitle: 'How it works',
+    steps: [
+      { title: 'Answer questions', desc: 'Tell us your setup, mood, and squad size' },
+      { title: 'We find matches',  desc: 'Our engine filters games that actually fit' },
+      { title: 'See your picks',   desc: 'Get personalized recommendations instantly' },
+      { title: 'Play & enjoy',     desc: 'Find new favorites and share with friends' },
+    ],
+    qa: [
+      { title: null, desc: 'Recent releases' },
+      { title: null, desc: 'Play together' },
+      { title: null, desc: 'Just for you' },
+      { title: null, desc: 'Underrated picks' },
+    ],
+    gamesReady: 'games ready',
+  },
+  ru: {
+    hiwTitle: 'Как это работает',
+    steps: [
+      { title: 'Ответь на вопросы', desc: 'Расскажи о своём ПК, настроении и компании' },
+      { title: 'Мы подбираем',      desc: 'Алгоритм отбирает игры, которые правда подходят' },
+      { title: 'Смотри подборку',   desc: 'Получи персональные рекомендации мгновенно' },
+      { title: 'Играй и наслаждайся', desc: 'Находи любимые игры и делись с друзьями' },
+    ],
+    qa: [
+      { title: null, desc: 'Недавние релизы' },
+      { title: null, desc: 'Играйте вместе' },
+      { title: null, desc: 'Только для вас' },
+      { title: null, desc: 'Недооценённые' },
+    ],
+    gamesReady: 'игр готово',
+  },
+};
+
+/* ── One-time animation keyframes — purely additive (opacity/transform),
+   never load-bearing for layout, so nothing breaks if it doesn't apply. ── */
+function GlobalAnim() {
+  return (
+    <style>{`
+      @keyframes gmFadeUp { from { opacity:0; transform:translateY(18px);} to { opacity:1; transform:translateY(0);} }
+      .gm-fade { animation: gmFadeUp 0.55s cubic-bezier(.2,.8,.2,1) both; }
+    `}</style>
+  );
+}
+
 function MiniCardImg({ src, alt }) {
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -78,15 +127,15 @@ function MiniCard({ game, onClick, rank }) {
 function GameRow({ title, Icon, games, onGame, onViewAll, viewAll, showRanks }) {
   if (!games?.length) return null;
   return (
-    <section style={{ marginBottom:'2.5rem' }}>
+    <section style={{ marginBottom:'2.75rem' }}>
       <div className="section-header">
         <span className="section-title" style={{ display:'flex', alignItems:'center', gap:'0.5rem' }}>
-          {Icon && <Icon size={16} style={{ color:C.primary, flexShrink:0 }}/>}
+          {Icon && <Icon size={17} style={{ color:C.primary, flexShrink:0 }}/>}
           {title}
         </span>
         <button onClick={onViewAll}
           style={{ display:'flex', alignItems:'center', gap:'0.3rem',
-            font:'600 0.82rem inherit', color:C.primary,
+            font:'600 0.85rem inherit', color:C.primary,
             background:'none', border:'none', cursor:'pointer' }}>
           {viewAll} <ChevronRight size={13}/>
         </button>
@@ -100,61 +149,44 @@ function GameRow({ title, Icon, games, onGame, onViewAll, viewAll, showRanks }) 
   );
 }
 
-/* ── Hand-drawn original controller illustration (no product photo,
-   no third-party IP — built entirely from primitive SVG shapes) ── */
-function ControllerIllustration({ size = 150 }) {
+/* ── Controller illustration — bigger, richer ── */
+function ControllerIllustration({ size = 210 }) {
   return (
     <svg width={size} height={size * 0.62} viewBox="0 0 240 150" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="bodyGrad2" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#FFFFFF"/>
           <stop offset="100%" stopColor="#EFF6FF"/>
         </linearGradient>
-        <radialGradient id="stickGrad" cx="35%" cy="35%" r="70%">
+        <radialGradient id="stickGrad2" cx="35%" cy="35%" r="70%">
           <stop offset="0%" stopColor="#60A5FA"/>
           <stop offset="100%" stopColor="#2563EB"/>
         </radialGradient>
       </defs>
-
-      {/* Grips (drawn first, sit behind the body bar) */}
-      <ellipse cx="42" cy="98" rx="34" ry="38" fill="url(#bodyGrad)" stroke="#BFDBFE" strokeWidth="2"/>
-      <ellipse cx="198" cy="98" rx="34" ry="38" fill="url(#bodyGrad)" stroke="#BFDBFE" strokeWidth="2"/>
-
-      {/* Shoulder bumpers */}
+      <ellipse cx="42" cy="98" rx="34" ry="38" fill="url(#bodyGrad2)" stroke="#BFDBFE" strokeWidth="2"/>
+      <ellipse cx="198" cy="98" rx="34" ry="38" fill="url(#bodyGrad2)" stroke="#BFDBFE" strokeWidth="2"/>
       <rect x="20" y="30" width="46" height="16" rx="8" fill="#DBEAFE"/>
       <rect x="174" y="30" width="46" height="16" rx="8" fill="#DBEAFE"/>
-
-      {/* Main body bar */}
-      <rect x="18" y="42" width="204" height="72" rx="36" fill="url(#bodyGrad)" stroke="#BFDBFE" strokeWidth="2"/>
-
-      {/* Glossy highlight */}
+      <rect x="18" y="42" width="204" height="72" rx="36" fill="url(#bodyGrad2)" stroke="#BFDBFE" strokeWidth="2"/>
       <ellipse cx="90" cy="58" rx="55" ry="14" fill="#FFFFFF" opacity="0.55"/>
-
-      {/* D-pad (left) */}
       <rect x="57" y="73" width="10" height="26" rx="3" fill="#3B82F6"/>
       <rect x="49" y="81" width="26" height="10" rx="3" fill="#3B82F6"/>
-
-      {/* Face buttons (right, diamond layout) */}
       <circle cx="172" cy="70" r="7" fill="none" stroke="#3B82F6" strokeWidth="2.5"/>
       <circle cx="172" cy="94" r="7" fill="none" stroke="#3B82F6" strokeWidth="2.5"/>
       <circle cx="160" cy="82" r="7" fill="none" stroke="#3B82F6" strokeWidth="2.5"/>
       <circle cx="184" cy="82" r="7" fill="none" stroke="#3B82F6" strokeWidth="2.5"/>
-
-      {/* Menu buttons (center) */}
       <circle cx="112" cy="58" r="4" fill="#93C5FD"/>
       <circle cx="128" cy="58" r="4" fill="#93C5FD"/>
-
-      {/* Thumbsticks (on the grips) */}
       <circle cx="42" cy="100" r="18" fill="#F1F5F9" stroke="#BFDBFE" strokeWidth="2"/>
-      <circle cx="42" cy="100" r="9" fill="url(#stickGrad)"/>
+      <circle cx="42" cy="100" r="9" fill="url(#stickGrad2)"/>
       <circle cx="198" cy="100" r="18" fill="#F1F5F9" stroke="#BFDBFE" strokeWidth="2"/>
-      <circle cx="198" cy="100" r="9" fill="url(#stickGrad)"/>
+      <circle cx="198" cy="100" r="9" fill="url(#stickGrad2)"/>
     </svg>
   );
 }
 
-/* ── Hero — text left, illustrated controller right, tightly composed ── */
-function Hero({ t, stats }) {
+/* ── Hero — wider, bigger, background wash, trust chips with color ── */
+function Hero({ t, lang, stats }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 900);
@@ -162,92 +194,95 @@ function Hero({ t, stats }) {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const trustChips = [
-    t.hero.feat1_title, t.hero.feat2_title, t.hero.feat3_title,
-  ].filter(Boolean);
+  const trustChips = [t.hero.feat1_title, t.hero.feat2_title, t.hero.feat3_title].filter(Boolean);
 
   return (
-    <section style={{
-      maxWidth: 1200, margin: '0 auto', padding: isMobile ? '2.5rem 1.25rem 0' : '3.5rem 2rem 0',
-      display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.15fr 0.85fr',
-      gap: isMobile ? '2rem' : '2.5rem', alignItems: 'center',
-      textAlign: isMobile ? 'center' : 'left',
-    }}>
-      <div style={{ maxWidth: isMobile ? '100%' : 540, margin: isMobile ? '0 auto' : 0 }}>
-        <div style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 14px',
-          background:C.primaryLight, border:`1px solid ${C.primaryMid}`, borderRadius:100,
-          fontSize:'0.78rem', fontWeight:600, color:C.primary, marginBottom:'1.25rem' }}>
-          <Gamepad2 size={12}/> {t.hero.badge}
-        </div>
-        <h1 style={{ fontFamily:'var(--font-heading)', fontWeight:800, letterSpacing:'-0.03em',
-          fontSize:'clamp(2.1rem,4.2vw,3.2rem)', lineHeight:1.12, color:C.text, marginBottom:'1rem' }}>
-          {t.hero.title1} <span style={{ color:C.primary }}>{t.hero.title2}</span>
-        </h1>
-        <p style={{ fontSize:'1.02rem', color:C.text3, lineHeight:1.7, marginBottom:'1.4rem' }}>{t.hero.sub}</p>
+    <div style={{ position:'relative' }}>
+      {/* Full-bleed soft gradient wash behind the hero */}
+      <div style={{ position:'absolute', inset:0, top:-40, height:560, zIndex:0,
+        background:'radial-gradient(ellipse 900px 500px at 75% 10%, #EFF6FF 0%, transparent 65%), radial-gradient(ellipse 700px 400px at 10% 40%, #F5F9FF 0%, transparent 60%)' }}/>
 
-        {/* Trust chips — fills the space that used to be empty */}
-        <div style={{ display:'flex', flexWrap:'wrap', gap:'0.5rem', justifyContent: isMobile ? 'center' : 'flex-start' }}>
-          {trustChips.map((label, i) => (
-            <span key={i} style={{ display:'inline-flex', alignItems:'center', gap:5,
-              fontSize:'0.78rem', fontWeight:600, color:C.text2,
-              background:C.surface, border:`1px solid ${C.border}`, borderRadius:100, padding:'0.35rem 0.8rem' }}>
-              <Check size={12} style={{ color:C.primary }}/> {label}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {!isMobile && (
-        <div style={{ position:'relative', height:280, display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <div style={{ position:'absolute', inset:'6%',
-            background:`radial-gradient(circle at 35% 30%, ${C.primaryLight} 0%, ${C.bg} 72%)`,
-            borderRadius:'50% 45% 55% 50% / 55% 50% 50% 45%' }}/>
-          {/* Extra floating shapes to give the area more life */}
-          <div style={{ position:'absolute', width:34, height:34, borderRadius:'50%', top:'2%', left:'8%',
-            background:C.primaryLight, border:`1px solid ${C.primaryMid}` }}/>
-          <div style={{ position:'absolute', width:18, height:18, borderRadius:'50%', bottom:'12%', left:'0%',
-            background:C.primaryLight, border:`1px solid ${C.primaryMid}` }}/>
-          <div style={{ position:'absolute', width:12, height:12, borderRadius:'50%', bottom:'34%', right:'2%',
-            background:'#DBEAFE' }}/>
-          <div style={{ position:'absolute', width:22, height:22, borderRadius:'50%', top:'10%', right:'14%',
-            background:'#DBEAFE', opacity:0.7 }}/>
-
-          <div style={{ position:'relative', width:'88%', maxWidth:280, aspectRatio:'1.3/1',
-            background:'#fff', borderRadius:C.radiusLg, display:'flex', alignItems:'center', justifyContent:'center',
-            boxShadow:C.shadowLg, border:`1px solid ${C.primaryMid}` }}>
-            <ControllerIllustration size={168}/>
+      <section className="gm-fade" style={{
+        position:'relative', zIndex:1, maxWidth: MAX_W, margin: '0 auto',
+        padding: isMobile ? '2.5rem 1.25rem 0' : '4rem 2rem 0',
+        display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.15fr 1fr',
+        gap: isMobile ? '2rem' : '3rem', alignItems: 'center',
+        textAlign: isMobile ? 'center' : 'left',
+      }}>
+        <div style={{ maxWidth: isMobile ? '100%' : 620, margin: isMobile ? '0 auto' : 0 }}>
+          <div style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'7px 16px',
+            background:C.primaryLight, border:`1px solid ${C.primaryMid}`, borderRadius:100,
+            fontSize:'0.82rem', fontWeight:600, color:C.primary, marginBottom:'1.5rem' }}>
+            <Gamepad2 size={13}/> {t.hero.badge}
           </div>
+          <h1 style={{ fontFamily:'var(--font-heading)', fontWeight:800, letterSpacing:'-0.03em',
+            fontSize:'clamp(2.4rem,4.8vw,3.8rem)', lineHeight:1.1, color:C.text, marginBottom:'1.2rem' }}>
+            {t.hero.title1} <span style={{ color:C.primary }}>{t.hero.title2}</span>
+          </h1>
+          <p style={{ fontSize:'1.12rem', color:C.text3, lineHeight:1.7, marginBottom:'1.6rem' }}>{t.hero.sub}</p>
 
-          <div style={{ position:'absolute', bottom:'2%', right:'-2%', background:'#fff',
-            borderRadius:C.radius, padding:'0.65rem 1rem', boxShadow:C.shadowLg,
-            display:'flex', alignItems:'center', gap:'0.55rem', border:`1px solid ${C.border}` }}>
-            <div style={{ width:32, height:32, borderRadius:9, background:C.primaryLight,
-              display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <Sparkles size={15} style={{ color:C.primary }}/>
-            </div>
-            <div>
-              <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.05rem', fontWeight:800, color:C.text, lineHeight:1 }}>
-                {stats?.totalGames || '600+'}
-              </div>
-              <div style={{ fontSize:'0.65rem', color:C.text3, fontWeight:600 }}>
-                {t.hero.games_ready || 'games ready'}
-              </div>
-            </div>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:'0.6rem', justifyContent: isMobile ? 'center' : 'flex-start' }}>
+            {trustChips.map((label, i) => (
+              <span key={i} style={{ display:'inline-flex', alignItems:'center', gap:7,
+                fontSize:'0.85rem', fontWeight:600, color:C.text2,
+                background:C.surface, border:`1px solid ${C.border}`, borderRadius:100, padding:'0.5rem 1rem',
+                boxShadow:'0 2px 6px rgba(15,23,42,0.03)' }}>
+                <span style={{ width:20, height:20, borderRadius:'50%', background:C.primaryLight,
+                  display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                  <Check size={11} style={{ color:C.primary }}/>
+                </span>
+                {label}
+              </span>
+            ))}
           </div>
         </div>
-      )}
-    </section>
+
+        {!isMobile && (
+          <div style={{ position:'relative', height:340, display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <div style={{ position:'absolute', inset:'2%',
+              background:`radial-gradient(circle at 35% 30%, ${C.primaryLight} 0%, transparent 72%)`,
+              borderRadius:'50% 45% 55% 50% / 55% 50% 50% 45%' }}/>
+            <div style={{ position:'absolute', width:40, height:40, borderRadius:'50%', top:'0%', left:'6%',
+              background:C.primaryLight, border:`1px solid ${C.primaryMid}` }}/>
+            <div style={{ position:'absolute', width:22, height:22, borderRadius:'50%', bottom:'8%', left:'0%',
+              background:C.primaryLight, border:`1px solid ${C.primaryMid}` }}/>
+            <div style={{ position:'absolute', width:14, height:14, borderRadius:'50%', bottom:'30%', right:'0%',
+              background:'#DBEAFE' }}/>
+            <div style={{ position:'absolute', width:28, height:28, borderRadius:'50%', top:'6%', right:'12%',
+              background:'#DBEAFE', opacity:0.7 }}/>
+
+            <div style={{ position:'relative', width:'92%', maxWidth:340, aspectRatio:'1.3/1',
+              background:'#fff', borderRadius:C.radiusLg, display:'flex', alignItems:'center', justifyContent:'center',
+              boxShadow:C.shadowLg, border:`1px solid ${C.primaryMid}` }}>
+              <ControllerIllustration size={210}/>
+            </div>
+
+            <div style={{ position:'absolute', bottom:'0%', right:'-2%', background:'#fff',
+              borderRadius:C.radius, padding:'0.85rem 1.25rem', boxShadow:C.shadowLg,
+              display:'flex', alignItems:'center', gap:'0.7rem', border:`1px solid ${C.border}` }}>
+              <div style={{ width:40, height:40, borderRadius:11, background:C.primaryLight,
+                display:'flex', alignItems:'center', justifyContent:'center' }}>
+                <Sparkles size={19} style={{ color:C.primary }}/>
+              </div>
+              <div>
+                <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.3rem', fontWeight:800, color:C.text, lineHeight:1 }}>
+                  {stats?.totalGames || '600+'}
+                </div>
+                <div style={{ fontSize:'0.7rem', color:C.text3, fontWeight:600 }}>
+                  {(lang === 'ru' ? COPY.ru : COPY.en).gamesReady}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+    </div>
   );
 }
 
-function HowItWorks({ t }) {
-  const hiw = t.hero || {};
-  const steps = [
-    { Icon: ClipboardList, title: hiw.hiw1_title || 'Answer questions', desc: hiw.hiw1_desc || 'Tell us your setup, mood, and squad size' },
-    { Icon: Sparkles,      title: hiw.hiw2_title || 'We find matches',  desc: hiw.hiw2_desc || 'Our engine filters games that actually fit' },
-    { Icon: Gamepad2,      title: hiw.hiw3_title || 'See your picks',   desc: hiw.hiw3_desc || 'Get personalized recommendations instantly' },
-    { Icon: PartyPopper,   title: hiw.hiw4_title || 'Play & enjoy',     desc: hiw.hiw4_desc || 'Find new favorites and share with friends' },
-  ];
+function HowItWorks({ lang }) {
+  const copy = lang === 'ru' ? COPY.ru : COPY.en;
+  const icons = [ClipboardList, Sparkles, Gamepad2, PartyPopper];
   const [isMobile, setIsMobile] = useState(window.innerWidth < 800);
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 800);
@@ -256,34 +291,49 @@ function HowItWorks({ t }) {
   }, []);
 
   return (
-    <div style={{ maxWidth:1000, margin:'0 auto 3rem', padding: isMobile ? '2rem 1.25rem' : '2.5rem 2rem',
-      background:C.surface, borderRadius:C.radiusLg, border:`1px solid ${C.border}` }}>
-      <div style={{ display:'flex', alignItems:'center', gap:'0.6rem', fontFamily:'var(--font-heading)',
-        fontSize:'1.15rem', fontWeight:800, color:C.text, marginBottom:'1.75rem' }}>
-        <Gamepad2 size={18} style={{ color:C.primary }}/>
-        {hiw.hiw_title || 'How it works'}
+    <div className="gm-fade" style={{ maxWidth: MAX_W, margin:'0 auto 3rem', padding: isMobile ? '2.25rem 1.25rem' : '3rem 2.5rem',
+      background:`linear-gradient(180deg, #fff 0%, ${C.bg} 100%)`, borderRadius:C.radiusLg, border:`1px solid ${C.border}` }}>
+      <div style={{ display:'flex', alignItems:'center', gap:'0.65rem', fontFamily:'var(--font-heading)',
+        fontSize:'1.4rem', fontWeight:800, color:C.text, marginBottom:'2.25rem' }}>
+        <Gamepad2 size={22} style={{ color:C.primary }}/>
+        {copy.hiwTitle}
       </div>
-      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap:'1.75rem' }}>
-        {steps.map((s, i) => (
-          <div key={i} style={{ textAlign:'left' }}>
-            <div style={{ position:'relative', width:44, height:44, borderRadius:14,
-              background:C.primaryLight, display:'flex', alignItems:'center', justifyContent:'center',
-              color:C.primary, marginBottom:'0.85rem' }}>
-              <s.Icon size={20}/>
-              <div style={{ position:'absolute', top:-6, right:-6, width:20, height:20, borderRadius:'50%',
-                background:C.primary, color:'#fff', fontSize:'0.65rem', fontWeight:800,
-                display:'flex', alignItems:'center', justifyContent:'center', border:`2px solid ${C.surface}` }}>
-                {i+1}
+      <div style={{ position:'relative', display:'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap:'2rem' }}>
+        {!isMobile && (
+          <div style={{ position:'absolute', top:28, left:'12%', right:'12%', height:2,
+            background:`linear-gradient(90deg, transparent, ${C.primaryMid} 15%, ${C.primaryMid} 85%, transparent)`, zIndex:0 }}/>
+        )}
+        {copy.steps.map((s, i) => {
+          const Icon = icons[i];
+          return (
+            <div key={i} style={{ textAlign:'left', position:'relative', zIndex:1 }}>
+              <div style={{ position:'relative', width:56, height:56, borderRadius:16,
+                background:'#fff', border:`1px solid ${C.primaryMid}`,
+                display:'flex', alignItems:'center', justifyContent:'center',
+                color:C.primary, marginBottom:'1.1rem', boxShadow:'0 4px 12px rgba(59,130,246,0.1)' }}>
+                <Icon size={25}/>
+                <div style={{ position:'absolute', top:-8, right:-8, width:24, height:24, borderRadius:'50%',
+                  background:C.primary, color:'#fff', fontSize:'0.72rem', fontWeight:800,
+                  display:'flex', alignItems:'center', justifyContent:'center', border:`3px solid ${C.surface}` }}>
+                  {i+1}
+                </div>
               </div>
+              <div style={{ fontWeight:700, fontSize:'1rem', color:C.text, marginBottom:'0.35rem' }}>{s.title}</div>
+              <div style={{ fontSize:'0.84rem', color:C.text3, lineHeight:1.55 }}>{s.desc}</div>
             </div>
-            <div style={{ fontWeight:700, fontSize:'0.88rem', color:C.text, marginBottom:'0.25rem' }}>{s.title}</div>
-            <div style={{ fontSize:'0.78rem', color:C.text3, lineHeight:1.5 }}>{s.desc}</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 }
+
+const STAT_ACCENTS = [
+  { bg:'#EFF6FF', fg:'#3B82F6' },
+  { bg:'#F3E8FF', fg:'#9333EA' },
+  { bg:'#FFF7ED', fg:'#EA580C' },
+  { bg:'#F0FDF4', fg:'#16A34A' },
+];
 
 function StatsTiles({ stats, t }) {
   const tiles = [
@@ -293,26 +343,40 @@ function StatsTiles({ stats, t }) {
     { Icon: Award,    num: '100%', label: t.hero.stat_free },
   ];
   return (
-    <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:'0.85rem',
-      maxWidth:1000, margin:'0 auto 3rem', padding:'0 2rem' }}>
-      {tiles.map((tile, i) => (
-        <div key={i} style={{ background:C.surface, border:`1px solid ${C.border}`,
-          borderRadius:C.radius, padding:'1.1rem 0.6rem', textAlign:'center' }}>
-          <div style={{ width:32, height:32, borderRadius:10, background:C.primaryLight, color:C.primary,
-            display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 0.6rem' }}>
-            <tile.Icon size={16}/>
+    <div className="gm-fade" style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:'1.1rem',
+      maxWidth: MAX_W, margin:'0 auto 3rem', padding:'0 2rem' }}>
+      {tiles.map((tile, i) => {
+        const acc = STAT_ACCENTS[i];
+        return (
+          <div key={i} style={{ background:C.surface, border:`1px solid ${C.border}`,
+            borderRadius:C.radius, padding:'1.6rem 1rem', textAlign:'center', transition:'all 0.2s' }}
+            onMouseEnter={e => { e.currentTarget.style.boxShadow = C.shadow; e.currentTarget.style.transform = 'translateY(-3px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
+          >
+            <div style={{ width:48, height:48, borderRadius:14, background:acc.bg, color:acc.fg,
+              display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 0.85rem' }}>
+              <tile.Icon size={22}/>
+            </div>
+            <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.6rem', fontWeight:800, color:C.text, marginBottom:3 }}>
+              {tile.num}
+            </div>
+            <div style={{ fontSize:'0.8rem', color:C.text3, fontWeight:500 }}>{tile.label}</div>
           </div>
-          <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.1rem', fontWeight:800, color:C.text, marginBottom:2 }}>
-            {tile.num}
-          </div>
-          <div style={{ fontSize:'0.7rem', color:C.text3, fontWeight:500 }}>{tile.label}</div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
 
-function QuickAccessGrid({ navigate, t }) {
+const QA_ACCENTS = [
+  { bg:'#EFF6FF', fg:'#3B82F6' },
+  { bg:'#F0FDF4', fg:'#16A34A' },
+  { bg:'#FFF7ED', fg:'#EA580C' },
+  { bg:'#F3E8FF', fg:'#9333EA' },
+];
+
+function QuickAccessGrid({ navigate, t, lang }) {
+  const copy = lang === 'ru' ? COPY.ru : COPY.en;
   const [isMobile, setIsMobile] = useState(window.innerWidth < 700);
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 700);
@@ -321,39 +385,43 @@ function QuickAccessGrid({ navigate, t }) {
   }, []);
 
   const items = [
-    { Icon: Clock,    title: t.hero.recent_title, desc: t.quickaccess?.recent_desc || 'Recent releases' },
-    { Icon: Users,    title: t.hero.feat2_title,  desc: t.quickaccess?.coop_desc   || 'Play together' },
-    { Icon: UserIcon, title: t.form.style_solo,   desc: t.quickaccess?.solo_desc   || 'Just for you' },
-    { Icon: Gem,      title: t.hero.hidden_gems || 'Hidden Gems', desc: t.quickaccess?.gems_desc || 'Underrated picks' },
+    { Icon: Clock,    title: t.hero.recent_title, desc: copy.qa[0].desc },
+    { Icon: Users,    title: t.hero.feat2_title,  desc: copy.qa[1].desc },
+    { Icon: UserIcon, title: t.form.style_solo,   desc: copy.qa[2].desc },
+    { Icon: Gem,      title: t.hero.hidden_gems || 'Hidden Gems', desc: copy.qa[3].desc },
   ];
   return (
-    <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
-      gap:'0.75rem', maxWidth:1200, margin:'0 auto 2.5rem', padding:'0 2rem' }}>
-      {items.map((item, i) => (
-        <div key={i} onClick={() => navigate('browse')}
-          style={{ display:'flex', alignItems:'center', gap:'0.75rem', padding:'1rem 1.1rem',
-            background:C.surface, border:`1px solid ${C.border}`, borderRadius:C.radius,
-            cursor:'pointer', transition:'all 0.18s' }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = C.primaryMid; e.currentTarget.style.boxShadow = C.shadow; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.boxShadow = 'none'; }}
-        >
-          <div style={{ width:38, height:38, borderRadius:12, background:C.primaryLight, color:C.primary,
-            display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-            <item.Icon size={17}/>
+    <div className="gm-fade" style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
+      gap:'1rem', maxWidth: MAX_W, margin:'0 auto 3rem', padding:'0 2rem' }}>
+      {items.map((item, i) => {
+        const acc = QA_ACCENTS[i];
+        return (
+          <div key={i} onClick={() => navigate('browse')}
+            style={{ position:'relative', overflow:'hidden', display:'flex', alignItems:'center', gap:'1rem',
+              padding:'1.4rem 1.3rem', background:C.surface, border:`1px solid ${C.border}`, borderRadius:C.radius,
+              cursor:'pointer', transition:'all 0.2s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = acc.fg; e.currentTarget.style.boxShadow = C.shadow; e.currentTarget.style.transform='translateY(-3px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform='none'; }}
+          >
+            <item.Icon size={64} style={{ position:'absolute', right:-14, bottom:-14, color:acc.fg, opacity:0.06 }}/>
+            <div style={{ width:48, height:48, borderRadius:14, background:acc.bg, color:acc.fg,
+              display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, zIndex:1 }}>
+              <item.Icon size={22}/>
+            </div>
+            <div style={{ zIndex:1 }}>
+              <div style={{ fontWeight:700, fontSize:'0.95rem', color:C.text, marginBottom:2 }}>{item.title}</div>
+              <div style={{ fontSize:'0.78rem', color:C.text3 }}>{item.desc}</div>
+            </div>
           </div>
-          <div>
-            <div style={{ fontWeight:700, fontSize:'0.85rem', color:C.text }}>{item.title}</div>
-            <div style={{ fontSize:'0.72rem', color:C.text3 }}>{item.desc}</div>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
 
 /* ══════════════════════════════════════════════════════════ */
 export default function HomePage({ navigate }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [step,    setStep]    = useState('hero');
   const [results, setResults] = useState([]);
   const [prefs,   setPrefs]   = useState(null);
@@ -389,27 +457,28 @@ export default function HomePage({ navigate }) {
 
   if (step === 'hero') return (
     <>
-      <Hero t={t} stats={hp?.stats}/>
+      <GlobalAnim/>
+      <Hero t={t} lang={lang} stats={hp?.stats}/>
 
-      <div style={{ maxWidth:1200, margin:'0 auto', padding:'1.75rem 2rem 1.5rem' }}>
+      <div style={{ maxWidth: MAX_W, margin:'0 auto', padding:'2rem 2rem 1.5rem' }}>
         <QuickMatch
           onResults={(res, p) => { setResults(res); setPrefs(p); setStep('results'); }}
           onFullSearch={() => setStep('form')}
         />
-        <div style={{ textAlign:'center', marginTop:'0.9rem' }}>
+        <div style={{ textAlign:'center', marginTop:'1.1rem' }}>
           <button className="btn btn-muted" onClick={() => navigate('bored')}>
             <Zap size={13}/> {t.hero.cta_bored}
           </button>
         </div>
       </div>
 
-      <div style={{ paddingTop:'1.5rem' }}>
+      <div style={{ paddingTop:'1.75rem' }}>
         {showSkeleton ? <GameRowSkeleton/> : (
           <GameRow title={t.hero.popular_title} Icon={Star} games={hp?.popular}
             onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all} showRanks/>
         )}
 
-        <QuickAccessGrid navigate={navigate} t={t}/>
+        <QuickAccessGrid navigate={navigate} t={t} lang={lang}/>
 
         {!showSkeleton && (
           <>
@@ -420,25 +489,25 @@ export default function HomePage({ navigate }) {
           </>
         )}
 
-        <HowItWorks t={t}/>
+        <HowItWorks lang={lang}/>
         <StatsTiles stats={hp?.stats} t={t}/>
 
-        <div style={{ padding:'0 2rem', maxWidth:1000, margin:'0 auto 3rem' }}>
+        <div className="gm-fade" style={{ padding:'0 2rem', maxWidth: MAX_W, margin:'0 auto 3rem' }}>
           <div style={{ background:`linear-gradient(135deg, ${C.primaryLight}, ${C.surface})`,
-            border:`1px solid ${C.primaryMid}`, borderRadius:C.radiusLg, padding:'2rem 2.5rem',
+            border:`1px solid ${C.primaryMid}`, borderRadius:C.radiusLg, padding:'2.5rem 3rem',
             display:'flex', alignItems:'center', justifyContent:'space-between',
             flexWrap:'wrap', gap:'1.5rem' }}>
             <div>
-              <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.2rem', fontWeight:800,
-                color:C.text, letterSpacing:'-0.02em', marginBottom:'0.35rem' }}>
+              <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.4rem', fontWeight:800,
+                color:C.text, letterSpacing:'-0.02em', marginBottom:'0.4rem' }}>
                 {t.hero.friends_cta_title || 'Playing with friends tonight?'}
               </div>
-              <p style={{ fontSize:'0.875rem', color:C.text3, maxWidth:480 }}>
+              <p style={{ fontSize:'0.95rem', color:C.text3, maxWidth:520 }}>
                 {t.hero.friends_cta_desc || 'Create a room, everyone adds their preferences, and you get games you all agree on.'}
               </p>
             </div>
             <button className="btn btn-primary btn-lg" onClick={()=>navigate('room-landing')}>
-              <Users size={15}/> {t.nav.friends}
+              <Users size={16}/> {t.nav.friends}
             </button>
           </div>
         </div>
