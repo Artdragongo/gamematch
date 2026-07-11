@@ -23,10 +23,8 @@ const C = {
   shadowLg: '0 24px 56px rgba(59,130,246,0.15), 0 8px 20px rgba(15,23,42,0.07)',
 };
 
-const MAX_W = 1400; // matches the width of the game-cover rows everywhere else
+const MAX_W = 1400;
 
-/* ── Bilingual copy hardcoded directly here — cannot go stale or
-   depend on a separate translation patch ever being run again. ── */
 const COPY = {
   en: {
     hiwTitle: 'How it works',
@@ -37,10 +35,8 @@ const COPY = {
       { title: 'Play & enjoy',     desc: 'Find new favorites and share with friends' },
     ],
     qa: [
-      { title: null, desc: 'Recent releases' },
-      { title: null, desc: 'Play together' },
-      { title: null, desc: 'Just for you' },
-      { title: null, desc: 'Underrated picks' },
+      { desc: 'Recent releases' }, { desc: 'Play together' },
+      { desc: 'Just for you' }, { desc: 'Underrated picks' },
     ],
     gamesReady: 'games ready',
   },
@@ -53,22 +49,19 @@ const COPY = {
       { title: 'Играй и наслаждайся', desc: 'Находи любимые игры и делись с друзьями' },
     ],
     qa: [
-      { title: null, desc: 'Недавние релизы' },
-      { title: null, desc: 'Играйте вместе' },
-      { title: null, desc: 'Только для вас' },
-      { title: null, desc: 'Недооценённые' },
+      { desc: 'Недавние релизы' }, { desc: 'Играйте вместе' },
+      { desc: 'Только для вас' }, { desc: 'Недооценённые' },
     ],
     gamesReady: 'игр готово',
   },
 };
 
-/* ── One-time animation keyframes — purely additive (opacity/transform),
-   never load-bearing for layout, so nothing breaks if it doesn't apply. ── */
 function GlobalAnim() {
   return (
     <style>{`
       @keyframes gmFadeUp { from { opacity:0; transform:translateY(18px);} to { opacity:1; transform:translateY(0);} }
       .gm-fade { animation: gmFadeUp 0.55s cubic-bezier(.2,.8,.2,1) both; }
+      @keyframes gmFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
     `}</style>
   );
 }
@@ -149,92 +142,50 @@ function GameRow({ title, Icon, games, onGame, onViewAll, viewAll, showRanks }) 
   );
 }
 
-/* ── Controller illustration — layered gradients + drop shadow for real volume,
-   instead of flat outlines. Same silhouette/brand palette, just rendered with depth. ── */
-function ControllerIllustration({ size = 210 }) {
+/* ── Fanned stack of REAL game covers — replaces the abstract
+   controller drawing entirely. Uses actual box art from the catalog. ── */
+function CoverStackCard({ src, style }) {
+  const [failed, setFailed] = useState(false);
   return (
-    <svg width={size} height={size * 0.62} viewBox="0 0 240 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="shellGrad3" cx="32%" cy="24%" r="90%">
-          <stop offset="0%" stopColor="#FFFFFF"/>
-          <stop offset="55%" stopColor="#F3F8FF"/>
-          <stop offset="100%" stopColor="#DCEAFE"/>
-        </radialGradient>
-        <linearGradient id="gripAccent3" x1="15%" y1="0%" x2="85%" y2="100%">
-          <stop offset="0%" stopColor="#93C5FD"/>
-          <stop offset="45%" stopColor="#3B82F6"/>
-          <stop offset="100%" stopColor="#1D4ED8"/>
-        </linearGradient>
-        <radialGradient id="stickGrad3" cx="35%" cy="30%" r="75%">
-          <stop offset="0%" stopColor="#93C5FD"/>
-          <stop offset="55%" stopColor="#3B82F6"/>
-          <stop offset="100%" stopColor="#1D4ED8"/>
-        </radialGradient>
-        <radialGradient id="buttonGrad3" cx="35%" cy="30%" r="80%">
-          <stop offset="0%" stopColor="#FFFFFF"/>
-          <stop offset="70%" stopColor="#E4EEFC"/>
-          <stop offset="100%" stopColor="#BFDBFE"/>
-        </radialGradient>
-        <linearGradient id="triggerGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#EFF6FF"/>
-          <stop offset="100%" stopColor="#BFDBFE"/>
-        </linearGradient>
-        <filter id="ctrlShadow" x="-30%" y="-30%" width="160%" height="160%">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#2563EB" floodOpacity="0.22"/>
-        </filter>
-        <filter id="ctrlBlur"><feGaussianBlur stdDeviation="3.5"/></filter>
-      </defs>
-
-      <g filter="url(#ctrlShadow)">
-        {/* blue accent rim peeking out from underneath, so the shell reads as having real thickness */}
-        <ellipse cx="42" cy="102" rx="34" ry="38" fill="url(#gripAccent3)"/>
-        <ellipse cx="198" cy="102" rx="34" ry="38" fill="url(#gripAccent3)"/>
-        <rect x="18" y="46" width="204" height="72" rx="36" fill="url(#gripAccent3)"/>
-
-        {/* main shell, sitting slightly above the accent rim */}
-        <ellipse cx="42" cy="98" rx="34" ry="38" fill="url(#shellGrad3)" stroke="#BFDBFE" strokeWidth="1.5"/>
-        <ellipse cx="198" cy="98" rx="34" ry="38" fill="url(#shellGrad3)" stroke="#BFDBFE" strokeWidth="1.5"/>
-        <rect x="18" y="42" width="204" height="72" rx="36" fill="url(#shellGrad3)" stroke="#BFDBFE" strokeWidth="1.5"/>
-
-        {/* specular highlight across the top, like light hitting curved plastic */}
-        <ellipse cx="88" cy="56" rx="58" ry="15" fill="#FFFFFF" opacity="0.65" filter="url(#ctrlBlur)"/>
-
-        {/* domed shoulder triggers */}
-        <rect x="20" y="28" width="46" height="17" rx="8.5" fill="url(#triggerGrad3)" stroke="#BFDBFE" strokeWidth="1"/>
-        <rect x="174" y="28" width="46" height="17" rx="8.5" fill="url(#triggerGrad3)" stroke="#BFDBFE" strokeWidth="1"/>
-
-        {/* embossed d-pad */}
-        <rect x="57" y="73" width="10" height="26" rx="3" fill="url(#buttonGrad3)" stroke="#BFDBFE" strokeWidth="1"/>
-        <rect x="49" y="81" width="26" height="10" rx="3" fill="url(#buttonGrad3)" stroke="#BFDBFE" strokeWidth="1"/>
-
-        {/* domed face buttons with tiny glints */}
-        <circle cx="172" cy="70" r="7.5" fill="url(#buttonGrad3)" stroke="#93C5FD" strokeWidth="1.5"/>
-        <circle cx="172" cy="94" r="7.5" fill="url(#buttonGrad3)" stroke="#93C5FD" strokeWidth="1.5"/>
-        <circle cx="160" cy="82" r="7.5" fill="url(#buttonGrad3)" stroke="#93C5FD" strokeWidth="1.5"/>
-        <circle cx="184" cy="82" r="7.5" fill="url(#buttonGrad3)" stroke="#93C5FD" strokeWidth="1.5"/>
-        <circle cx="170" cy="68" r="2" fill="#fff" opacity="0.8"/>
-        <circle cx="170" cy="92" r="2" fill="#fff" opacity="0.8"/>
-        <circle cx="158" cy="80" r="2" fill="#fff" opacity="0.8"/>
-        <circle cx="182" cy="80" r="2" fill="#fff" opacity="0.8"/>
-
-        <circle cx="112" cy="58" r="4" fill="#93C5FD"/>
-        <circle cx="128" cy="58" r="4" fill="#93C5FD"/>
-
-        {/* analog sticks: recessed well + raised gradient cap + glint, for real depth */}
-        <circle cx="42" cy="100" r="18" fill="#EAF1FC" stroke="#BFDBFE" strokeWidth="2"/>
-        <circle cx="42" cy="100" r="9.5" fill="url(#stickGrad3)"/>
-        <circle cx="39" cy="97" r="2.6" fill="#fff" opacity="0.7"/>
-
-        <circle cx="198" cy="100" r="18" fill="#EAF1FC" stroke="#BFDBFE" strokeWidth="2"/>
-        <circle cx="198" cy="100" r="9.5" fill="url(#stickGrad3)"/>
-        <circle cx="195" cy="97" r="2.6" fill="#fff" opacity="0.7"/>
-      </g>
-    </svg>
+    <div style={{
+      position: 'absolute', borderRadius: 18, overflow: 'hidden',
+      boxShadow: '0 20px 40px rgba(15,23,42,0.18), 0 6px 16px rgba(15,23,42,0.08)',
+      border: '4px solid #fff', background: C.surface2, ...style,
+    }}>
+      {!src || failed ? (
+        <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center',
+          background:`linear-gradient(135deg,${C.primaryLight},${C.surface2})` }}>
+          <Gamepad2 size={32} style={{ color:C.primary, opacity:0.3 }}/>
+        </div>
+      ) : (
+        <img src={src} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={()=>setFailed(true)}/>
+      )}
+    </div>
   );
 }
 
-/* ── Hero — wider, bigger, background wash, trust chips with color ── */
-function Hero({ t, lang, stats }) {
+function GameCoverStack({ games }) {
+  const g = games || [];
+  return (
+    <div style={{ position:'relative', width:'100%', height:'100%' }}>
+      <CoverStackCard src={g[2]?.coverImage} style={{
+        width:'58%', aspectRatio:'16/10', top:'2%', left:'4%',
+        transform:'rotate(-9deg)', zIndex:1, opacity:0.9,
+      }}/>
+      <CoverStackCard src={g[1]?.coverImage} style={{
+        width:'62%', aspectRatio:'16/10', top:'8%', right:'2%',
+        transform:'rotate(7deg)', zIndex:2,
+      }}/>
+      <CoverStackCard src={g[0]?.coverImage} style={{
+        width:'68%', aspectRatio:'16/10', bottom:'6%', left:'16%',
+        transform:'rotate(-2deg)', zIndex:3, animation:'gmFloat 4s ease-in-out infinite',
+      }}/>
+    </div>
+  );
+}
+
+/* ── Hero — real game-cover stack instead of an illustration ── */
+function Hero({ t, lang, stats, previewGames }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 900);
@@ -246,7 +197,6 @@ function Hero({ t, lang, stats }) {
 
   return (
     <div style={{ position:'relative' }}>
-      {/* Full-bleed soft gradient wash behind the hero */}
       <div style={{ position:'absolute', inset:0, top:-40, height:560, zIndex:0,
         background:'radial-gradient(ellipse 900px 500px at 75% 10%, #EFF6FF 0%, transparent 65%), radial-gradient(ellipse 700px 400px at 10% 40%, #F5F9FF 0%, transparent 60%)' }}/>
 
@@ -286,28 +236,11 @@ function Hero({ t, lang, stats }) {
         </div>
 
         {!isMobile && (
-          <div style={{ position:'relative', height:340, display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <div style={{ position:'absolute', inset:'2%',
-              background:`radial-gradient(circle at 35% 30%, ${C.primaryLight} 0%, transparent 72%)`,
-              borderRadius:'50% 45% 55% 50% / 55% 50% 50% 45%' }}/>
-            <div style={{ position:'absolute', width:40, height:40, borderRadius:'50%', top:'0%', left:'6%',
-              background:C.primaryLight, border:`1px solid ${C.primaryMid}` }}/>
-            <div style={{ position:'absolute', width:22, height:22, borderRadius:'50%', bottom:'8%', left:'0%',
-              background:C.primaryLight, border:`1px solid ${C.primaryMid}` }}/>
-            <div style={{ position:'absolute', width:14, height:14, borderRadius:'50%', bottom:'30%', right:'0%',
-              background:'#DBEAFE' }}/>
-            <div style={{ position:'absolute', width:28, height:28, borderRadius:'50%', top:'6%', right:'12%',
-              background:'#DBEAFE', opacity:0.7 }}/>
-
-            <div style={{ position:'relative', width:'92%', maxWidth:340, aspectRatio:'1.3/1',
-              background:'#fff', borderRadius:C.radiusLg, display:'flex', alignItems:'center', justifyContent:'center',
-              boxShadow:C.shadowLg, border:`1px solid ${C.primaryMid}` }}>
-              <ControllerIllustration size={210}/>
-            </div>
-
-            <div style={{ position:'absolute', bottom:'0%', right:'-2%', background:'#fff',
+          <div style={{ position:'relative', height:360 }}>
+            <GameCoverStack games={previewGames}/>
+            <div style={{ position:'absolute', bottom:'2%', right:'0%', background:'#fff',
               borderRadius:C.radius, padding:'0.85rem 1.25rem', boxShadow:C.shadowLg,
-              display:'flex', alignItems:'center', gap:'0.7rem', border:`1px solid ${C.border}` }}>
+              display:'flex', alignItems:'center', gap:'0.7rem', border:`1px solid ${C.border}`, zIndex:4 }}>
               <div style={{ width:40, height:40, borderRadius:11, background:C.primaryLight,
                 display:'flex', alignItems:'center', justifyContent:'center' }}>
                 <Sparkles size={19} style={{ color:C.primary }}/>
@@ -377,10 +310,8 @@ function HowItWorks({ lang }) {
 }
 
 const STAT_ACCENTS = [
-  { bg:'#EFF6FF', fg:'#3B82F6' },
-  { bg:'#F3E8FF', fg:'#9333EA' },
-  { bg:'#FFF7ED', fg:'#EA580C' },
-  { bg:'#F0FDF4', fg:'#16A34A' },
+  { bg:'#EFF6FF', fg:'#3B82F6' }, { bg:'#F3E8FF', fg:'#9333EA' },
+  { bg:'#FFF7ED', fg:'#EA580C' }, { bg:'#F0FDF4', fg:'#16A34A' },
 ];
 
 function StatsTiles({ stats, t }) {
@@ -417,10 +348,8 @@ function StatsTiles({ stats, t }) {
 }
 
 const QA_ACCENTS = [
-  { bg:'#EFF6FF', fg:'#3B82F6' },
-  { bg:'#F0FDF4', fg:'#16A34A' },
-  { bg:'#FFF7ED', fg:'#EA580C' },
-  { bg:'#F3E8FF', fg:'#9333EA' },
+  { bg:'#EFF6FF', fg:'#3B82F6' }, { bg:'#F0FDF4', fg:'#16A34A' },
+  { bg:'#FFF7ED', fg:'#EA580C' }, { bg:'#F3E8FF', fg:'#9333EA' },
 ];
 
 function QuickAccessGrid({ navigate, t, lang }) {
@@ -506,7 +435,7 @@ export default function HomePage({ navigate }) {
   if (step === 'hero') return (
     <>
       <GlobalAnim/>
-      <Hero t={t} lang={lang} stats={hp?.stats}/>
+      <Hero t={t} lang={lang} stats={hp?.stats} previewGames={hp?.popular}/>
 
       <div style={{ maxWidth: MAX_W, margin:'0 auto', padding:'2rem 2rem 1.5rem' }}>
         <QuickMatch
