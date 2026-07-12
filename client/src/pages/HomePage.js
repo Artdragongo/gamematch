@@ -352,49 +352,49 @@ const QA_ACCENTS = [
   { bg:'#FFF7ED', fg:'#EA580C' }, { bg:'#F3E8FF', fg:'#9333EA' },
 ];
 
-function QuickAccessGrid({ navigate, t, lang }) {
+/* ── Slim single-line pill row — deliberately lightweight so it doesn't
+   compete with the rich game-cover rows around it. Lives with the other
+   action tools (Quick Match, I'm Bored) instead of interrupting content. ── */
+function QuickFilterPills({ navigate, t, lang }) {
   const copy = lang === 'ru' ? COPY.ru : COPY.en;
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 700);
-  useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 700);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
+  const [hoverIdx, setHoverIdx] = useState(null);
 
   const items = [
-    { Icon: Clock,    title: t.hero.recent_title, desc: copy.qa[0].desc },
-    { Icon: Users,    title: t.hero.feat2_title,  desc: copy.qa[1].desc },
-    { Icon: UserIcon, title: t.form.style_solo,   desc: copy.qa[2].desc },
-    { Icon: Gem,      title: t.hero.hidden_gems || 'Hidden Gems', desc: copy.qa[3].desc },
+    { Icon: Clock,    label: t.hero.recent_title },
+    { Icon: Users,    label: t.hero.feat2_title  },
+    { Icon: UserIcon, label: t.form.style_solo   },
+    { Icon: Gem,      label: t.hero.hidden_gems || 'Hidden Gems' },
   ];
+
   return (
-    <div className="gm-fade" style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
-      gap:'1rem', maxWidth: MAX_W, margin:'0 auto 3rem', padding:'0 2rem' }}>
+    <div style={{ display:'flex', flexWrap:'wrap', gap:'0.6rem', justifyContent:'center' }}>
       {items.map((item, i) => {
         const acc = QA_ACCENTS[i];
+        const hover = hoverIdx === i;
         return (
-          <div key={i} onClick={() => navigate('browse')}
-            style={{ position:'relative', overflow:'hidden', display:'flex', alignItems:'center', gap:'1rem',
-              padding:'1.4rem 1.3rem', background:C.surface, border:`1px solid ${C.border}`, borderRadius:C.radius,
-              cursor:'pointer', transition:'all 0.2s' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = acc.fg; e.currentTarget.style.boxShadow = C.shadow; e.currentTarget.style.transform='translateY(-3px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform='none'; }}
-          >
-            <item.Icon size={64} style={{ position:'absolute', right:-14, bottom:-14, color:acc.fg, opacity:0.06 }}/>
-            <div style={{ width:48, height:48, borderRadius:14, background:acc.bg, color:acc.fg,
-              display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, zIndex:1 }}>
-              <item.Icon size={22}/>
-            </div>
-            <div style={{ zIndex:1 }}>
-              <div style={{ fontWeight:700, fontSize:'0.95rem', color:C.text, marginBottom:2 }}>{item.title}</div>
-              <div style={{ fontSize:'0.78rem', color:C.text3 }}>{item.desc}</div>
-            </div>
-          </div>
+          <button key={i} onClick={() => navigate('browse')}
+            onMouseEnter={() => setHoverIdx(i)}
+            onMouseLeave={() => setHoverIdx(null)}
+            style={{ display:'inline-flex', alignItems:'center', gap:'0.55rem',
+              padding:'0.55rem 1.1rem 0.55rem 0.55rem',
+              background: hover ? acc.bg : C.surface,
+              border:`1px solid ${hover ? acc.fg + '55' : C.border}`,
+              borderRadius:100, cursor:'pointer', fontFamily:'inherit',
+              boxShadow: hover ? '0 4px 14px rgba(15,23,42,0.08)' : 'none',
+              transform: hover ? 'translateY(-1px)' : 'none',
+              transition:'all 0.18s' }}>
+            <span style={{ width:28, height:28, borderRadius:'50%', background:acc.bg, color:acc.fg,
+              display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+              <item.Icon size={14}/>
+            </span>
+            <span style={{ fontSize:'0.85rem', fontWeight:600, color:C.text }}>{item.label}</span>
+          </button>
         );
       })}
     </div>
   );
 }
+
 
 /* ══════════════════════════════════════════════════════════ */
 export default function HomePage({ navigate }) {
@@ -447,6 +447,9 @@ export default function HomePage({ navigate }) {
             <Zap size={13}/> {t.hero.cta_bored}
           </button>
         </div>
+        <div style={{ marginTop:'1.5rem' }}>
+          <QuickFilterPills navigate={navigate} t={t} lang={lang}/>
+        </div>
       </div>
 
       <div style={{ paddingTop:'1.75rem' }}>
@@ -454,8 +457,6 @@ export default function HomePage({ navigate }) {
           <GameRow title={t.hero.popular_title} Icon={Star} games={hp?.popular}
             onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all} showRanks/>
         )}
-
-        <QuickAccessGrid navigate={navigate} t={t} lang={lang}/>
 
         {!showSkeleton && (
           <>
