@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Gamepad2, Monitor, Users, ArrowLeft, TrendingUp, Clock,
   Star, ChevronRight, Award, Zap, Search, Calendar,
-  Gem, ClipboardList, Sparkles, PartyPopper, User as UserIcon, Check
+  Gem, ClipboardList, Sparkles, PartyPopper, User as UserIcon, Check,
+  Dice5, Headphones, Swords, Target, Puzzle, Trophy
 } from 'lucide-react';
 import PreferencesForm from '../components/PreferencesForm';
 import GameCard from '../components/GameCard';
@@ -39,6 +40,7 @@ const COPY = {
       { desc: 'Just for you' }, { desc: 'Underrated picks' },
     ],
     gamesReady: 'games ready',
+    pills: ['Recently added', 'Co-op', 'Solo', 'Hidden Gems'],
   },
   ru: {
     hiwTitle: 'Как это работает',
@@ -53,8 +55,33 @@ const COPY = {
       { desc: 'Только для вас' }, { desc: 'Недооценённые' },
     ],
     gamesReady: 'игр готово',
+    pills: ['Недавно добавлено', 'Кооператив', 'Соло', 'Скрытые жемчужины'],
   },
 };
+
+
+/* ── Subtle scattered gaming-icon texture behind the hero.
+   Very low opacity, non-interactive, purely decorative. ── */
+function BackgroundIcons() {
+  const icons = [
+    { Icon: Gamepad2,    top:'4%',  left:'2%',  size:70,  rotate:-12 },
+    { Icon: Dice5,       top:'62%', left:'5%',  size:46,  rotate:16  },
+    { Icon: Headphones,  top:'14%', left:'93%', size:56,  rotate:10  },
+    { Icon: Swords,      top:'70%', left:'95%', size:52,  rotate:-8  },
+    { Icon: Trophy,      top:'40%', left:'0%',  size:44,  rotate:6   },
+    { Icon: Target,      top:'85%', left:'88%', size:40,  rotate:-14 },
+    { Icon: Puzzle,      top:'2%',  left:'75%', size:38,  rotate:20  },
+  ];
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden', pointerEvents:'none', zIndex:0 }}>
+      {icons.map(({ Icon, top, left, size, rotate }, i) => (
+        <Icon key={i} size={size} strokeWidth={1.3}
+          style={{ position:'absolute', top, left, color:'#3B82F6', opacity:0.045,
+            transform:`rotate(${rotate}deg)` }}/>
+      ))}
+    </div>
+  );
+}
 
 function GlobalAnim() {
   return (
@@ -117,10 +144,10 @@ function MiniCard({ game, onClick, rank }) {
   );
 }
 
-function GameRow({ title, Icon, games, onGame, onViewAll, viewAll, showRanks }) {
+function GameRow({ id, title, Icon, games, onGame, onViewAll, viewAll, showRanks }) {
   if (!games?.length) return null;
   return (
-    <section style={{ marginBottom:'2.75rem' }}>
+    <section id={id} style={{ marginBottom:'2.75rem', scrollMarginTop:'90px' }}>
       <div className="section-header">
         <span className="section-title" style={{ display:'flex', alignItems:'center', gap:'0.5rem' }}>
           {Icon && <Icon size={17} style={{ color:C.primary, flexShrink:0 }}/>}
@@ -197,6 +224,7 @@ function Hero({ t, lang, stats, previewGames }) {
 
   return (
     <div style={{ position:'relative' }}>
+      <BackgroundIcons/>
       <div style={{ position:'absolute', inset:0, top:-40, height:560, zIndex:0,
         background:'radial-gradient(ellipse 900px 500px at 75% 10%, #EFF6FF 0%, transparent 65%), radial-gradient(ellipse 700px 400px at 10% 40%, #F5F9FF 0%, transparent 60%)' }}/>
 
@@ -355,15 +383,15 @@ const QA_ACCENTS = [
 /* ── Slim single-line pill row — deliberately lightweight so it doesn't
    compete with the rich game-cover rows around it. Lives with the other
    action tools (Quick Match, I'm Bored) instead of interrupting content. ── */
-function QuickFilterPills({ navigate, t, lang }) {
+function QuickFilterPills({ navigate, lang }) {
   const copy = lang === 'ru' ? COPY.ru : COPY.en;
   const [hoverIdx, setHoverIdx] = useState(null);
 
   const items = [
-    { Icon: Clock,    label: t.hero.recent_title },
-    { Icon: Users,    label: t.hero.feat2_title  },
-    { Icon: UserIcon, label: t.form.style_solo   },
-    { Icon: Gem,      label: t.hero.hidden_gems || 'Hidden Gems' },
+    { Icon: Clock,    label: copy.pills[0], action: () => document.getElementById('section-recent')?.scrollIntoView({ behavior:'smooth', block:'start' }) },
+    { Icon: Users,    label: copy.pills[1], action: () => { try { sessionStorage.setItem('gm_coop_filter','coop'); } catch {} navigate('browse'); } },
+    { Icon: UserIcon, label: copy.pills[2], action: () => { try { sessionStorage.setItem('gm_coop_filter','solo'); } catch {} navigate('browse'); } },
+    { Icon: Gem,      label: copy.pills[3], action: () => document.getElementById('section-hidden-gems')?.scrollIntoView({ behavior:'smooth', block:'start' }) },
   ];
 
   return (
@@ -372,7 +400,7 @@ function QuickFilterPills({ navigate, t, lang }) {
         const acc = QA_ACCENTS[i];
         const hover = hoverIdx === i;
         return (
-          <button key={i} onClick={() => navigate('browse')}
+          <button key={i} onClick={item.action}
             onMouseEnter={() => setHoverIdx(i)}
             onMouseLeave={() => setHoverIdx(null)}
             style={{ display:'inline-flex', alignItems:'center', gap:'0.55rem',
@@ -394,6 +422,7 @@ function QuickFilterPills({ navigate, t, lang }) {
     </div>
   );
 }
+
 
 
 /* ══════════════════════════════════════════════════════════ */
@@ -448,7 +477,7 @@ export default function HomePage({ navigate }) {
           </button>
         </div>
         <div style={{ marginTop:'1.5rem' }}>
-          <QuickFilterPills navigate={navigate} t={t} lang={lang}/>
+          <QuickFilterPills navigate={navigate} lang={lang}/>
         </div>
       </div>
 
@@ -462,8 +491,8 @@ export default function HomePage({ navigate }) {
           <>
             <GameRow title={t.hero.trending_title}  Icon={TrendingUp} games={hp?.trending}   onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
             <GameRow title={t.hero.top_rated_title} Icon={Award}      games={hp?.topRated}   onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all} showRanks/>
-            <GameRow title={t.hero.recent_title}    Icon={Clock}      games={hp?.recent}     onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
-            <GameRow title={t.hero.hidden_gems||'Hidden Gems'} Icon={Gem} games={hp?.hiddenGems} onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
+            <GameRow id="section-recent" title={t.hero.recent_title}    Icon={Clock}      games={hp?.recent}     onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
+            <GameRow id="section-hidden-gems" title={t.hero.hidden_gems||'Hidden Gems'} Icon={Gem} games={hp?.hiddenGems} onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all}/>
           </>
         )}
 

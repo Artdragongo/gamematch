@@ -11,9 +11,20 @@ const C = {
   shadow: '0 6px 20px rgba(59,130,246,0.09), 0 2px 6px rgba(15,23,42,0.04)',
 };
 
-const PROMPT = {
-  en: { solo: 'How do you want to play tonight?', pc: "What's your PC like?" },
-  ru: { solo: 'Как хотите играть сегодня?',       pc: 'Какой у вас ПК?' },
+/* Hardcoded bilingual copy — does not depend on translations.js
+   ever containing a t.quickmatch key, so it can never silently
+   fall back to English again. */
+const QM_COPY = {
+  en: {
+    title: 'Quick Match', sub: '2 taps to a recommendation', full: 'Full search',
+    solo: 'How do you want to play tonight?', pc: "What's your PC like?",
+    soloDesc: 'Just me', friendsDesc: 'With friends',
+  },
+  ru: {
+    title: 'Быстрый подбор', sub: '2 нажатия — и рекомендация готова', full: 'Полный поиск',
+    solo: 'Как хотите играть сегодня?', pc: 'Какой у вас ПК?',
+    soloDesc: 'Только я', friendsDesc: 'С друзьями',
+  },
 };
 
 /* ── Segmented pill toggle — ONE continuous rounded shape with an
@@ -73,8 +84,7 @@ export default function QuickMatch({ onResults, onFullSearch }) {
   const { t, lang } = useLang();
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState(null);
-  const qm = t.quickmatch || {};
-  const prompt = lang === 'ru' ? PROMPT.ru : PROMPT.en;
+  const qc = lang === 'ru' ? QM_COPY.ru : QM_COPY.en;
 
   const handleMode = async (withFriends) => {
     setMode(withFriends);
@@ -101,9 +111,9 @@ export default function QuickMatch({ onResults, onFullSearch }) {
   const reset = () => { setStep(0); setMode(null); };
 
   const modeOptions = [
-    { value: false, icon: <User size={19}/>,  label: t.form.style_solo,    desc: qm.solo_desc || 'Just me',
+    { value: false, icon: <User size={19}/>,  label: t.form.style_solo,    desc: qc.soloDesc,
       accentFg: C.primary, accentLight: C.primaryLight },
-    { value: true,  icon: <Users size={19}/>, label: t.form.style_friends, desc: qm.friends_desc || 'With friends',
+    { value: true,  icon: <Users size={19}/>, label: t.form.style_friends, desc: qc.friendsDesc,
       accentFg: C.indigo, accentLight: C.indigoLight },
   ];
 
@@ -128,10 +138,10 @@ export default function QuickMatch({ onResults, onFullSearch }) {
           <div>
             <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.1rem', fontWeight:800,
               color:C.text, lineHeight:1.2 }}>
-              {qm.title || 'Quick Match'}
+              {qc.title}
             </div>
             <div style={{ fontSize:'0.8rem', color:C.text3 }}>
-              {qm.sub || '2 taps to a recommendation'}
+              {qc.sub}
             </div>
           </div>
         </div>
@@ -140,14 +150,14 @@ export default function QuickMatch({ onResults, onFullSearch }) {
             font:'600 0.82rem inherit', color:C.primary,
             background:C.primaryLight, border:'none',
             borderRadius:100, padding:'0.45rem 0.9rem', cursor:'pointer' }}>
-          <SlidersHorizontal size={13}/> {qm.full || 'Full search'}
+          <SlidersHorizontal size={13}/> {qc.full}
         </button>
       </div>
 
       {step === 0 && (
         <div>
           <div style={{ fontSize:'1.05rem', fontWeight:700, color:C.text, marginBottom:'1rem', textAlign:'center' }}>
-            {prompt.solo}
+            {qc.solo}
           </div>
           <SegmentedToggle options={modeOptions} onSelect={handleMode}/>
         </div>
@@ -156,7 +166,7 @@ export default function QuickMatch({ onResults, onFullSearch }) {
       {step === 1 && (
         <div>
           <div style={{ fontSize:'1.05rem', fontWeight:700, color:C.text, marginBottom:'1rem', textAlign:'center' }}>
-            {prompt.pc}
+            {qc.pc}
           </div>
           <SegmentedToggle options={pcOptions} onSelect={handlePc}/>
           <button onClick={reset}

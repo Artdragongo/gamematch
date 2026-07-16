@@ -29,7 +29,10 @@ export default function BrowsePage({ navigate }) {
       const saved = sessionStorage.getItem('gm_genre_filter');
       if (saved) { setGenre(saved); sessionStorage.removeItem('gm_genre_filter'); }
     } catch {}
-
+    try {
+      const savedCoop = sessionStorage.getItem('gm_coop_filter');
+      if (savedCoop) { setCoop(savedCoop); sessionStorage.removeItem('gm_coop_filter'); }
+    } catch {}
     fetchAllGames()
       .then(g => { setGames(g); setLoading(false); })
       .catch(() => setLoading(false));
