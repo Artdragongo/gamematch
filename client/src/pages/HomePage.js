@@ -10,6 +10,7 @@ import GameCard from '../components/GameCard';
 import QuickMatch from '../components/QuickMatch';
 import ShareButton from '../components/ShareButton';
 import GameRowSkeleton from '../components/GameRowSkeleton';
+import PriceBadge from '../components/PriceBadge';
 import { fetchRecommendations } from '../utils/api';
 import { useHomepageData } from '../hooks/useHomepageData';
 import { useLang } from '../i18n/LangContext';
@@ -139,6 +140,11 @@ function MiniCard({ game, onClick, rank }) {
             <Monitor size={10}/> {game.pcRequirements}
           </span>
         </div>
+        {game.price && (
+          <div style={{ paddingTop:'0.15rem' }}>
+            <PriceBadge price={game.price}/>
+          </div>
+        )}
       </div>
     </div>
   );

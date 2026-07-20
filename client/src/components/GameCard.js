@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Monitor, Users, Clock, Zap, ExternalLink, ArrowRight, BookOpen, Heart, ThumbsDown } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 import { useGameList } from '../hooks/useGameList';
+import PriceBadge from './PriceBadge';
 
 function getMatchScore(rank) {
   if (!rank) return null;
@@ -105,6 +106,12 @@ export default function GameCard({ game, rank, onClick, animate = true, showList
             {game.coop ? t.card.coop : t.card.solo}
           </span>
         </div>
+
+        {game.price && (
+          <div style={{ paddingTop: '0.4rem' }}>
+            <PriceBadge price={game.price} />
+          </div>
+        )}
 
         <div className="gc-meta">
           {game.difficulty && <span className="gc-meta-item"><Zap size={11}/>{diffLabel}</span>}

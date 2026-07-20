@@ -7,6 +7,7 @@ import { fetchGame } from '../utils/api';
 import { useLang } from '../i18n/LangContext';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useGameList } from '../hooks/useGameList';
+import PriceBadge from '../components/PriceBadge';
 
 const BASE     = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 const PC_CLASS = { low:'tag-pc-low', medium:'tag-pc-med', high:'tag-pc-hi' };
@@ -313,6 +314,14 @@ export default function GameDetailPage({ gameId, navigate }) {
         {/* Sidebar */}
         <div className="detail-card" style={{ alignSelf:'start' }}>
           <div className="detail-section-label">{t.detail.details}</div>
+          {game.price && (
+            <div style={{ paddingBottom: '1rem', marginBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
+              <div className="detail-section-label" style={{ marginBottom: '0.5rem' }}>
+                {lang === 'ru' ? 'Цена в Steam' : 'Steam Price'}
+              </div>
+              <PriceBadge price={game.price} size="lg" />
+            </div>
+          )}
           {[
             [<Users size={13}/>,    t.detail.players,    playerStr],
             [<Users size={13}/>,    t.detail.mode,       game.coop?t.detail.coop_mode:t.detail.solo_mode],

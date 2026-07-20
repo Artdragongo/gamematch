@@ -25,6 +25,8 @@ function saveJson(file, data) {
 // View tracking
 let views     = loadJson('views.json',     {});
 let reactions = loadJson('reactions.json', {});
+let prices = loadJson('prices.json', {});
+function savePrices() { saveJson('prices.json', prices); }
 
 function trackView(gameId) {
   const now = Date.now();
@@ -42,6 +44,15 @@ function getTopByViews(days=7, limit=8) {
     .slice(0, limit)
     .map(x => x.g);
 }
+app.get('/api/games/:id/price', async (req, res) => {
+  const game = games.find(g => g.id === req.params.id);
+  if (!game?.steamLink) return res.json(null);
+  const m = game.steamLink.match(/\/app\/(\d+)\//);
+  if (!m) return res.json(null);
+  const result = await fetchSteamPrice(m[1]);
+  if (result) { prices[req.params.id] = result; savePrices(); }
+  res.json(result);
+});
 
 // ─── Steam screenshots ────────────────────────────────────────
 function fetchSteamScreenshots(appId) {
@@ -63,6 +74,34 @@ function fetchSteamScreenshots(appId) {
         } catch { resolve([]); }
       });
     }).on('error', () => resolve([]));
+  });
+}
+function fetchSteamPrice(appId) {
+  return new Promise((resolve) => {
+    const url = `https://store.steampowered.com/api/appdetails?appids=${appId}&cc=us&l=en&filters=price_overview,is_free`;
+    https.get(url, { headers: { 'User-Agent': 'GameMatch/1.0' } }, (res) => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          const d = json[appId];
+          if (!d?.success) return resolve(null);
+          if (d.data?.is_free) {
+            return resolve({ isFree: true, final: null, initial: null, discountPercent: 0, fetchedAt: Date.now() });
+          }
+          const p = d.data?.price_overview;
+          if (!p) return resolve(null); // not sold in this region / no price data
+          resolve({
+            isFree: false,
+            final: p.final_formatted,
+            initial: p.discount_percent > 0 ? p.initial_formatted : null,
+            discountPercent: p.discount_percent || 0,
+            fetchedAt: Date.now(),
+          });
+        } catch { resolve(null); }
+      });
+    }).on('error', () => resolve(null));
   });
 }
 
@@ -110,6 +149,11 @@ const TOP      = ['Elden Ring',"Baldur's Gate 3",'Hollow Knight','Outer Wilds','
 const HIDDEN   = ['Noita','Loop Hero','Dome Keeper','Wildermyth','We Were Here Together','Barotrauma','Hardspace: Shipbreaker','Return of the Obra Dinn','Norco','Webfishing'];
 
 function byNames(names) { return names.map(n=>games.find(g=>g.name===n)).filter(Boolean); }
+
+function withPrice(game) {
+  const p = prices[game.id];
+  return p ? { ...game, price: p } : game;
+}
 
 // ─── Routes ───────────────────────────────────────────────────
 app.get('/api/games', (req,res) => res.json(games));
@@ -407,4 +451,41 @@ app.get('/health',     (req,res)=>res.json({ok:true,games:games.length}));
 app.get('/api/health', (req,res)=>res.json({ok:true,games:games.length}));
 
 const PORT=process.env.PORT||3001;
+const PRICE_STALE_MS = 12 * 60 * 60 * 1000; // refresh entries older than 12h
+const PRICE_DELAY_MS = 1500;                 // same safe throttle as verify_images.js
+
+let warmerRunning = false;
+
+async function warmPricesOnce() {
+  if (warmerRunning) return;
+  warmerRunning = true;
+  let updated = 0;
+
+  for (const g of games) {
+    if (!g.steamLink) continue;
+    const cached = prices[g.id];
+    if (cached && Date.now() - cached.fetchedAt < PRICE_STALE_MS) continue;
+
+    const m = g.steamLink.match(/\/app\/(\d+)\//);
+    if (!m) continue;
+
+    const result = await fetchSteamPrice(m[1]);
+    if (result) {
+      prices[g.id] = result;
+      updated++;
+      if (updated % 15 === 0) savePrices(); // persist progress incrementally
+    }
+    await new Promise(r => setTimeout(r, PRICE_DELAY_MS));
+  }
+
+  savePrices();
+  warmerRunning = false;
+  console.log(`💰 Price warmer pass complete — ${updated} games updated`);
+}
+
+// Kick off shortly after boot (let the server finish starting first),
+// then repeat every 6 hours. Never runs twice concurrently.
+setTimeout(warmPricesOnce, 10_000);
+setInterval(warmPricesOnce, 6 * 60 * 60 * 1000);
+
 app.listen(PORT,'0.0.0.0',()=>console.log(`\n🎮 GameMatch on port ${PORT} | ${games.length} games\n`));
