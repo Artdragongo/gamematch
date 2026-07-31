@@ -49,7 +49,7 @@ function SegmentedToggle({ options, onSelect }) {
             onMouseLeave={() => setHoverIdx(null)}
             style={{
               flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-              justifyContent: 'center', gap: 6, padding: '1.15rem 0.75rem',
+              justifyContent: 'center', gap: 6, padding: window.innerWidth < 480 ? '0.85rem 0.5rem' : '1.15rem 0.75rem',
               border: 'none', borderRadius: 999, cursor: 'pointer', fontFamily: 'inherit',
               background: isHover ? '#fff' : 'transparent',
               boxShadow: isHover ? '0 6px 18px rgba(15,23,42,0.1)' : 'none',
@@ -58,14 +58,14 @@ function SegmentedToggle({ options, onSelect }) {
             }}
           >
             <span style={{
-              width: 40, height: 40, borderRadius: '50%',
+              width: window.innerWidth < 480 ? 32 : 40, height: window.innerWidth < 480 ? 32 : 40, borderRadius: '50%',
               background: isHover ? opt.accentLight : '#fff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: opt.accentFg, transition: 'all 0.2s', flexShrink: 0,
             }}>
               {opt.icon}
             </span>
-            <span style={{ fontWeight: 700, fontSize: '0.92rem', color: C.text }}>
+            <span style={{ fontWeight: 700, fontSize: window.innerWidth < 480 ? '0.8rem' : '0.92rem', color: C.text, textAlign:'center' }}>
               {opt.label}
             </span>
             {opt.desc && (
@@ -84,7 +84,14 @@ export default function QuickMatch({ onResults, onFullSearch }) {
   const { t, lang } = useLang();
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 480);
   const qc = lang === 'ru' ? QM_COPY.ru : QM_COPY.en;
+
+  React.useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 480);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   const handleMode = async (withFriends) => {
     setMode(withFriends);
@@ -126,7 +133,7 @@ export default function QuickMatch({ onResults, onFullSearch }) {
   return (
     <div className="gm-fade" style={{
       background: C.surface, border: `1px solid ${C.border}`,
-      borderRadius: '24px', padding: '1.75rem 2rem',
+      borderRadius: isMobile ? '18px' : '24px', padding: isMobile ? '1.25rem 1.1rem' : '1.75rem 2rem',
       maxWidth: 640, margin: '0 auto', boxShadow: C.shadow,
     }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'1.5rem', flexWrap:'wrap', gap:'0.5rem' }}>

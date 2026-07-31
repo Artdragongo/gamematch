@@ -248,7 +248,7 @@ function Hero({ t, lang, stats, previewGames }) {
             <Gamepad2 size={13}/> {t.hero.badge}
           </div>
           <h1 style={{ fontFamily:'var(--font-heading)', fontWeight:800, letterSpacing:'-0.03em',
-            fontSize:'clamp(2.4rem,4.8vw,3.8rem)', lineHeight:1.1, color:C.text, marginBottom:'1.2rem' }}>
+            fontSize:'clamp(2rem,7vw,3.8rem)', lineHeight:1.1, color:C.text, marginBottom:'1.2rem' }}>
             {t.hero.title1} <span style={{ color:C.primary }}>{t.hero.title2}</span>
           </h1>
           <p style={{ fontSize:'1.12rem', color:C.text3, lineHeight:1.7, marginBottom:'1.6rem' }}>{t.hero.sub}</p>
@@ -257,8 +257,8 @@ function Hero({ t, lang, stats, previewGames }) {
             {trustChips.map((label, i) => (
               <span key={i} style={{ display:'inline-flex', alignItems:'center', gap:7,
                 fontSize:'0.85rem', fontWeight:600, color:C.text2,
-                background:C.surface, border:`1px solid ${C.border}`, borderRadius:100, padding:'0.5rem 1rem',
-                boxShadow:'0 2px 6px rgba(15,23,42,0.03)' }}>
+                background:C.surface, border:`1px solid ${C.border}`, borderRadius:100, padding:'0.5rem 0.9rem',
+                boxShadow:'0 2px 6px rgba(15,23,42,0.03)' }} className="gm-chip">
                 <span style={{ width:20, height:20, borderRadius:'50%', background:C.primaryLight,
                   display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                   <Check size={11} style={{ color:C.primary }}/>
@@ -472,7 +472,7 @@ export default function HomePage({ navigate }) {
       <GlobalAnim/>
       <Hero t={t} lang={lang} stats={hp?.stats} previewGames={hp?.popular}/>
 
-      <div style={{ maxWidth: MAX_W, margin:'0 auto', padding:'2rem 2rem 1.5rem' }}>
+      <div className="gm-mobile-tight-pad" style={{ maxWidth: MAX_W, margin:'0 auto', padding:'2rem 2rem 1.5rem' }}>
         <QuickMatch
           onResults={(res, p) => { setResults(res); setPrefs(p); setStep('results'); }}
           onFullSearch={() => setStep('form')}
@@ -487,7 +487,7 @@ export default function HomePage({ navigate }) {
         </div>
       </div>
 
-      <div style={{ paddingTop:'1.75rem' }}>
+      <div className="gm-mobile-tight-pad" style={{ paddingTop:'1.75rem' }}>
         {showSkeleton ? <GameRowSkeleton/> : (
           <GameRow title={t.hero.popular_title} Icon={Star} games={hp?.popular}
             onGame={goGame} onViewAll={()=>navigate('browse')} viewAll={t.hero.view_all} showRanks/>

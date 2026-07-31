@@ -1311,3 +1311,82 @@ body { background: var(--bg); }
 }
 .btn-secondary { border-radius: 100px; }
 .btn-muted { border-radius: 100px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE HARDENING — added for the mobile UX overhaul.
+   Covers: touch target sizes, Browse filters, Game Detail layout,
+   Friends Room panels, Compare page, forms, modals — everything
+   that wasn't already handled by the self-contained inline mobile
+   logic in HomePage.js / QuickMatch.js / Nav.js.
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  /* ── Global touch target + readability baseline ── */
+  button, .btn, a { min-height: 40px; }
+  body { font-size: 15px; }
+  .gm-mobile-tight-pad { padding-left: 1rem !important; padding-right: 1rem !important; }
+  .gm-chip { font-size: 0.78rem !important; }
+
+  /* ── Browse page ── */
+  .browse-header { padding: 1.5rem 1rem 1rem !important; }
+  .browse-filters { padding: 0 1rem 1rem !important; gap: 0.5rem !important; }
+  .filter-input { width: 100% !important; }
+  .filter-select { flex: 1 1 45%; min-width: 130px; }
+  .browse-title { font-size: 1.4rem !important; }
+
+  /* ── Game Detail page ── */
+  .detail-page { padding: 1.25rem 1rem 3rem !important; }
+  .detail-title { font-size: 1.75rem !important; }
+  .detail-body { grid-template-columns: 1fr !important; gap: 1rem !important; }
+  .detail-card { padding: 1.1rem !important; }
+  .detail-actions { flex-direction: column !important; }
+  .detail-actions .btn { width: 100%; justify-content: center; }
+  .similar-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.6rem !important; }
+
+  /* ── Friends Room ── */
+  .room-page { padding: 1.5rem 1rem 3rem !important; }
+  .split-panels { grid-template-columns: 1fr !important; }
+  .room-code-box { flex-direction: column; align-items: flex-start !important; gap: 1rem; }
+  .room-code-right { align-items: flex-start !important; width: 100%; }
+  .room-results-grid { grid-template-columns: 1fr !important; }
+  .how-list { gap: 0.75rem !important; }
+
+  /* ── Compare page ── */
+  .compare-page { padding: 1.25rem 1rem 3rem !important; }
+  .compare-pickers { grid-template-columns: 1fr !important; }
+  .compare-vs { display: none !important; }
+  .compare-table { font-size: 0.78rem; }
+  .compare-table th, .compare-table td { padding: 0.5rem 0.6rem !important; }
+
+  /* ── My List ── */
+  .list-page { padding: 1.5rem 1rem 3rem !important; }
+  .list-tabs { overflow-x: auto; flex-wrap: nowrap !important; }
+
+  /* ── Forms (PreferencesForm) ── */
+  .form-row { grid-template-columns: 1fr !important; gap: 1rem !important; }
+  .pc-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 0.4rem !important; }
+  .pc-card { padding: 0.75rem 0.4rem !important; }
+  .pc-card-desc { display: none !important; }
+  .genre-wrap { gap: 0.4rem !important; }
+  .genre-chip { padding: 0.3rem 0.7rem !important; font-size: 0.78rem !important; }
+
+  /* ── Bored mode ── */
+  .bored-page { padding: 1.5rem 1rem 3rem !important; }
+  .bored-options { grid-template-columns: 1fr !important; }
+  .bored-time-grid { grid-template-columns: 1fr 1fr !important; }
+  .bored-grid { grid-template-columns: 1fr !important; }
+
+  /* ── Footer ── */
+  .footer-inner { grid-template-columns: 1fr !important; gap: 1.5rem !important; padding: 0 1rem !important; }
+  .footer-bottom { padding: 0 1rem !important; flex-direction: column; align-items: flex-start !important; gap: 0.4rem; }
+
+  /* ── Modals / lightboxes never overflow the viewport ── */
+  .empty { padding: 2.5rem 1.25rem !important; }
+}
+
+@media (max-width: 380px) {
+  /* Extra-narrow phones (SE, small Android) */
+  .hero-eyebrow, .result-chip { font-size: 0.72rem !important; }
+  .pc-grid { grid-template-columns: 1fr 1fr !important; }
+  .similar-grid { grid-template-columns: 1fr !important; }
+}
