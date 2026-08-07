@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Gamepad2, Search, Users, Zap, Globe, ChevronDown, BookMarked,
-         Menu, X, Home, Grid3x3, GitCompare } from 'lucide-react';
+         Menu, X, Home, Grid3x3, GitCompare, Sparkles } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 import { searchGames } from '../utils/api';
 
@@ -85,6 +85,7 @@ function MobileMenu({ open, onClose, navigate, activePage, lang, setLang, t }) {
   const links = [
     { key:'home',         label: t.nav.find,    Icon: Home },
     { key:'browse',       label: t.nav.browse,  Icon: Grid3x3 },
+    { key:'emoji',        label: lang==='ru'?'Пазл дня':'Daily Puzzle', Icon: Sparkles },
     { key:'room-landing', label: t.nav.friends, Icon: Users },
     { key:'bored',        label: t.nav.bored,   Icon: Zap },
     { key:'compare',      label: t.footer?.compare || (lang==='ru'?'Сравнение':'Compare'), Icon: GitCompare },
@@ -201,6 +202,7 @@ export default function Nav({ navigate, activePage }) {
   const links = [
     { key:'home',         label: t.nav.find    },
     { key:'browse',       label: t.nav.browse  },
+    { key:'emoji',        label: lang==='ru'?'Пазл дня':'Puzzle' },
     { key:'room-landing', label: t.nav.friends },
     { key:'bored',        label: t.nav.bored   },
     { key:'compare',      label: t.footer?.compare || (lang==='ru'?'Сравнение':'Compare') },

@@ -485,6 +485,28 @@ export default function HomePage({ navigate }) {
         <div style={{ marginTop:'1.5rem' }}>
           <QuickFilterPills navigate={navigate} lang={lang}/>
         </div>
+        <div className="gm-fade" onClick={() => navigate('emoji')}
+          style={{ maxWidth:640, margin:'1.5rem auto 0', cursor:'pointer',
+            background:'linear-gradient(135deg, #FEF3C7, #FFF7ED)', border:'1px solid #FDE68A',
+            borderRadius:18, padding:'1rem 1.3rem', display:'flex', alignItems:'center', gap:'0.9rem',
+            transition:'transform 0.18s' }}
+          onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+        >
+          <div style={{ width:42, height:42, borderRadius:12, background:'#F59E0B',
+            display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'1.3rem' }}>
+            🎮
+          </div>
+          <div style={{ flex:1 }}>
+            <div style={{ fontWeight:800, fontSize:'0.92rem', color:C.text }}>
+              {lang === 'ru' ? 'Пазл дня: угадай игру по эмодзи' : "Today's puzzle: guess the game from emoji"}
+            </div>
+            <div style={{ fontSize:'0.78rem', color:C.text3 }}>
+              {lang === 'ru' ? 'Новая головоломка каждый день' : 'A new challenge every day'}
+            </div>
+          </div>
+          <ChevronRight size={18} style={{ color:'#D97706', flexShrink:0 }}/>
+        </div>
       </div>
 
       <div className="gm-mobile-tight-pad" style={{ paddingTop:'1.75rem' }}>

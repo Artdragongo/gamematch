@@ -11,6 +11,7 @@ import ComparePage from './pages/ComparePage';
 import NotFoundPage from './pages/NotFoundPage';
 import { RoomLandingPage, RoomPage } from './pages/RoomPage';
 import { useLang } from './i18n/LangContext';
+import EmojiPuzzlePage from './pages/EmojiPuzzlePage';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -23,7 +24,7 @@ function useNav() {
   return (target, params = {}) => {
     const routes = {
       home: '/', browse: '/browse', bored: '/bored',
-      'room-landing': '/room', list: '/list', compare: '/compare',
+      'room-landing': '/room', list: '/list', compare: '/compare', emoji: '/emoji',
     };
     if (routes[target]) navigate(routes[target]);
     else if (target === 'room'  && params.roomId) navigate(`/room/${params.roomId}`);
@@ -54,6 +55,7 @@ function AppShell() {
     path === '/'              ? 'home'         :
     path === '/browse'        ? 'browse'        :
     path === '/bored'         ? 'bored'         :
+    path === '/emoji'         ? 'emoji'         :
     path === '/room'          ? 'room-landing'  :
     path === '/list'          ? 'list'          :
     path === '/compare'       ? 'compare'       :
@@ -78,6 +80,7 @@ function AppShell() {
           <Route path="/list"         element={<MyListPage      navigate={nav} />} />
           <Route path="/compare"      element={<ComparePage     navigate={nav} />} />
           <Route path="*"             element={<NotFoundPage    navigate={nav} />} />
+          <Route path="/emoji" element={<EmojiPuzzlePage navigate={nav} />} />
         </Routes>
       </main>
       {showFooter && <Footer navigate={nav} />}

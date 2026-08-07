@@ -147,9 +147,108 @@ const POPULAR  = ['Hades',"Baldur's Gate 3",'Helldivers 2','Deep Rock Galactic',
 const TRENDING = ['Warhammer 40,000: Space Marine 2','Palworld','Balatro','Schedule I','Repo','Split Fiction','Monster Hunter Wilds','Enshrouded'];
 const TOP      = ['Elden Ring',"Baldur's Gate 3",'Hollow Knight','Outer Wilds','Disco Elysium','Hades','Red Dead Redemption 2','God of War'];
 const HIDDEN   = ['Noita','Loop Hero','Dome Keeper','Wildermyth','We Were Here Together','Barotrauma','Hardspace: Shipbreaker','Return of the Obra Dinn','Norco','Webfishing'];
-
+const EMOJI_PUZZLES = [
+  { name: 'Minecraft',                    emojis: ['⛏️','🟫','🐷','🌙'] },
+  { name: 'Stardew Valley',               emojis: ['🌾','🐔','❤️','👨‍🌾'] },
+  { name: 'The Witcher 3: Wild Hunt',     emojis: ['🐺','⚔️','🧙','🐴'] },
+  { name: 'Among Us',                     emojis: ['🚀','🔪','👤','🫥'] },
+  { name: 'Portal 2',                     emojis: ['🌀','🧪','🤖','🎂'] },
+  { name: 'Grand Theft Auto V',           emojis: ['🚗','💰','🔫','🌴'] },
+  { name: "Baldur's Gate 3",              emojis: ['🎲','🐙','⚔️','🧛'] },
+  { name: 'Elden Ring',                   emojis: ['🌳','💍','⚔️','🐉'] },
+  { name: 'Hollow Knight',                emojis: ['🐛','🗡️','🕳️','⚫'] },
+  { name: 'Terraria',                     emojis: ['⛏️','🌍','🧟','⚔️'] },
+  { name: 'Valheim',                      emojis: ['🪓','⚡','🛶','🐗'] },
+  { name: 'Left 4 Dead 2',                emojis: ['🧟','🔫','🚁','4️⃣'] },
+  { name: 'Cyberpunk 2077',               emojis: ['🤖','🌃','💊','🔫'] },
+  { name: 'Dark Souls III',               emojis: ['🔥','⚔️','💀','🛡️'] },
+  { name: 'Hades',                        emojis: ['🔥','😈','🏛️','⚔️'] },
+  { name: 'Slay the Spire',               emojis: ['🃏','🗼','⚔️','🐍'] },
+  { name: 'Vampire Survivors',            emojis: ['🧛','🌙','🔫','⏱️'] },
+  { name: 'Deep Rock Galactic',           emojis: ['⛏️','🪨','👨‍🦲','🚀'] },
+  { name: 'It Takes Two',                 emojis: ['2️⃣','🧸','❤️','🪄'] },
+  { name: 'Rocket League',                emojis: ['🚗','⚽','🚀','🥅'] },
+  { name: 'League of Legends',            emojis: ['🗡️','🛡️','🏰','⚡'] },
+  { name: 'Dota 2',                       emojis: ['🗡️','🛡️','🏰','2️⃣'] },
+  { name: 'Civilization VI',              emojis: ['🏛️','🌍','⚔️','👑'] },
+  { name: 'Fallout: New Vegas',           emojis: ['☢️','🎰','🏜️','🤖'] },
+  { name: 'The Elder Scrolls V: Skyrim',  emojis: ['🐉','❄️','⚔️','🛡️'] },
+  { name: 'Red Dead Redemption 2',        emojis: ['🤠','🐴','🔫','🌵'] },
+  { name: 'Persona 5 Royal',              emojis: ['🎭','😈','🐱','🗼'] },
+  { name: 'Hitman 3',                     emojis: ['🕴️','🔫','🎯','🌍'] },
+  { name: 'Doom Eternal',                 emojis: ['👹','🔫','🔥','😈'] },
+  { name: 'Half-Life: Alyx',              emojis: ['👽','🥽','🔫','🌆'] },
+  { name: 'Overwatch 2',                  emojis: ['🦸','🔫','🌍','2️⃣'] },
+  { name: 'Sea of Thieves',               emojis: ['🏴‍☠️','⛵','💰','🦜'] },
+  { name: 'Rust',                         emojis: ['🏚️','🔨','☢️','🤝'] },
+  { name: 'Payday 2',                     emojis: ['🏦','🎭','💰','🔫'] },
+  { name: 'Mortal Kombat 1',              emojis: ['🥋','🩸','💀','1️⃣'] },
+  { name: 'Street Fighter 6',             emojis: ['🥊','🔥','6️⃣','💪'] },
+  { name: 'Forza Horizon 5',              emojis: ['🏎️','🌵','🏁','5️⃣'] },
+  { name: 'No Man\'s Sky',                emojis: ['🚀','🪐','👽','🌌'] },
+  { name: 'Subnautica',                   emojis: ['🌊','🐟','🤿','😱'] },
+  { name: 'The Long Dark',                emojis: ['❄️','🐺','🏕️','🎒'] },
+  { name: 'Dying Light 2',                emojis: ['🧟','🏃','🌆','2️⃣'] },
+  { name: 'Lethal Company',               emojis: ['👽','🌑','💰','😱'] },
+  { name: 'Phasmophobia',                 emojis: ['👻','📷','🏚️','😱'] },
+  { name: 'Star Wars Jedi: Fallen Order', emojis: ['⚔️','✨','🤖','🌌'] },
+  { name: 'Control',                      emojis: ['🏢','🧠','🔮','📎'] },
+  { name: 'Alan Wake 2',                  emojis: ['🔦','✍️','🌲','😱'] },
+  { name: 'Journey',                      emojis: ['🏜️','🧣','⛰️','☁️'] },
+  { name: 'Celeste',                      emojis: ['⛰️','🍓','🎮','😢'] },
+  { name: 'Outer Wilds',                  emojis: ['🚀','🪐','⏳','☀️'] },
+  { name: 'Firewatch',                    emojis: ['🔥','🌲','📻','👀'] },
+  { name: 'Untitled Goose Game',          emojis: ['🦢','😈','🎩','🐐'] },
+  { name: 'Cuphead',                      emojis: ['☕','👊','🎩','🎷'] },
+  { name: 'Inside',                       emojis: ['🏃','👦','🌫️','😨'] },
+  { name: 'Limbo',                        emojis: ['🕷️','🌑','👦','⚫'] },
+  { name: 'Portal',                       emojis: ['🌀','🤖','🎂','1️⃣'] },
+  { name: 'The Stanley Parable',          emojis: ['🚪','🗣️','🏢','❓'] },
+  { name: 'Disco Elysium',                emojis: ['🕵️','🍺','🧠','🌆'] },
+  { name: 'Frostpunk',                    emojis: ['❄️','🏭','⚙️','👑'] },
+  { name: 'This War of Mine',             emojis: ['🏚️','😢','🔫','🕯️'] },
+  { name: 'Factorio',                     emojis: ['⚙️','🏭','🚂','🤖'] },
+  { name: 'Cities: Skylines II',          emojis: ['🏙️','🚗','🏗️','2️⃣'] },
+  { name: 'Crusader Kings III',           emojis: ['👑','⚔️','🏰','3️⃣'] },
+  { name: 'Stellaris',                    emojis: ['🚀','🌌','👽','⭐'] },
+  { name: 'XCOM 2',                       emojis: ['👽','🔫','🛸','2️⃣'] },
+  { name: 'Into the Breach',              emojis: ['🤖','⏳','👾','🏙️'] },
+  { name: 'Monster Train',                emojis: ['🚂','😈','🃏','🔥'] },
+  { name: 'Inscryption',                  emojis: ['🃏','🐺','🕯️','😱'] },
+  { name: 'Golf It!',                     emojis: ['⛳','🏌️','🕳️','😂'] },
+  { name: 'Overcooked! 2',                emojis: ['🍳','⏱️','😤','2️⃣'] },
+  { name: 'A Way Out',                    emojis: ['🔗','🚔','👥','🏃'] },
+  { name: 'Team Fortress 2',              emojis: ['🎩','🔫','🤠','2️⃣'] },
+  { name: 'Apex Legends',                 emojis: ['🪂','🔫','🏆','🦸'] },
+  { name: 'Warframe',                     emojis: ['🥷','🚀','⚔️','👽'] },
+  { name: 'Destiny 2',                    emojis: ['🚀','👽','🔫','2️⃣'] },
+  { name: 'Escape from Tarkov',           emojis: ['🎒','🔫','🏚️','😰'] },
+  { name: 'ARK: Survival Ascended',       emojis: ['🦖','🏝️','🏹','🥚'] },
+  { name: 'Palworld',                     emojis: ['🐾','🔫','🏭','🥚'] },
+  { name: 'Helldivers 2',                 emojis: ['🪖','👽','🚀','2️⃣'] },
+  { name: 'Balatro',                      emojis: ['🃏','🤡','💰','🎰'] },
+  { name: 'Split Fiction',                emojis: ['📖','2️⃣','✨','🤝'] },
+  { name: 'Content Warning',              emojis: ['📹','👻','😂','⚠️'] },
+];
 function byNames(names) { return names.map(n=>games.find(g=>g.name===n)).filter(Boolean); }
+function normalizeGuess(s) {
+  return (s || '').toLowerCase().replace(/[:'’\-–—.,!?®™]/g, '').replace(/\s+/g, ' ').trim();
+}
 
+function getTodaysPuzzle() {
+  // Only puzzles whose name resolves to a REAL game currently in the
+  // catalog are eligible — self-heals if games.json gets renumbered
+  // or a title changes slightly, never serves a broken puzzle.
+  const valid = EMOJI_PUZZLES
+    .map(p => ({ ...p, game: games.find(g => g.name === p.name) }))
+    .filter(p => p.game);
+
+  if (!valid.length) return null;
+  const dayIndex = Math.floor(Date.now() / (24*60*60*1000));
+  const puzzleNumber = dayIndex; // used as the public "puzzle #" for sharing
+  const puzzle = valid[dayIndex % valid.length];
+  return { ...puzzle, puzzleNumber };
+}
 function withPrice(game) {
   const p = prices[game.id];
   return p ? { ...game, price: p } : game;
@@ -251,6 +350,37 @@ app.get('/api/games/:id/screenshots', async (req,res) => {
   if(!m) return res.json([]);
   res.json(await fetchSteamScreenshots(m[1]));
 });
+app.get('/api/emoji-puzzle/today', (req, res) => {
+  const p = getTodaysPuzzle();
+  if (!p) return res.status(503).json({ error: 'No puzzles available' });
+  res.json({ puzzleNumber: p.puzzleNumber, emojis: p.emojis });
+});
+
+app.post('/api/emoji-puzzle/guess', (req, res) => {
+  const p = getTodaysPuzzle();
+  if (!p) return res.status(503).json({ error: 'No puzzles available' });
+
+  const { guess, attemptsUsed } = req.body;
+  const isCorrect = normalizeGuess(guess) === normalizeGuess(p.game.name)
+    || normalizeGuess(p.game.name).includes(normalizeGuess(guess))
+    || normalizeGuess(guess).includes(normalizeGuess(p.game.name));
+
+  const outOfAttempts = (attemptsUsed || 0) >= 6;
+
+  if (isCorrect || outOfAttempts) {
+    return res.json({
+      correct: isCorrect,
+      revealed: true,
+      game: {
+        id: p.game.id, name: p.game.name, coverImage: p.game.coverImage,
+        genre: p.game.genre, steamLink: p.game.steamLink,
+      },
+    });
+  }
+
+  res.json({ correct: false, revealed: false });
+});
+
 
 // Reactions
 app.get('/api/games/:id/reactions', (req,res) => {
