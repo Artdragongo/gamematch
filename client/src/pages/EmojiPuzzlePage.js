@@ -1,19 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, Check, X, Share2, Flame, Trophy, Search } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
+import { useTheme } from '../context/ThemeContext';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { searchGames } from '../utils/api';
 
 const BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 const MAX_ATTEMPTS = 6;
-
-const C = {
-  primary: '#3B82F6', primaryLight: '#EFF6FF', primaryMid: '#BFDBFE',
-  surface: '#FFFFFF', surface2: '#F1F5F9', border: '#E5E9F0',
-  text: '#0F172A', text3: '#64748B',
-  green: '#16A34A', greenLight: '#F0FDF4',
-  red: '#DC2626', redLight: '#FEF2F2',
-};
 
 const COPY = {
   en: {
@@ -53,8 +46,8 @@ function loadPuzzleState(puzzleNumber) {
 }
 function savePuzzleState(state) { try { localStorage.setItem('gm_emoji_state', JSON.stringify(state)); } catch {} }
 
-/* ── Autocomplete guess input — reuses the existing search endpoint ── */
 function GuessInput({ onSubmit, disabled, placeholder }) {
+  const { C } = useTheme();
   const [query,   setQuery]   = useState('');
   const [results, setResults] = useState([]);
   const [open,    setOpen]    = useState(false);
@@ -92,13 +85,13 @@ function GuessInput({ onSubmit, disabled, placeholder }) {
           placeholder={placeholder}
           style={{ width:'100%', padding:'0.85rem 1rem 0.85rem 2.6rem', fontSize:'0.95rem',
             border:`1.5px solid ${C.border}`, borderRadius:14, outline:'none',
-            fontFamily:'inherit', opacity: disabled ? 0.5 : 1 }}
+            fontFamily:'inherit', opacity: disabled ? 0.5 : 1, background:C.surface, color:C.text }}
         />
       </div>
       {open && results.length > 0 && (
         <div style={{ position:'absolute', top:'calc(100% + 6px)', left:0, right:0,
-          background:'#fff', border:`1px solid ${C.border}`, borderRadius:14,
-          boxShadow:'0 12px 32px rgba(15,23,42,0.12)', overflow:'hidden', zIndex:20 }}>
+          background:C.surface, border:`1px solid ${C.border}`, borderRadius:14,
+          boxShadow:C.shadowLg, overflow:'hidden', zIndex:20 }}>
           {results.map(g => (
             <div key={g.id} onClick={() => submit(g.name)}
               style={{ padding:'0.7rem 1rem', cursor:'pointer', fontSize:'0.88rem', fontWeight:600, color:C.text,
@@ -116,12 +109,13 @@ function GuessInput({ onSubmit, disabled, placeholder }) {
 
 export default function EmojiPuzzlePage({ navigate }) {
   const { lang } = useLang();
+  const { C } = useTheme();
   const copy = lang === 'ru' ? COPY.ru : COPY.en;
   usePageTitle(copy.title);
 
   const [puzzleNumber, setPuzzleNumber] = useState(null);
   const [emojis,       setEmojis]       = useState([]);
-  const [guesses,      setGuesses]      = useState([]); // [{ text, correct }]
+  const [guesses,      setGuesses]      = useState([]);
   const [completed,    setCompleted]    = useState(false);
   const [won,          setWon]          = useState(false);
   const [revealedGame, setRevealedGame] = useState(null);
@@ -221,15 +215,13 @@ export default function EmojiPuzzlePage({ navigate }) {
         <p style={{ color:C.text3, fontSize:'0.95rem' }}>{copy.sub}</p>
       </div>
 
-      {/* Emoji display */}
-      <div style={{ background:'#fff', border:`1px solid ${C.border}`, borderRadius:20,
-        padding:'2.5rem 1.5rem', textAlign:'center', marginBottom:'1.25rem', boxShadow:'0 6px 20px rgba(59,130,246,0.08)' }}>
+      <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:20,
+        padding:'2.5rem 1.5rem', textAlign:'center', marginBottom:'1.25rem', boxShadow:C.shadow }}>
         <div style={{ fontSize:'3.2rem', letterSpacing:'0.3rem' }}>
           {emojis.join(' ')}
         </div>
       </div>
 
-      {/* Guess history */}
       {guesses.length > 0 && (
         <div style={{ marginBottom:'1.25rem' }}>
           <div style={{ fontSize:'0.72rem', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase',
@@ -241,7 +233,7 @@ export default function EmojiPuzzlePage({ navigate }) {
               <div key={i} style={{ display:'flex', alignItems:'center', gap:'0.7rem',
                 padding:'0.65rem 0.9rem', borderRadius:12,
                 background: g.correct ? C.greenLight : C.redLight,
-                border:`1px solid ${g.correct ? '#BBF7D0' : '#FECACA'}` }}>
+                border:`1px solid ${g.correct ? C.greenBorder : C.redBorder}` }}>
                 {g.correct ? <Check size={16} style={{ color:C.green }}/> : <X size={16} style={{ color:C.red }}/>}
                 <span style={{ fontSize:'0.88rem', fontWeight:600, color:C.text }}>{g.text}</span>
               </div>
@@ -250,7 +242,6 @@ export default function EmojiPuzzlePage({ navigate }) {
         </div>
       )}
 
-      {/* Guess input or result */}
       {!completed ? (
         <>
           <GuessInput onSubmit={handleGuess} disabled={submitting} placeholder={copy.placeholder}/>
@@ -259,8 +250,8 @@ export default function EmojiPuzzlePage({ navigate }) {
           </div>
         </>
       ) : (
-        <div style={{ background:'#fff', border:`1px solid ${C.border}`, borderRadius:20, padding:'1.75rem',
-          textAlign:'center', boxShadow:'0 10px 28px rgba(15,23,42,0.08)' }}>
+        <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:20, padding:'1.75rem',
+          textAlign:'center', boxShadow:C.shadowLg }}>
           {won ? <Trophy size={32} style={{ color:'#F59E0B', margin:'0 auto 0.75rem' }}/>
                : <X size={32} style={{ color:C.red, margin:'0 auto 0.75rem' }}/>}
           <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.15rem', fontWeight:800, color:C.text, marginBottom:'0.3rem' }}>
@@ -286,7 +277,7 @@ export default function EmojiPuzzlePage({ navigate }) {
           <div style={{ display:'flex', gap:'0.6rem' }}>
             <button onClick={handleShare}
               style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:6,
-                padding:'0.75rem', borderRadius:12, border:`1px solid ${C.border}`, background:'#fff',
+                padding:'0.75rem', borderRadius:12, border:`1px solid ${C.border}`, background:C.surface,
                 fontWeight:700, fontSize:'0.85rem', color:C.text, cursor:'pointer' }}>
               {copied ? <Check size={15}/> : <Share2 size={15}/>} {copied ? copy.copied : copy.share}
             </button>
@@ -301,14 +292,13 @@ export default function EmojiPuzzlePage({ navigate }) {
         </div>
       )}
 
-      {/* Stats */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'0.75rem', marginTop:'2rem' }}>
         {[
           { Icon: Flame,   num: stats.streak || 0, label: copy.streak },
           { Icon: Sparkles,num: stats.played || 0, label: copy.played },
           { Icon: Trophy,  num: `${winRate}%`,     label: copy.winRate },
         ].map(({ Icon, num, label }, i) => (
-          <div key={i} style={{ background:'#fff', border:`1px solid ${C.border}`, borderRadius:14,
+          <div key={i} style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:14,
             padding:'1rem 0.5rem', textAlign:'center' }}>
             <Icon size={16} style={{ color:C.primary, margin:'0 auto 0.4rem' }}/>
             <div style={{ fontFamily:'var(--font-heading)', fontSize:'1.2rem', fontWeight:800, color:C.text }}>{num}</div>

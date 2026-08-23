@@ -1,19 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Zap, User, Users, Monitor, SlidersHorizontal, ArrowLeft, Cpu } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
+import { useTheme } from '../context/ThemeContext';
 import { fetchRecommendations } from '../utils/api';
 
-const C = {
-  primary: '#3B82F6', primaryHover: '#2563EB', primaryLight: '#EFF6FF', primaryMid: '#BFDBFE',
-  indigo: '#6366F1', indigoLight: '#EEF2FF',
-  surface: '#FFFFFF', surface2: '#F1F5F9', border: '#E5E9F0',
-  text: '#0F172A', text3: '#64748B',
-  shadow: '0 6px 20px rgba(59,130,246,0.09), 0 2px 6px rgba(15,23,42,0.04)',
-};
-
-/* Hardcoded bilingual copy — does not depend on translations.js
-   ever containing a t.quickmatch key, so it can never silently
-   fall back to English again. */
 const QM_COPY = {
   en: {
     title: 'Quick Match', sub: '2 taps to a recommendation', full: 'Full search',
@@ -27,11 +17,8 @@ const QM_COPY = {
   },
 };
 
-/* ── Segmented pill toggle — ONE continuous rounded shape with an
-   animated sliding highlight, not separate bordered boxes. This is
-   the same interaction pattern as an iOS switch / macOS segmented
-   control, deliberately not a grid of cards. ── */
-function SegmentedToggle({ options, onSelect }) {
+function SegmentedToggle({ options, onSelect, isMobile }) {
+  const { C } = useTheme();
   const [hoverIdx, setHoverIdx] = useState(null);
 
   return (
@@ -49,23 +36,23 @@ function SegmentedToggle({ options, onSelect }) {
             onMouseLeave={() => setHoverIdx(null)}
             style={{
               flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-              justifyContent: 'center', gap: 6, padding: window.innerWidth < 480 ? '0.85rem 0.5rem' : '1.15rem 0.75rem',
+              justifyContent: 'center', gap: 6, padding: isMobile ? '0.85rem 0.5rem' : '1.15rem 0.75rem',
               border: 'none', borderRadius: 999, cursor: 'pointer', fontFamily: 'inherit',
-              background: isHover ? '#fff' : 'transparent',
-              boxShadow: isHover ? '0 6px 18px rgba(15,23,42,0.1)' : 'none',
+              background: isHover ? C.surface : 'transparent',
+              boxShadow: isHover ? C.shadow : 'none',
               transform: isHover ? 'scale(1.02)' : 'scale(1)',
               transition: 'all 0.2s',
             }}
           >
             <span style={{
-              width: window.innerWidth < 480 ? 32 : 40, height: window.innerWidth < 480 ? 32 : 40, borderRadius: '50%',
-              background: isHover ? opt.accentLight : '#fff',
+              width: isMobile ? 32 : 40, height: isMobile ? 32 : 40, borderRadius: '50%',
+              background: isHover ? opt.accentLight : C.surface,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: opt.accentFg, transition: 'all 0.2s', flexShrink: 0,
             }}>
               {opt.icon}
             </span>
-            <span style={{ fontWeight: 700, fontSize: window.innerWidth < 480 ? '0.8rem' : '0.92rem', color: C.text, textAlign:'center' }}>
+            <span style={{ fontWeight: 700, fontSize: isMobile ? '0.8rem' : '0.92rem', color: C.text, textAlign:'center' }}>
               {opt.label}
             </span>
             {opt.desc && (
@@ -82,12 +69,13 @@ function SegmentedToggle({ options, onSelect }) {
 
 export default function QuickMatch({ onResults, onFullSearch }) {
   const { t, lang } = useLang();
+  const { C } = useTheme();
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 480);
   const qc = lang === 'ru' ? QM_COPY.ru : QM_COPY.en;
 
-  React.useEffect(() => {
+  useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 480);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
@@ -166,7 +154,7 @@ export default function QuickMatch({ onResults, onFullSearch }) {
           <div style={{ fontSize:'1.05rem', fontWeight:700, color:C.text, marginBottom:'1rem', textAlign:'center' }}>
             {qc.solo}
           </div>
-          <SegmentedToggle options={modeOptions} onSelect={handleMode}/>
+          <SegmentedToggle options={modeOptions} onSelect={handleMode} isMobile={isMobile}/>
         </div>
       )}
 
@@ -175,7 +163,7 @@ export default function QuickMatch({ onResults, onFullSearch }) {
           <div style={{ fontSize:'1.05rem', fontWeight:700, color:C.text, marginBottom:'1rem', textAlign:'center' }}>
             {qc.pc}
           </div>
-          <SegmentedToggle options={pcOptions} onSelect={handlePc}/>
+          <SegmentedToggle options={pcOptions} onSelect={handlePc} isMobile={isMobile}/>
           <button onClick={reset}
             style={{ display:'flex', alignItems:'center', gap:5, font:'500 0.82rem inherit', color:C.text3,
               background:'none', border:'none', cursor:'pointer', marginTop:'0.9rem' }}>

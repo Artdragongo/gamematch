@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLang } from '../i18n/LangContext';
+import { useTheme } from '../context/ThemeContext';
 
 const COPY = {
   en: { free: 'Free to Play' },
@@ -16,6 +17,7 @@ const COPY = {
  */
 export default function PriceBadge({ price, size = 'sm' }) {
   const { lang } = useLang();
+  const { C } = useTheme();
   const copy = lang === 'ru' ? COPY.ru : COPY.en;
 
   if (!price) return null;
@@ -25,7 +27,7 @@ export default function PriceBadge({ price, size = 'sm' }) {
 
   if (price.isFree) {
     return (
-      <span style={{ fontSize, fontWeight: 700, color: '#16A34A' }}>
+      <span style={{ fontSize, fontWeight: 700, color: C.green }}>
         {copy.free}
       </span>
     );
@@ -39,18 +41,18 @@ export default function PriceBadge({ price, size = 'sm' }) {
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       {onSale && (
         <span style={{
-          background: '#16A34A', color: '#fff', fontWeight: 800,
+          background: C.green, color: '#fff', fontWeight: 800,
           fontSize: smallFontSize, padding: '1px 6px', borderRadius: 5,
         }}>
           -{price.discountPercent}%
         </span>
       )}
       {onSale && (
-        <span style={{ fontSize: smallFontSize, color: '#94A3B8', textDecoration: 'line-through' }}>
+        <span style={{ fontSize: smallFontSize, color: C.text4, textDecoration: 'line-through' }}>
           {price.initial}
         </span>
       )}
-      <span style={{ fontSize, fontWeight: 700, color: onSale ? '#16A34A' : '#0F172A' }}>
+      <span style={{ fontSize, fontWeight: 700, color: onSale ? C.green : C.text }}>
         {price.final}
       </span>
     </span>

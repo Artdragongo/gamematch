@@ -14,16 +14,8 @@ import PriceBadge from '../components/PriceBadge';
 import { fetchRecommendations } from '../utils/api';
 import { useHomepageData } from '../hooks/useHomepageData';
 import { useLang } from '../i18n/LangContext';
+import { useTheme } from '../context/ThemeContext';
 import { usePageTitle } from '../hooks/usePageTitle';
-
-const C = {
-  primary: '#3B82F6', primaryHover: '#2563EB', primaryLight: '#EFF6FF', primaryMid: '#BFDBFE',
-  bg: '#F8FAFC', surface: '#FFFFFF', surface2: '#F1F5F9', border: '#E5E9F0',
-  text: '#0F172A', text2: '#334155', text3: '#64748B', text4: '#94A3B8',
-  radiusSm: '10px', radius: '16px', radiusLg: '22px',
-  shadow: '0 6px 20px rgba(59,130,246,0.09), 0 2px 6px rgba(15,23,42,0.04)',
-  shadowLg: '0 24px 56px rgba(59,130,246,0.15), 0 8px 20px rgba(15,23,42,0.07)',
-};
 
 const MAX_W = 1400;
 
@@ -60,10 +52,18 @@ const COPY = {
   },
 };
 
+function GlobalAnim() {
+  return (
+    <style>{`
+      @keyframes gmFadeUp { from { opacity:0; transform:translateY(18px);} to { opacity:1; transform:translateY(0);} }
+      .gm-fade { animation: gmFadeUp 0.55s cubic-bezier(.2,.8,.2,1) both; }
+      @keyframes gmFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    `}</style>
+  );
+}
 
-/* ── Subtle scattered gaming-icon texture behind the hero.
-   Very low opacity, non-interactive, purely decorative. ── */
 function BackgroundIcons() {
+  const { C } = useTheme();
   const icons = [
     { Icon: Gamepad2,    top:'4%',  left:'2%',  size:70,  rotate:-12 },
     { Icon: Dice5,       top:'62%', left:'5%',  size:46,  rotate:16  },
@@ -77,24 +77,15 @@ function BackgroundIcons() {
     <div style={{ position:'absolute', inset:0, overflow:'hidden', pointerEvents:'none', zIndex:0 }}>
       {icons.map(({ Icon, top, left, size, rotate }, i) => (
         <Icon key={i} size={size} strokeWidth={1.3}
-          style={{ position:'absolute', top, left, color:'#3B82F6', opacity:0.045,
+          style={{ position:'absolute', top, left, color:C.primary, opacity:0.06,
             transform:`rotate(${rotate}deg)` }}/>
       ))}
     </div>
   );
 }
 
-function GlobalAnim() {
-  return (
-    <style>{`
-      @keyframes gmFadeUp { from { opacity:0; transform:translateY(18px);} to { opacity:1; transform:translateY(0);} }
-      .gm-fade { animation: gmFadeUp 0.55s cubic-bezier(.2,.8,.2,1) both; }
-      @keyframes gmFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-    `}</style>
-  );
-}
-
 function MiniCardImg({ src, alt }) {
+  const { C } = useTheme();
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
   if (!src || failed) return (
@@ -114,15 +105,15 @@ function MiniCardImg({ src, alt }) {
   );
 }
 
-const TIER_COLORS = {
-  low:    { bg:'#F0FDF4', fg:'#16A34A' },
-  medium: { bg:'#FFFBEB', fg:'#D97706' },
-  high:   { bg:'#FEF2F2', fg:'#DC2626' },
-};
-
 function MiniCard({ game, onClick, rank }) {
   const { t } = useLang();
+  const { C } = useTheme();
   const gl = g => t.genres?.[g] || g;
+  const TIER_COLORS = {
+    low:    { bg: C.greenLight, fg: C.green },
+    medium: { bg: C.orangeLight, fg: C.orange },
+    high:   { bg: C.redLight, fg: C.red },
+  };
   const tier = TIER_COLORS[game.pcRequirements] || TIER_COLORS.medium;
   return (
     <div className="game-card" onClick={()=>onClick?.(game)} style={{ cursor:'pointer' }}>
@@ -151,6 +142,7 @@ function MiniCard({ game, onClick, rank }) {
 }
 
 function GameRow({ id, title, Icon, games, onGame, onViewAll, viewAll, showRanks }) {
+  const { C } = useTheme();
   if (!games?.length) return null;
   return (
     <section id={id} style={{ marginBottom:'2.75rem', scrollMarginTop:'90px' }}>
@@ -175,15 +167,14 @@ function GameRow({ id, title, Icon, games, onGame, onViewAll, viewAll, showRanks
   );
 }
 
-/* ── Fanned stack of REAL game covers — replaces the abstract
-   controller drawing entirely. Uses actual box art from the catalog. ── */
 function CoverStackCard({ src, style }) {
+  const { C } = useTheme();
   const [failed, setFailed] = useState(false);
   return (
     <div style={{
       position: 'absolute', borderRadius: 18, overflow: 'hidden',
-      boxShadow: '0 20px 40px rgba(15,23,42,0.18), 0 6px 16px rgba(15,23,42,0.08)',
-      border: '4px solid #fff', background: C.surface2, ...style,
+      boxShadow: '0 20px 40px rgba(0,0,0,0.25), 0 6px 16px rgba(0,0,0,0.12)',
+      border: `4px solid ${C.surface}`, background: C.surface2, ...style,
     }}>
       {!src || failed ? (
         <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center',
@@ -217,8 +208,8 @@ function GameCoverStack({ games }) {
   );
 }
 
-/* ── Hero — real game-cover stack instead of an illustration ── */
 function Hero({ t, lang, stats, previewGames }) {
+  const { C } = useTheme();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 900);
@@ -232,7 +223,7 @@ function Hero({ t, lang, stats, previewGames }) {
     <div style={{ position:'relative' }}>
       <BackgroundIcons/>
       <div style={{ position:'absolute', inset:0, top:-40, height:560, zIndex:0,
-        background:'radial-gradient(ellipse 900px 500px at 75% 10%, #EFF6FF 0%, transparent 65%), radial-gradient(ellipse 700px 400px at 10% 40%, #F5F9FF 0%, transparent 60%)' }}/>
+        background:`radial-gradient(ellipse 900px 500px at 75% 10%, ${C.primaryLight} 0%, transparent 65%), radial-gradient(ellipse 700px 400px at 10% 40%, ${C.primaryLight} 0%, transparent 60%)`, opacity:0.6 }}/>
 
       <section className="gm-fade" style={{
         position:'relative', zIndex:1, maxWidth: MAX_W, margin: '0 auto',
@@ -255,10 +246,10 @@ function Hero({ t, lang, stats, previewGames }) {
 
           <div style={{ display:'flex', flexWrap:'wrap', gap:'0.6rem', justifyContent: isMobile ? 'center' : 'flex-start' }}>
             {trustChips.map((label, i) => (
-              <span key={i} style={{ display:'inline-flex', alignItems:'center', gap:7,
+              <span key={i} className="gm-chip" style={{ display:'inline-flex', alignItems:'center', gap:7,
                 fontSize:'0.85rem', fontWeight:600, color:C.text2,
-                background:C.surface, border:`1px solid ${C.border}`, borderRadius:100, padding:'0.5rem 0.9rem',
-                boxShadow:'0 2px 6px rgba(15,23,42,0.03)' }} className="gm-chip">
+                background:C.surface, border:`1px solid ${C.border}`, borderRadius:100,
+                padding:'0.5rem 0.9rem', boxShadow:'0 2px 6px rgba(0,0,0,0.04)' }}>
                 <span style={{ width:20, height:20, borderRadius:'50%', background:C.primaryLight,
                   display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                   <Check size={11} style={{ color:C.primary }}/>
@@ -272,8 +263,8 @@ function Hero({ t, lang, stats, previewGames }) {
         {!isMobile && (
           <div style={{ position:'relative', height:360 }}>
             <GameCoverStack games={previewGames}/>
-            <div style={{ position:'absolute', bottom:'2%', right:'0%', background:'#fff',
-              borderRadius:C.radius, padding:'0.85rem 1.25rem', boxShadow:C.shadowLg,
+            <div style={{ position:'absolute', bottom:'2%', right:'0%', background:C.surface,
+              borderRadius:16, padding:'0.85rem 1.25rem', boxShadow:C.shadowLg,
               display:'flex', alignItems:'center', gap:'0.7rem', border:`1px solid ${C.border}`, zIndex:4 }}>
               <div style={{ width:40, height:40, borderRadius:11, background:C.primaryLight,
                 display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -296,6 +287,7 @@ function Hero({ t, lang, stats, previewGames }) {
 }
 
 function HowItWorks({ lang }) {
+  const { C } = useTheme();
   const copy = lang === 'ru' ? COPY.ru : COPY.en;
   const icons = [ClipboardList, Sparkles, Gamepad2, PartyPopper];
   const [isMobile, setIsMobile] = useState(window.innerWidth < 800);
@@ -307,7 +299,7 @@ function HowItWorks({ lang }) {
 
   return (
     <div className="gm-fade" style={{ maxWidth: MAX_W, margin:'0 auto 3rem', padding: isMobile ? '2.25rem 1.25rem' : '3rem 2.5rem',
-      background:`linear-gradient(180deg, #fff 0%, ${C.bg} 100%)`, borderRadius:C.radiusLg, border:`1px solid ${C.border}` }}>
+      background:`linear-gradient(180deg, ${C.surface} 0%, ${C.bg} 100%)`, borderRadius:20, border:`1px solid ${C.border}` }}>
       <div style={{ display:'flex', alignItems:'center', gap:'0.65rem', fontFamily:'var(--font-heading)',
         fontSize:'1.4rem', fontWeight:800, color:C.text, marginBottom:'2.25rem' }}>
         <Gamepad2 size={22} style={{ color:C.primary }}/>
@@ -323,9 +315,9 @@ function HowItWorks({ lang }) {
           return (
             <div key={i} style={{ textAlign:'left', position:'relative', zIndex:1 }}>
               <div style={{ position:'relative', width:56, height:56, borderRadius:16,
-                background:'#fff', border:`1px solid ${C.primaryMid}`,
+                background:C.surface, border:`1px solid ${C.primaryMid}`,
                 display:'flex', alignItems:'center', justifyContent:'center',
-                color:C.primary, marginBottom:'1.1rem', boxShadow:'0 4px 12px rgba(59,130,246,0.1)' }}>
+                color:C.primary, marginBottom:'1.1rem', boxShadow:'0 4px 12px rgba(0,0,0,0.08)' }}>
                 <Icon size={25}/>
                 <div style={{ position:'absolute', top:-8, right:-8, width:24, height:24, borderRadius:'50%',
                   background:C.primary, color:'#fff', fontSize:'0.72rem', fontWeight:800,
@@ -343,12 +335,12 @@ function HowItWorks({ lang }) {
   );
 }
 
-const STAT_ACCENTS = [
-  { bg:'#EFF6FF', fg:'#3B82F6' }, { bg:'#F3E8FF', fg:'#9333EA' },
-  { bg:'#FFF7ED', fg:'#EA580C' }, { bg:'#F0FDF4', fg:'#16A34A' },
-];
-
 function StatsTiles({ stats, t }) {
+  const { C } = useTheme();
+  const STAT_ACCENTS = [
+    { bg:C.primaryLight, fg:C.primary }, { bg:C.purpleLight, fg:C.purple },
+    { bg:C.orangeLight, fg:C.orange }, { bg:C.greenLight, fg:C.green },
+  ];
   const tiles = [
     { Icon: Gamepad2, num: stats?.totalGames || '600+', label: t.hero.stat_games },
     { Icon: Users,    num: stats?.coopGames ? `${stats.coopGames}+` : '250+', label: t.hero.stat_coop || 'Co-op games' },
@@ -362,7 +354,7 @@ function StatsTiles({ stats, t }) {
         const acc = STAT_ACCENTS[i];
         return (
           <div key={i} style={{ background:C.surface, border:`1px solid ${C.border}`,
-            borderRadius:C.radius, padding:'1.6rem 1rem', textAlign:'center', transition:'all 0.2s' }}
+            borderRadius:16, padding:'1.6rem 1rem', textAlign:'center', transition:'all 0.2s' }}
             onMouseEnter={e => { e.currentTarget.style.boxShadow = C.shadow; e.currentTarget.style.transform = 'translateY(-3px)'; }}
             onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
           >
@@ -381,17 +373,15 @@ function StatsTiles({ stats, t }) {
   );
 }
 
-const QA_ACCENTS = [
-  { bg:'#EFF6FF', fg:'#3B82F6' }, { bg:'#F0FDF4', fg:'#16A34A' },
-  { bg:'#FFF7ED', fg:'#EA580C' }, { bg:'#F3E8FF', fg:'#9333EA' },
-];
-
-/* ── Slim single-line pill row — deliberately lightweight so it doesn't
-   compete with the rich game-cover rows around it. Lives with the other
-   action tools (Quick Match, I'm Bored) instead of interrupting content. ── */
 function QuickFilterPills({ navigate, lang }) {
+  const { C } = useTheme();
   const copy = lang === 'ru' ? COPY.ru : COPY.en;
   const [hoverIdx, setHoverIdx] = useState(null);
+
+  const QA_ACCENTS = [
+    { bg:C.primaryLight, fg:C.primary }, { bg:C.greenLight, fg:C.green },
+    { bg:C.orangeLight, fg:C.orange }, { bg:C.purpleLight, fg:C.purple },
+  ];
 
   const items = [
     { Icon: Clock,    label: copy.pills[0], action: () => document.getElementById('section-recent')?.scrollIntoView({ behavior:'smooth', block:'start' }) },
@@ -414,7 +404,7 @@ function QuickFilterPills({ navigate, lang }) {
               background: hover ? acc.bg : C.surface,
               border:`1px solid ${hover ? acc.fg + '55' : C.border}`,
               borderRadius:100, cursor:'pointer', fontFamily:'inherit',
-              boxShadow: hover ? '0 4px 14px rgba(15,23,42,0.08)' : 'none',
+              boxShadow: hover ? '0 4px 14px rgba(0,0,0,0.1)' : 'none',
               transform: hover ? 'translateY(-1px)' : 'none',
               transition:'all 0.18s' }}>
             <span style={{ width:28, height:28, borderRadius:'50%', background:acc.bg, color:acc.fg,
@@ -429,11 +419,38 @@ function QuickFilterPills({ navigate, lang }) {
   );
 }
 
-
+function EmojiPuzzleTeaser({ navigate, lang }) {
+  const { C } = useTheme();
+  return (
+    <div className="gm-fade" onClick={() => navigate('emoji')}
+      style={{ maxWidth:640, margin:'1.5rem auto 0', cursor:'pointer',
+        background: `linear-gradient(135deg, ${C.orangeLight}, ${C.surface})`, border:`1px solid ${C.primaryMid}`,
+        borderRadius:18, padding:'1rem 1.3rem', display:'flex', alignItems:'center', gap:'0.9rem',
+        transition:'transform 0.18s' }}
+      onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+      onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+    >
+      <div style={{ width:42, height:42, borderRadius:12, background:C.orange,
+        display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'1.3rem' }}>
+        🎮
+      </div>
+      <div style={{ flex:1 }}>
+        <div style={{ fontWeight:800, fontSize:'0.92rem', color:C.text }}>
+          {lang === 'ru' ? 'Пазл дня: угадай игру по эмодзи' : "Today's puzzle: guess the game from emoji"}
+        </div>
+        <div style={{ fontSize:'0.78rem', color:C.text3 }}>
+          {lang === 'ru' ? 'Новая головоломка каждый день' : 'A new challenge every day'}
+        </div>
+      </div>
+      <ChevronRight size={18} style={{ color:C.orange, flexShrink:0 }}/>
+    </div>
+  );
+}
 
 /* ══════════════════════════════════════════════════════════ */
 export default function HomePage({ navigate }) {
   const { t, lang } = useLang();
+  const { C } = useTheme();
   const [step,    setStep]    = useState('hero');
   const [results, setResults] = useState([]);
   const [prefs,   setPrefs]   = useState(null);
@@ -485,28 +502,7 @@ export default function HomePage({ navigate }) {
         <div style={{ marginTop:'1.5rem' }}>
           <QuickFilterPills navigate={navigate} lang={lang}/>
         </div>
-        <div className="gm-fade" onClick={() => navigate('emoji')}
-          style={{ maxWidth:640, margin:'1.5rem auto 0', cursor:'pointer',
-            background:'linear-gradient(135deg, #FEF3C7, #FFF7ED)', border:'1px solid #FDE68A',
-            borderRadius:18, padding:'1rem 1.3rem', display:'flex', alignItems:'center', gap:'0.9rem',
-            transition:'transform 0.18s' }}
-          onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'none'}
-        >
-          <div style={{ width:42, height:42, borderRadius:12, background:'#F59E0B',
-            display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'1.3rem' }}>
-            🎮
-          </div>
-          <div style={{ flex:1 }}>
-            <div style={{ fontWeight:800, fontSize:'0.92rem', color:C.text }}>
-              {lang === 'ru' ? 'Пазл дня: угадай игру по эмодзи' : "Today's puzzle: guess the game from emoji"}
-            </div>
-            <div style={{ fontSize:'0.78rem', color:C.text3 }}>
-              {lang === 'ru' ? 'Новая головоломка каждый день' : 'A new challenge every day'}
-            </div>
-          </div>
-          <ChevronRight size={18} style={{ color:'#D97706', flexShrink:0 }}/>
-        </div>
+        <EmojiPuzzleTeaser navigate={navigate} lang={lang}/>
       </div>
 
       <div className="gm-mobile-tight-pad" style={{ paddingTop:'1.75rem' }}>
@@ -529,7 +525,7 @@ export default function HomePage({ navigate }) {
 
         <div className="gm-fade" style={{ padding:'0 2rem', maxWidth: MAX_W, margin:'0 auto 3rem' }}>
           <div style={{ background:`linear-gradient(135deg, ${C.primaryLight}, ${C.surface})`,
-            border:`1px solid ${C.primaryMid}`, borderRadius:C.radiusLg, padding:'2.5rem 3rem',
+            border:`1px solid ${C.primaryMid}`, borderRadius:20, padding:'2.5rem 3rem',
             display:'flex', alignItems:'center', justifyContent:'space-between',
             flexWrap:'wrap', gap:'1.5rem' }}>
             <div>

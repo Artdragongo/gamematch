@@ -1,13 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Gamepad2, Search, Users, Zap, Globe, ChevronDown, BookMarked,
-         Menu, X, Home, Grid3x3, GitCompare, Sparkles } from 'lucide-react';
+         Menu, X, Home, Grid3x3, GitCompare, Sparkles, Sun, Moon } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
+import { useTheme } from '../context/ThemeContext';
 import { searchGames } from '../utils/api';
-
-const C = {
-  primary: '#3B82F6', primaryLight: '#EFF6FF', primaryMid: '#BFDBFE',
-  surface: '#FFFFFF', border: '#E5E9F0', text: '#0F172A', text3: '#64748B',
-};
 
 function GlobalSearch({ navigate, onNavigate }) {
   const { t } = useLang();
@@ -76,10 +72,8 @@ function GlobalSearch({ navigate, onNavigate }) {
   );
 }
 
-/* ── Full-screen mobile menu — big tappable rows, real navigation
-   restored for phones (previously everything just vanished below
-   700px with no replacement). ── */
 function MobileMenu({ open, onClose, navigate, activePage, lang, setLang, t }) {
+  const { C, theme, toggleTheme } = useTheme();
   if (!open) return null;
 
   const links = [
@@ -97,7 +91,7 @@ function MobileMenu({ open, onClose, navigate, activePage, lang, setLang, t }) {
 
   return (
     <div style={{
-      position:'fixed', inset:0, zIndex:500, background:'#fff',
+      position:'fixed', inset:0, zIndex:500, background:C.surface,
       display:'flex', flexDirection:'column', animation:'gmSlideDown 0.22s ease',
     }}>
       <style>{`@keyframes gmSlideDown { from { opacity:0; transform:translateY(-8px);} to { opacity:1; transform:translateY(0);} }`}</style>
@@ -134,7 +128,7 @@ function MobileMenu({ open, onClose, navigate, activePage, lang, setLang, t }) {
                   background: active ? C.primaryLight : 'transparent',
                   cursor:'pointer', fontFamily:'inherit' }}>
                 <div style={{ width:38, height:38, borderRadius:10,
-                  background: active ? '#fff' : 'var(--surface2)',
+                  background: active ? C.surface2 : C.surface2,
                   display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                   <l.Icon size={18} style={{ color: active ? C.primary : C.text3 }}/>
                 </div>
@@ -144,6 +138,26 @@ function MobileMenu({ open, onClose, navigate, activePage, lang, setLang, t }) {
               </button>
             );
           })}
+        </div>
+
+        {/* Theme toggle */}
+        <div style={{ marginBottom:'1.5rem' }}>
+          <div style={{ fontSize:'0.72rem', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase',
+            color:C.text3, marginBottom:'0.6rem', paddingLeft:'0.25rem' }}>
+            {lang === 'ru' ? 'Тема' : 'Theme'}
+          </div>
+          <button onClick={toggleTheme}
+            style={{ display:'flex', alignItems:'center', gap:'0.9rem', width:'100%',
+              padding:'0.9rem 1rem', borderRadius:14, border:`1.5px solid ${C.border}`,
+              background:'transparent', cursor:'pointer', fontFamily:'inherit' }}>
+            <div style={{ width:38, height:38, borderRadius:10, background:C.surface2,
+              display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+              {theme === 'dark' ? <Moon size={18} style={{ color:C.primary }}/> : <Sun size={18} style={{ color:C.primary }}/>}
+            </div>
+            <span style={{ fontSize:'1rem', fontWeight:700, color:C.text }}>
+              {theme === 'dark' ? (lang==='ru'?'Тёмная':'Dark') : (lang==='ru'?'Светлая':'Light')}
+            </span>
+          </button>
         </div>
 
         <div style={{ marginBottom:'1.5rem' }}>
@@ -156,7 +170,7 @@ function MobileMenu({ open, onClose, navigate, activePage, lang, setLang, t }) {
               <button key={code} onClick={() => setLang(code)}
                 style={{ flex:1, padding:'0.75rem', borderRadius:12,
                   border:`1.5px solid ${lang === code ? C.primary : C.border}`,
-                  background: lang === code ? C.primaryLight : '#fff',
+                  background: lang === code ? C.primaryLight : 'transparent',
                   color: lang === code ? C.primary : C.text,
                   fontWeight: lang === code ? 700 : 500, fontSize:'0.9rem',
                   cursor:'pointer', fontFamily:'inherit' }}>
@@ -180,6 +194,7 @@ function MobileMenu({ open, onClose, navigate, activePage, lang, setLang, t }) {
 
 export default function Nav({ navigate, activePage }) {
   const { lang, setLang, t } = useLang();
+  const { C, theme, toggleTheme } = useTheme();
   const [langOpen, setLangOpen]   = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile]   = useState(window.innerWidth < 900);
@@ -241,6 +256,17 @@ export default function Nav({ navigate, activePage }) {
 
               <button
                 type="button"
+                onClick={toggleTheme}
+                title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+                style={{ width:32, height:32, borderRadius:8, border:'1px solid var(--border)',
+                  background:'var(--surface)', display:'flex', alignItems:'center', justifyContent:'center',
+                  cursor:'pointer', flexShrink:0 }}
+              >
+                {theme === 'dark' ? <Sun size={14} style={{ color:'var(--text-2)' }}/> : <Moon size={14} style={{ color:'var(--text-2)' }}/>}
+              </button>
+
+              <button
+                type="button"
                 className={`nav-link ${activePage === 'list' ? 'active' : ''}`}
                 onClick={() => navigate('list')}
                 title={t.list?.title || 'My List'}
@@ -283,14 +309,24 @@ export default function Nav({ navigate, activePage }) {
           )}
 
           {isMobile && (
-            <button
-              type="button"
-              onClick={() => setMobileOpen(true)}
-              style={{ width:40, height:40, borderRadius:10, border:`1px solid ${C.border}`,
-                background:'#fff', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}
-            >
-              <Menu size={19} style={{ color:C.text }}/>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={toggleTheme}
+                style={{ width:40, height:40, borderRadius:10, border:'1px solid var(--border)',
+                  background:'var(--surface)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}
+              >
+                {theme === 'dark' ? <Sun size={17} style={{ color:'var(--text-2)' }}/> : <Moon size={17} style={{ color:'var(--text-2)' }}/>}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileOpen(true)}
+                style={{ width:40, height:40, borderRadius:10, border:'1px solid var(--border)',
+                  background:'var(--surface)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}
+              >
+                <Menu size={19} style={{ color:'var(--text)' }}/>
+              </button>
+            </>
           )}
         </div>
       </nav>
