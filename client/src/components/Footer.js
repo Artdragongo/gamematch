@@ -50,6 +50,8 @@ export default function Footer({ navigate }) {
           <div className="footer-link">
             <a href="mailto:feedback@gamematch.app">{ft.feedback}</a>
           </div>
+          <button className="footer-link" onClick={() => navigate('privacy')}>Privacy Policy</button>
+          <button className="footer-link" onClick={() => navigate('terms')}>Terms of Service</button>
         </div>
       </div>
 

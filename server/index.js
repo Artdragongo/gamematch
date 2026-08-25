@@ -10,16 +10,17 @@ app.use(cors({ origin: process.env.CLIENT_URL || '*', methods: ['GET','POST','DE
 app.use(express.json());
 
 const games = JSON.parse(fs.readFileSync(path.join(__dirname, 'games.json'), 'utf8'));
+const DATA_DIR = process.env.NODE_ENV === 'production' ? '/data' : __dirname;
 let rooms = loadJson('rooms.json', {});
 const screenshotCache = {};
 
 // ─── Persistence helpers ──────────────────────────────────────
 function loadJson(file, def) {
-  try { return JSON.parse(fs.readFileSync(path.join(__dirname, file), 'utf8')); }
+  try { return JSON.parse(fs.readFileSync(path.join(DATA_DIR, file), 'utf8')); }
   catch { return def; }
 }
 function saveJson(file, data) {
-  try { fs.writeFileSync(path.join(__dirname, file), JSON.stringify(data)); } catch {}
+  try { fs.writeFileSync(path.join(DATA_DIR, file), JSON.stringify(data)); } catch {}
 }
 
 // View tracking
